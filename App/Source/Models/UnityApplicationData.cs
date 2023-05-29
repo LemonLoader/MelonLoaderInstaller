@@ -76,7 +76,7 @@ namespace MelonLoaderInstaller.App.Models
                 EngineVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
                 return;
             }
-            catch (Java.IO.FileNotFoundException _) { }
+            catch (Java.IO.FileNotFoundException) { }
 
             // If failed before, try to get the data from data.unity3d
             try

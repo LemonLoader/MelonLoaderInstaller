@@ -18,7 +18,7 @@ namespace MelonLoaderInstaller.App.Utilities
     {
         public static List<UnityApplicationData> Find(Activity context)
         {
-            PackageManager pm = context.PackageManager;
+            PackageManager? pm = context.PackageManager;
             if (pm == null)
                 throw new Exception("PackageManager is null, how does this happen?");
 
@@ -37,8 +37,9 @@ namespace MelonLoaderInstaller.App.Utilities
                     if (!isUnity)
                         continue;
                 }
-                catch (IOException _)
+                catch (IOException)
                 {
+                    // This probably means that it's a special app that we can't access
                     continue;
                 }
 
