@@ -71,11 +71,12 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Activities\ViewApplication.cs" />
     <Compile Include="Source\Adapters\ApplicationsAdapter.cs" />
     <Compile Include="Source\Models\UnityApplicationData.cs" />
     <Compile Include="Source\Utilities\PackageWarnings.cs" />
     <Compile Include="Source\Utilities\Logger.cs" />
-    <Compile Include="Source\MainActivity.cs" />
+    <Compile Include="Source\Activities\MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\Utilities\UnityApplicationFinder.cs" />

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -9,11 +10,14 @@ using MelonLoaderInstaller.App.Adapters;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
 
-namespace MelonLoaderInstaller.App
+namespace MelonLoaderInstaller.App.Activities
 {
     [Activity(Label = "@string/app_name", Theme = "@style/Theme.MelonLoaderInstaller", MainLauncher = true)]
     public class MainActivity : AppCompatActivity, AdapterView.IOnItemClickListener
     {
+        private List<UnityApplicationData> _availableApps;
+        private Toast _unsupportedToast;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -24,8 +28,8 @@ namespace MelonLoaderInstaller.App
 
             PackageWarnings.Run(this);
 
-            List<UnityApplicationData> availableApps = UnityApplicationFinder.Find(this);
-            ApplicationsAdapter adapter = new ApplicationsAdapter(this, availableApps);
+            _availableApps = UnityApplicationFinder.Find(this);
+            ApplicationsAdapter adapter = new ApplicationsAdapter(this, _availableApps);
 
             ListView listView = FindViewById<ListView>(Resource.Id.application_list);
             listView.Adapter = adapter;
@@ -41,7 +45,19 @@ namespace MelonLoaderInstaller.App
 
         public void OnItemClick(AdapterView parent, View view, int position, long id)
         {
-            throw new System.NotImplementedException();
+            UnityApplicationData app = _availableApps[position];
+
+            if (!app.IsSupported)
+            {
+                _unsupportedToast ??= Toast.MakeText(this, "Unsupported application", ToastLength.Short);
+                _unsupportedToast.Show();
+                return;
+            }
+
+            Intent intent = new Intent();
+            intent.SetClass(this, typeof(ViewApplication));
+            intent.PutExtra("target.packageName", app.PackageName);
+            StartActivity(intent);
         }
     }
 }
