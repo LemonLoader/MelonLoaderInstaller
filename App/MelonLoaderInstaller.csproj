@@ -46,6 +46,7 @@
     <AndroidSigningStorePass>3ToAF#E^HAY!&amp;3!MtiT@r4</AndroidSigningStorePass>
     <AndroidSigningKeyAlias>lemonman</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass>3ToAF#E^HAY!&amp;3!MtiT@r4</AndroidSigningKeyPass>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -59,6 +60,7 @@
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -69,11 +71,14 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Utilities\PackageWarnings.cs" />
-    <Compile Include="Utilities\Logger.cs" />
-    <Compile Include="MainActivity.cs" />
+    <Compile Include="Source\Adapters\ApplicationsAdapter.cs" />
+    <Compile Include="Source\Models\UnityApplicationData.cs" />
+    <Compile Include="Source\Utilities\PackageWarnings.cs" />
+    <Compile Include="Source\Utilities\Logger.cs" />
+    <Compile Include="Source\MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\Utilities\UnityApplicationFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -112,6 +117,12 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AssetRipper.VersionUtilities">
+      <Version>1.4.0</Version>
+    </PackageReference>
+    <PackageReference Include="AssetsTools.NET">
+      <Version>3.0.0-preview3</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
     </PackageReference>
@@ -126,9 +137,6 @@
     <AndroidResource Include="Resources\layout\item_supported_application.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\icon_placeholder.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values-night\styles.xml">
@@ -148,6 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\dimens.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
