@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Android;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Net;
 using Android.OS;
 using Android.Runtime;
@@ -9,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
+using AndroidX.Core.App;
 using MelonLoaderInstaller.App.Adapters;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
@@ -44,17 +47,13 @@ namespace MelonLoaderInstaller.App.Activities
             TryRequestPermissions();
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            if (grantResults.Length > 0 && grantResults[0] == Android.Content.PM.Permission.Granted)
-            {
-                RequestInstallUnknownSources();
-            }
-            else
+            if (grantResults.Length > 0 && grantResults.Any(a => a != Permission.Granted))
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder
@@ -71,8 +70,8 @@ namespace MelonLoaderInstaller.App.Activities
 
         public void TryRequestPermissions()
         {
-            bool canRead = CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Granted;
-            bool canWrite = CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Granted;
+            bool canRead = CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
+            bool canWrite = CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
 
             if (!canRead || !canWrite)
             {
@@ -83,13 +82,10 @@ namespace MelonLoaderInstaller.App.Activities
                 }, 100);
             }
 
-            // TODO: does this fix the funny bug?
+            if (!PackageManager.CanRequestPackageInstalls())
+                RequestInstallUnknownSources();
             if (!Environment.IsExternalStorageManager)
-            {
-                var uri = Uri.Parse($"package:{Application.Context?.ApplicationInfo?.PackageName}");
-                var permissionIntent = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission, uri);
-                StartActivity(permissionIntent);
-            }
+                RequestManageAllFiles();
         }
 
         public void RequestInstallUnknownSources()
@@ -99,6 +95,20 @@ namespace MelonLoaderInstaller.App.Activities
                     .SetTitle("Install Permission")
                     .SetMessage("Lemon needs permission to install apps from unknown sources to function!")
                     .SetPositiveButton("Setup", (o, di) => StartActivity(new Intent(Android.Provider.Settings.ActionManageUnknownAppSources, Uri.Parse("package:" + PackageName))))
+                    .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+
+            AlertDialog alert = builder.Create();
+            alert.SetCancelable(false);
+            alert.Show();
+        }
+
+        public void RequestManageAllFiles()
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder
+                    .SetTitle("Storage Permission")
+                    .SetMessage("Lemon needs permission to manage all files to function!")
+                    .SetPositiveButton("Setup", (o, di) => StartActivity(new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission, Uri.Parse("package:" + PackageName))))
                     .SetIcon(Android.Resource.Drawable.IcDialogAlert);
 
             AlertDialog alert = builder.Create();
