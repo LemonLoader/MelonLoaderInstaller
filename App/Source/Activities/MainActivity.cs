@@ -7,6 +7,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
 using MelonLoaderInstaller.App.Adapters;
 using MelonLoaderInstaller.App.Models;
@@ -37,6 +38,8 @@ namespace MelonLoaderInstaller.App.Activities
             ListView listView = FindViewById<ListView>(Resource.Id.application_list);
             listView.Adapter = adapter;
             listView.OnItemClickListener = this;
+
+            FolderPermission.l = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new FolderPermissionCallback());
 
             TryRequestPermissions();
         }
@@ -78,6 +81,14 @@ namespace MelonLoaderInstaller.App.Activities
                     Manifest.Permission.ReadExternalStorage,
                     Manifest.Permission.WriteExternalStorage,
                 }, 100);
+            }
+
+            // TODO: does this fix the funny bug?
+            if (!Environment.IsExternalStorageManager)
+            {
+                var uri = Uri.Parse($"package:{Application.Context?.ApplicationInfo?.PackageName}");
+                var permissionIntent = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission, uri);
+                StartActivity(permissionIntent);
             }
         }
 

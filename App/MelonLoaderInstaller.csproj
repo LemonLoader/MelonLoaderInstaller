@@ -74,6 +74,7 @@
     <Compile Include="Source\Activities\ViewApplication.cs" />
     <Compile Include="Source\Adapters\ApplicationsAdapter.cs" />
     <Compile Include="Source\Models\UnityApplicationData.cs" />
+    <Compile Include="Source\Utilities\FolderPermission.cs" />
     <Compile Include="Source\Utilities\PackageWarnings.cs" />
     <Compile Include="Source\Utilities\Logger.cs" />
     <Compile Include="Source\Activities\MainActivity.cs" />
@@ -166,6 +167,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\item_logger_output.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\menu\patch_menu.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\xml\provider_paths.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

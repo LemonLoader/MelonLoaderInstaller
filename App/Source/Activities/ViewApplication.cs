@@ -1,14 +1,17 @@
-﻿using Android.OS;
+﻿using Android.App;
+using Android.OS;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
 using System;
-using System.Linq;
+using static Android.Resource;
+using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace MelonLoaderInstaller.App.Activities
 {
+    [Activity(Label = "@string/app_name", Theme = "@style/Theme.MelonLoaderInstaller", MainLauncher = false)]
     public class ViewApplication : AppCompatActivity, View.IOnClickListener
     {
         private UnityApplicationData _applicationData;
@@ -32,8 +35,6 @@ namespace MelonLoaderInstaller.App.Activities
                 return;
             }
 
-            ActionBar.SetDisplayHomeAsUpEnabled(true);
-
             ImageView appIcon = FindViewById<ImageView>(Resource.Id.applicationIcon);
             TextView appName = FindViewById<TextView>(Resource.Id.applicationName);
             Button patchButton = FindViewById<Button>(Resource.Id.patchButton);
@@ -49,6 +50,16 @@ namespace MelonLoaderInstaller.App.Activities
             CheckWarnings(packageName);
 
             // TODO: FolderPermission for quest/android 12
+            FolderPermission.CurrentContext = this;
+            if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2 && Build.VERSION.SdkInt >= BuildVersionCodes.R)
+            {
+                FolderPermission.OpenDirectory("/sdcard/Android/data/" + packageName + "/");
+            }
+        }
+
+        public override void OnActionModeStarted(ActionMode mode)
+        {
+            MenuInflater.Inflate(Resource.Menu.patch_menu, mode.Menu);
         }
 
         private void CheckWarnings(string packageName)
