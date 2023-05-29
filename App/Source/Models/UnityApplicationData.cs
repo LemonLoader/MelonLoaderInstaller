@@ -20,7 +20,7 @@ namespace MelonLoaderInstaller.App.Models
         public string AppName { get; private set; }
         public string PackageName { get; private set; }
         public string ApkLocation { get; private set; }
-        public string LibraryLocation { get; private set; }
+        public string SplitLibAPKLocation { get; private set; }
         public bool IsPatched { get; private set; }
         public bool IsSupported { get; private set; }
         public bool IsSplit { get; private set; }
@@ -35,7 +35,7 @@ namespace MelonLoaderInstaller.App.Models
             AppName = info.PackageName;
             PackageName = info.PackageName;
             ApkLocation = info.PublicSourceDir;
-            LibraryLocation = info.SplitSourceDirs?.FirstOrDefault(d => d.Contains("arm64"));
+            SplitLibAPKLocation = info.SplitSourceDirs?.FirstOrDefault(d => d.Contains("arm64"));
 
             _applicationInfo = info;
             _assetManager = pm.GetResourcesForApplication(info)?.Assets;
@@ -45,8 +45,8 @@ namespace MelonLoaderInstaller.App.Models
 
             IsSplit = info.SplitSourceDirs != null;
             IsSupported = info.NativeLibraryDir?.Contains("arm64") ?? false;
-            IsPatched = _assetManager.List("melonloader") != null;
-            
+            IsPatched = (_assetManager.List("melonloader")?.Length ?? 0) != 0;
+
             TryGetVersion();
         }
 
@@ -74,6 +74,7 @@ namespace MelonLoaderInstaller.App.Models
 
                 AssetsFileInstance instance = uAssetsManager.LoadAssetsFile(memoryStream, "/bin/Data/globalgamemanagers", true);
                 EngineVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
+
                 return;
             }
             catch (Java.IO.FileNotFoundException) { }
@@ -81,7 +82,7 @@ namespace MelonLoaderInstaller.App.Models
             // If failed before, try to get the data from data.unity3d
             try
             {
-                Stream stream = _assetManager.Open("bin/Data/data.unity3d", Access.Buffer);
+                Stream stream = _assetManager.Open("bin/Data/data.unity3d");
 
                 using MemoryStream memoryStream = new MemoryStream();
                 byte[] buffer = new byte[4096];
@@ -105,9 +106,8 @@ namespace MelonLoaderInstaller.App.Models
             catch (Exception ex)
             {
                 Logger.Instance.Error("Failed to get Unity version for package " + PackageName + "\n" + ex.ToString());
+                EngineVersion = UnityVersion.MinVersion;
             }
-
-            EngineVersion = UnityVersion.MinVersion;
         }
     }
 }

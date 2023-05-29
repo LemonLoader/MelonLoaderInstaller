@@ -20,8 +20,7 @@ namespace MelonLoaderInstaller.App.Adapters
             UnityApplicationData application = GetItem(position);
 
             // Check if an existing view is being reused, otherwise inflate the view
-            convertView ??= LayoutInflater.From(Context)
-                .Inflate(Resource.Layout.item_supported_application, parent, false);
+            convertView = LayoutInflater.From(Context)?.Inflate(Resource.Layout.item_supported_application, parent, false);
 
             // Lookup view for data population
             TextView applicationName = convertView.FindViewById<TextView>(Resource.Id.applicationNameList);
@@ -37,22 +36,17 @@ namespace MelonLoaderInstaller.App.Adapters
             {
                 applicationPatched.Visibility = ViewStates.Visible;
                 applicationPatched.Text = "unsupported";
-                applicationPatched.SetTextColor(new Android.Content.Res.ColorStateList(new[]
-                {
-                    new[] {Android.Resource.Attribute.StateActive}
-                }, new int[] { Color.Red }));
+                applicationPatched.SetTextColor(Color.Red);
+            }
+            else if (application.IsPatched)
+            {
+                applicationPatched.Visibility = ViewStates.Visible;
+                applicationPatched.Text = "patched";
+                applicationPatched.SetTextColor(Color.Green);
+
             }
             else
-            {
                 applicationPatched.Visibility = ViewStates.Gone;
-                applicationPatched.Text = "patched";
-                applicationPatched.SetTextColor(new Android.Content.Res.ColorStateList(new[]
-                { 
-                    new[] {Android.Resource.Attribute.StateActive}
-                }, new int[] { Color.Green }));
-            }
-
-            applicationPatched.Visibility = application.IsPatched || !application.IsSupported ? ViewStates.Visible : ViewStates.Gone;
 
             unityVersion.Text = application.EngineVersion != UnityVersion.MinVersion ? application.EngineVersion.ToString() : "Unknown";
             unityVersion.Visibility = ViewStates.Visible;

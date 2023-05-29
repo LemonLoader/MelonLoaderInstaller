@@ -15,7 +15,7 @@ namespace MelonLoaderInstaller.App.Utilities
             using WebClient client = new WebClient();
             string warnings = "";
             try { warnings = client.DownloadString("https://raw.githubusercontent.com/LemonLoader/MelonLoaderInstaller/master/package_warnings.json"); }
-            catch (WebException _)
+            catch (WebException)
             {
                 AvailableWarnings = new Dictionary<string, string>();
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
