@@ -32,7 +32,7 @@ namespace MelonLoaderInstaller.App.Models
         public UnityApplicationData(PackageManager pm, ApplicationInfo info)
         {
             Icon = info.LoadIcon(pm);
-            AppName = info.PackageName;
+            AppName = pm.GetApplicationLabel(info);
             PackageName = info.PackageName;
             ApkLocation = info.PublicSourceDir;
             SplitLibAPKLocation = info.SplitSourceDirs?.FirstOrDefault(d => d.Contains("arm64"));

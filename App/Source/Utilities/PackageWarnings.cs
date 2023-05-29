@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.OS;
 using AndroidX.AppCompat.App;
 using System.Collections.Generic;
 using System.Net;
@@ -32,6 +33,29 @@ namespace MelonLoaderInstaller.App.Utilities
             }
 
             AvailableWarnings = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(warnings);
+        }
+    }
+
+    public class WarningCountdown : CountDownTimer
+    {
+        private AlertDialog.Builder _builder;
+        private AlertDialog _alert;
+
+        public WarningCountdown(long millisInFuture, long countDownInterval, AlertDialog.Builder builder, AlertDialog alert) : base(millisInFuture, countDownInterval)
+        {
+            _builder = builder;
+            _alert = alert;
+        }
+
+        public override void OnFinish()
+        {
+            _builder.SetPositiveButton("Understood", (a, b) => { });
+            _builder.Create().Show();
+            _alert.Dismiss();
+        }
+
+        public override void OnTick(long millisUntilFinished)
+        {
         }
     }
 }

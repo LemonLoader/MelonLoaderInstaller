@@ -42,5 +42,12 @@ namespace MelonLoaderInstaller.App.Utilities
 
             return unityApps;
         }
+
+        public static UnityApplicationData FromPackageName(Activity context, string packageName)
+        {
+            PackageManager pm = context.PackageManager;
+            ApplicationInfo packageInfo = pm.GetApplicationInfo(packageName, PackageInfoFlags.MetaData);
+            return new UnityApplicationData(pm, packageInfo);
+        }
     }
 }

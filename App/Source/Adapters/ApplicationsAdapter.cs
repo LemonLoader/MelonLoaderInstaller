@@ -29,7 +29,7 @@ namespace MelonLoaderInstaller.App.Adapters
             TextView applicationPatched = convertView.FindViewById<TextView>(Resource.Id.isPatchedList);
             // Populate the data into the template view using the data object
 
-            applicationName.Text = application.AppName;
+            applicationName.Text = $"{application.AppName} ({application.PackageName})";
             applicationIcon.SetImageDrawable(application.Icon);
 
             if (!application.IsSupported)
