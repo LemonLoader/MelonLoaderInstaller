@@ -24,25 +24,47 @@ namespace MelonLoaderInstaller.App.Utilities
             //    Directory.CreateDirectory(dirInExtenalStorage);
 
             Intent intent = new Intent(Intent.ActionOpenDocumentTree).PutExtra(DocumentsContract.ExtraInitialUri, Uri.Parse(RemapPathForApi300OrAbove(dirInExtenalStorage)));
-            CurrentContext.StartActivityForResult(intent, 1337);
+            l.Launch(intent);
         }
 
         public static string RemapPathForApi300OrAbove(string path)
         {
-            string suffix = path;
+            string text = path;
+            if (text.StartsWith("/sdcard"))
+                text = text["/sdcard".Length..];
 
-            Logger.Instance.Info(suffix);
+            if (text.StartsWith(Environment.ExternalStorageDirectory.AbsolutePath))
+                text = path[Environment.ExternalStorageDirectory.AbsolutePath.Length..];
 
-            if (suffix.StartsWith("/sdcard"))
-                suffix = suffix.Substring("/sdcard".Length);
-            if (path.StartsWith(Environment.ExternalStorageDirectory.AbsolutePath))
-                suffix = path.Substring(Environment.ExternalStorageDirectory.AbsolutePath.Length);
+            if (text.Length < 1)
+                text = "/";
 
-            string documentId = "primary:" + suffix.Substring(1);
-            return DocumentsContract.BuildDocumentUri(
-                "com.android.externalstorage.documents",
-                documentId
-            ).ToString();
+            string documentId = "primary:" + text[1..];
+            return DocumentsContract.BuildDocumentUri("com.android.externalstorage.documents", documentId).ToString();
+        }
+
+        public static DocumentFile GetAccessToFile(string dir)
+        {
+            Logger.Instance.Info("Trying to get access to " + dir);
+
+            string text = "/sdcard/Android/data";
+            if (dir.Contains("/Android/obb/"))
+                text = "/sdcard/Android/obb";
+
+            string diff = dir.Replace(text, "");
+            string[] dirs = diff.Split('/');
+            DocumentFile docFile = DocumentFile.FromTreeUri(CurrentContext, Uri.Parse(RemapPathForApi300OrAbove(text).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/")));
+            foreach (string dirName in dirs)
+            {
+                if (string.IsNullOrWhiteSpace(dirName))
+                    continue;
+
+                if (docFile.FindFile(dirName) == null)
+                    docFile.CreateDirectory(dirName);
+
+                docFile = docFile.FindFile(dirName);
+            }
+            return docFile;
         }
 
         /*public static void Copy(string from, string to)
@@ -60,30 +82,6 @@ namespace MelonLoaderInstaller.App.Utilities
             Logger.Instance.Info(parent.CanWrite().ToString());
 
             parent.CreateDirectory(Path.GetFileName(dir));
-        }
-
-        public static DocumentFile GetAccessToFile(string dir)
-        {
-            Logger.Instance.Info("Trying to get access to " + dir);
-
-            string text = "/sdcard/Android/data";
-            if (dir.Contains("/Android/obb/"))
-                text = "/sdcard/Android/obb";
-          
-            string diff = dir.Replace(text, "");
-            string[] dirs = diff.Split('/');
-            DocumentFile docFile = DocumentFile.FromTreeUri(CurrentContext, Uri.Parse(RemapPathForApi300OrAbove(text).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/")));
-            foreach (string dirName in dirs)
-            {
-                if (string.IsNullOrWhiteSpace(dirName))
-                    continue;
-
-                if (docFile.FindFile(dirName) == null)
-                    docFile.CreateDirectory(dirName);
-
-                docFile = docFile.FindFile(dirName);
-            }
-            return docFile;
         }
 
         public static Stream GetOutputStream(string path)
@@ -130,7 +128,6 @@ namespace MelonLoaderInstaller.App.Utilities
             {
                 if (activityResult.Data.Data != null)
                 {
-                    Logger.Instance.Info(activityResult.Data.Data.ToString());
                     FolderPermission.CurrentContext.ContentResolver.TakePersistableUriPermission(
                         activityResult.Data.Data,
                         ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission);

@@ -42,9 +42,16 @@ namespace MelonLoaderInstaller.App.Activities
             listView.Adapter = adapter;
             listView.OnItemClickListener = this;
 
+            FolderPermission.CurrentContext = this;
             FolderPermission.l = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new FolderPermissionCallback());
 
             TryRequestPermissions();
+
+            // TODO: FolderPermission for quest/android 12
+            if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2 && Build.VERSION.SdkInt >= BuildVersionCodes.R)
+            {
+                FolderPermission.OpenDirectory("/sdcard/Android/data");
+            }
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)

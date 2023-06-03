@@ -48,13 +48,6 @@ namespace MelonLoaderInstaller.App.Activities
             // TODO: setup LoggerHelper once i implement patching
 
             CheckWarnings(packageName);
-
-            // TODO: FolderPermission for quest/android 12
-            FolderPermission.CurrentContext = this;
-            if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2 && Build.VERSION.SdkInt >= BuildVersionCodes.R)
-            {
-                FolderPermission.OpenDirectory("/sdcard/Android/data/" + packageName + "/");
-            }
         }
 
         public override void OnActionModeStarted(ActionMode mode)
