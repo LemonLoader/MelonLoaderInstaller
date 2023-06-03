@@ -69,6 +69,7 @@
     <Reference Include="Mono.Android" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors" />
+    <ProjectReference Include="..\Core\MelonLoaderInstallerCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\Activities\ViewApplication.cs" />

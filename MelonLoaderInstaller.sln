@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelonLoaderInstaller", "App\MelonLoaderInstaller.csproj", "{CFB81A38-9B76-42EE-BDBA-A5D2CB5CF878}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelonLoaderInstallerCore", "Core\MelonLoaderInstallerCore.csproj", "{AA826443-47DC-49AE-8942-411757C3F380}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{CFB81A38-9B76-42EE-BDBA-A5D2CB5CF878}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFB81A38-9B76-42EE-BDBA-A5D2CB5CF878}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CFB81A38-9B76-42EE-BDBA-A5D2CB5CF878}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{AA826443-47DC-49AE-8942-411757C3F380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA826443-47DC-49AE-8942-411757C3F380}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA826443-47DC-49AE-8942-411757C3F380}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA826443-47DC-49AE-8942-411757C3F380}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
