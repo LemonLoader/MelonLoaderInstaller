@@ -3,15 +3,18 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
+using AndroidX.AppCompat.Widget;
+using Kotlin;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
 using System;
 using static Android.Resource;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace MelonLoaderInstaller.App.Activities
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/Theme.MelonLoaderInstaller", MainLauncher = false)]
+    [Activity(Label = "@string/app_name", Theme = "@style/Theme.MelonLoaderInstaller.NoActionBar", MainLauncher = false)]
     public class ViewApplication : AppCompatActivity, View.IOnClickListener
     {
         private UnityApplicationData _applicationData;
@@ -21,6 +24,9 @@ namespace MelonLoaderInstaller.App.Activities
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_view_application);
+
+            SetSupportActionBar(FindViewById<Toolbar>(Resource.Id.toolbar1));
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
 
             string packageName = Intent.GetStringExtra("target.packageName");
 
@@ -50,9 +56,26 @@ namespace MelonLoaderInstaller.App.Activities
             CheckWarnings(packageName);
         }
 
-        public override void OnActionModeStarted(ActionMode mode)
+        public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            MenuInflater.Inflate(Resource.Menu.patch_menu, mode.Menu);
+            MenuInflater.Inflate(Resource.Menu.patch_menu, menu);
+            return true;
+        }
+
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case Resource.Id.home:
+                    Finish();
+                    return true;
+                case Resource.Id.action_patch_local_deps:
+                    // TODO: patch with local deps
+                    // requires patching to work obviously
+                    return true;
+            }
+
+            return base.OnOptionsItemSelected(item);
         }
 
         private void CheckWarnings(string packageName)
@@ -63,7 +86,7 @@ namespace MelonLoaderInstaller.App.Activities
                 builder
                         .SetTitle("Warning")
                         .SetMessage(warning)
-                        .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                        .SetIcon(Drawable.IcDialogAlert);
 
                 AlertDialog alert = builder.Create();
                 alert.SetCancelable(false);
@@ -75,7 +98,6 @@ namespace MelonLoaderInstaller.App.Activities
 
         public void OnClick(View v)
         {
-            throw new NotImplementedException();
         }
     }
 }

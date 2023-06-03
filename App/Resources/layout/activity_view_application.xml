@@ -16,11 +16,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/applicationDetails"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/applicationDetails"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="?android:attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -53,10 +54,15 @@
             app:layout_constraintTop_toBottomOf="@+id/applicationName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp"
-
-            />
+            android:layout_marginTop="16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar1"
+            android:minHeight="?android:attr/actionBarSize"
+            android:minWidth="25px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
