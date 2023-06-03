@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Android.App;
 using Android.Content;
@@ -8,6 +9,7 @@ using Android.Provider;
 using AndroidX.Activity.Result;
 using AndroidX.DocumentFile.Provider;
 using Java.Lang;
+using Xamarin.Essentials;
 using File = System.IO.File;
 
 namespace MelonLoaderInstaller.App.Utilities
@@ -15,7 +17,7 @@ namespace MelonLoaderInstaller.App.Utilities
     // adapted from https://github.com/ComputerElite/QuestAppVersionSwitcher/blob/a168f5c0a77d35fb9d00096d1e75352032ced756/QuestAppVersionSwitcher/FolderPermission.cs
     public static class FolderPermission
     {
-        public static Activity CurrentContext;
+        public static Activities.MainActivity CurrentContext;
 
         public static ActivityResultLauncher l = null;
         public static void OpenDirectory(string dirInExtenalStorage)
@@ -45,8 +47,6 @@ namespace MelonLoaderInstaller.App.Utilities
 
         public static DocumentFile GetAccessToFile(string dir)
         {
-            Logger.Instance.Info("Trying to get access to " + dir);
-
             string text = "/sdcard/Android/data";
             if (dir.Contains("/Android/obb/"))
                 text = "/sdcard/Android/obb";
@@ -67,45 +67,20 @@ namespace MelonLoaderInstaller.App.Utilities
             return docFile;
         }
 
-        /*public static void Copy(string from, string to)
+        public static bool GotAccessTo(string dirInExtenalStorage)
         {
-            Stream file = GetOutputStream(to);
-            StreamWriter sw = new StreamWriter(file);
-            sw.Write(File.ReadAllBytes(from));
-            sw.Dispose();
+            if (!Directory.Exists(dirInExtenalStorage))
+                return false;
+
+            string b = RemapPathForApi300OrAbove(dirInExtenalStorage).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/");
+            foreach (UriPermission perm in Platform.AppContext.ContentResolver.PersistedUriPermissions)
+            {
+                if (perm.Uri.ToString() == b)
+                    return true;
+            }
+
+            return false;
         }
-
-        public static void CreateDirectory(string dir)
-        {
-            DocumentFile parent = GetAccessToFile(Directory.GetParent(dir).FullName);
-
-            Logger.Instance.Info(parent.CanWrite().ToString());
-
-            parent.CreateDirectory(Path.GetFileName(dir));
-        }
-
-        public static Stream GetOutputStream(string path)
-        {
-            DocumentFile directory = GetAccessToFile(Directory.GetParent(path).FullName);
-            string name = Path.GetFileName(path);
-            directory.FindFile(name)?.Delete();
-            return CurrentContext.ContentResolver.OpenOutputStream(directory.CreateFile("application/octet-stream", name).Uri);
-        }
-
-        public static void Delete(string path)
-        {
-            DocumentFile directory = GetAccessToFile(Directory.GetParent(path).FullName);
-            string name = Path.GetFileName(path);
-            directory.FindFile(name)?.Delete();
-        }
-
-        public static void CreateDirectoryIfNotExisting(string path)
-        {
-            Logger.Instance.Info("Creating directory " + path + " if it doesn't exist");
-            DocumentFile directory = GetAccessToFile(Directory.GetParent(path).FullName);
-            string name = Path.GetFileName(path);
-            if (directory.FindFile(name) == null) directory.CreateDirectory(name);
-        }*/
     }
 
     public class FolderPermissionCallback : Object, IActivityResultCallback
@@ -119,6 +94,8 @@ namespace MelonLoaderInstaller.App.Utilities
                     FolderPermission.CurrentContext.ContentResolver.TakePersistableUriPermission(
                         data.Data,
                         ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission);
+
+                    FolderPermission.CurrentContext.RequestFolderPermissions();
                 }
             }
         }
@@ -131,6 +108,8 @@ namespace MelonLoaderInstaller.App.Utilities
                     FolderPermission.CurrentContext.ContentResolver.TakePersistableUriPermission(
                         activityResult.Data.Data,
                         ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission);
+
+                    FolderPermission.CurrentContext.RequestFolderPermissions();
                 }
             }
         }

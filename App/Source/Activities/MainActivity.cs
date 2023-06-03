@@ -45,13 +45,9 @@ namespace MelonLoaderInstaller.App.Activities
             FolderPermission.CurrentContext = this;
             FolderPermission.l = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new FolderPermissionCallback());
 
+            // TODO: I feel like this mess of AlertDialogs on first start is a messy gross mess and should be cleaned or something
             TryRequestPermissions();
-
-            // TODO: FolderPermission for quest/android 12
-            if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2 && Build.VERSION.SdkInt >= BuildVersionCodes.R)
-            {
-                FolderPermission.OpenDirectory("/sdcard/Android/data");
-            }
+            RequestFolderPermissions();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
@@ -121,6 +117,43 @@ namespace MelonLoaderInstaller.App.Activities
             AlertDialog alert = builder.Create();
             alert.SetCancelable(false);
             alert.Show();
+        }
+
+        public void RequestFolderPermissions()
+        {
+            // Does not help these versions
+            if (Build.VERSION.SdkInt > BuildVersionCodes.SV2 || Build.VERSION.SdkInt < BuildVersionCodes.R)
+                return;
+
+            if (!FolderPermission.GotAccessTo("/sdcard/Android/data"))
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder
+                        .SetTitle("Data Folder Permission")
+                        .SetMessage("Lemon needs access to the Android data folder to backup game data.")
+                        .SetPositiveButton("Setup", (o, di) => FolderPermission.OpenDirectory("/sdcard/Android/data"))
+                        .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+
+                AlertDialog alert = builder.Create();
+                alert.SetCancelable(false);
+                alert.Show();
+                return;
+            }
+
+            if (!FolderPermission.GotAccessTo("/sdcard/Android/obb"))
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder
+                        .SetTitle("OBB Folder Permission")
+                        .SetMessage("Lemon needs access to the Android obb folder to backup game data.")
+                        .SetPositiveButton("Setup", (o, di) => FolderPermission.OpenDirectory("/sdcard/Android/obb"))
+                        .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+
+                AlertDialog alert = builder.Create();
+                alert.SetCancelable(false);
+                alert.Show();
+                return;
+            }
         }
 
         public void OnItemClick(AdapterView parent, View view, int position, long id)
