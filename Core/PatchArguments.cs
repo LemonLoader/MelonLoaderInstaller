@@ -1,5 +1,8 @@
 ﻿namespace MelonLoaderInstaller.Core
 {
+    /// <summary>
+    /// Public-facing class for user set information
+    /// </summary>
     public class PatchArguments
     {
         public string TargetApkPath;
