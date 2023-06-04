@@ -9,13 +9,15 @@ namespace MelonLoaderInstaller.Core
     {
         private PatchArguments _args;
         private PatchInfo _info;
+        private IPatchLogger _logger;
 
-        public static void Run(PatchArguments arguments)
+        public static void Run(PatchArguments arguments, IPatchLogger logger)
         {
             Patcher patcher = new Patcher
             {
                 _args = arguments,
-                _info = new PatchInfo(arguments)
+                _info = new PatchInfo(arguments),
+                _logger = logger
             };
 
             patcher.InternalRun();
@@ -23,7 +25,19 @@ namespace MelonLoaderInstaller.Core
 
         private void InternalRun()
         {
+            bool success = true;
 
+            try
+            {
+                _info.CreateDirectories();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log("[ERROR] " + ex.ToString());
+                success = false;
+            }
+
+            // return success;
         }
     }
 }

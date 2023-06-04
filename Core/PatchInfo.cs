@@ -25,5 +25,11 @@ namespace MelonLoaderInstaller.Core
 
             KeystorePath = Path.Combine(arguments.TempDirectory, "key.keystore");
         }
+
+        public void CreateDirectories()
+        {
+            Directory.CreateDirectory(arguments.TempDirectory);
+            Directory.CreateDirectory(LemonDataDirectory);
+        }
     }
 }
