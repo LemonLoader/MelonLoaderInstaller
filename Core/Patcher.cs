@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MelonLoaderInstaller.Core.PatchSteps;
+using System;
 using System.IO;
 
 namespace MelonLoaderInstaller.Core
@@ -38,6 +39,16 @@ namespace MelonLoaderInstaller.Core
 
                 IPatchStep[] steps = new IPatchStep[]
                 {
+                    new DetectUnityVersion(),
+                    new DownloadUnityDeps(),
+                    new DownloadNativeLibs(),
+                    new ExtractDependencies(),
+                    new ExtractUnityLibs(),
+                    new PatchManifest(),
+                    new RemoveStaleFiles(),
+                    new RepackAPK(),
+                    new GenerateKeystore(),
+                    new AlignSign(),
                 };
 
                 foreach (IPatchStep step in steps)
