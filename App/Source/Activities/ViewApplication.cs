@@ -7,6 +7,7 @@ using AndroidX.AppCompat.Widget;
 using Kotlin;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
+using MelonLoaderInstaller.Core;
 using System;
 using static Android.Resource;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
@@ -18,6 +19,7 @@ namespace MelonLoaderInstaller.App.Activities
     public class ViewApplication : AppCompatActivity, View.IOnClickListener
     {
         private UnityApplicationData _applicationData;
+        private PatchLogger _patchLogger;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -51,7 +53,7 @@ namespace MelonLoaderInstaller.App.Activities
             appIcon.SetImageDrawable(_applicationData.Icon);
             appName.Text = _applicationData.AppName;
 
-            // TODO: setup LoggerHelper once i implement patching
+            _patchLogger = new PatchLogger(this);
 
             CheckWarnings(packageName);
         }
@@ -98,6 +100,44 @@ namespace MelonLoaderInstaller.App.Activities
 
         public void OnClick(View v)
         {
+        private class PatchLogger : IPatchLogger
+        {
+            private Activity _context;
+            private TextView _content;
+            private ScrollView _scroller;
+            private bool _dirty = false;
+
+            public PatchLogger(Activity context)
+            {
+                _context = context;
+                _content = context.FindViewById<TextView>(Resource.Id.loggerBody);
+                _scroller = context.FindViewById<ScrollView>(Resource.Id.loggerScroll);
+                _content.Text = string.Empty;
+            }
+
+            public void Clear()
+            {
+                _context.RunOnUiThread(() =>
+                {
+                    _content.Text = string.Empty;
+                });
+            }
+
+            public void Log(string message)
+            {
+                Logger.Instance.Info(message);
+
+                _context.RunOnUiThread(() =>
+                {
+                    if (_dirty)
+                        _content.Append("\n");
+                    else
+                        _dirty = true;
+
+                    _content.Append(message);
+                    _scroller.FullScroll(FocusSearchDirection.Down);
+                });
+            }
         }
     }
 }
