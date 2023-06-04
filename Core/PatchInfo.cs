@@ -13,6 +13,9 @@ namespace MelonLoaderInstaller.Core
         public string UnityNativeDirectory { get; }
         public string UnityManagedDirectory { get; }
 
+        public string OutputBaseApkPath { get; }
+        public string OutputLibApkPath { get; }
+
         public string KeystorePath { get; }
 
         private PatchArguments _arguments;
@@ -26,6 +29,9 @@ namespace MelonLoaderInstaller.Core
             UnityBaseDirectory = Path.Combine(arguments.TempDirectory, "unity");
             UnityNativeDirectory = Path.Combine(UnityBaseDirectory, "Libs");
             UnityManagedDirectory = Path.Combine(UnityBaseDirectory, "Managed");
+
+            OutputBaseApkPath = Path.Combine(arguments.OutputApkDirectory, "base.apk");
+            OutputLibApkPath = Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(arguments.LibraryApkPath));
 
             KeystorePath = Path.Combine(arguments.TempDirectory, "key.keystore");
         }
