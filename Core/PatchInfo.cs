@@ -15,8 +15,12 @@ namespace MelonLoaderInstaller.Core
 
         public string KeystorePath { get; }
 
+        private PatchArguments _arguments;
+
         public PatchInfo(PatchArguments arguments)
         {
+            _arguments = arguments;
+
             LemonDataDirectory = Path.Combine(arguments.TempDirectory, "lemon_data");
 
             UnityBaseDirectory = Path.Combine(arguments.TempDirectory, "unity");
@@ -28,7 +32,7 @@ namespace MelonLoaderInstaller.Core
 
         public void CreateDirectories()
         {
-            Directory.CreateDirectory(arguments.TempDirectory);
+            Directory.CreateDirectory(_arguments.TempDirectory);
             Directory.CreateDirectory(LemonDataDirectory);
         }
     }
