@@ -11,7 +11,7 @@ namespace MelonLoaderInstaller.Core
         private PatchInfo _info;
         private IPatchLogger _logger;
 
-        public static void Run(PatchArguments arguments, IPatchLogger logger)
+        public static bool Run(PatchArguments arguments, IPatchLogger logger)
         {
             Patcher patcher = new Patcher
             {
@@ -20,10 +20,10 @@ namespace MelonLoaderInstaller.Core
                 _logger = logger
             };
 
-            patcher.InternalRun();
+            return patcher.InternalRun();
         }
 
-        private void InternalRun()
+        private bool InternalRun()
         {
             bool success = true;
 
@@ -37,7 +37,7 @@ namespace MelonLoaderInstaller.Core
                 success = false;
             }
 
-            // return success;
+            return success;
         }
     }
 }

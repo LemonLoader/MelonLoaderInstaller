@@ -3,15 +3,17 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
-using AndroidX.AppCompat.Widget;
-using Kotlin;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
 using MelonLoaderInstaller.Core;
 using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using static Android.Resource;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
+using Uri = Android.Net.Uri;
 
 namespace MelonLoaderInstaller.App.Activities
 {
@@ -98,9 +100,135 @@ namespace MelonLoaderInstaller.App.Activities
             }
         }
 
-        public void OnClick(View v)
+        public async void OnClick(View v) => await StartPatching(Path.Combine(GetExternalFilesDir(null).ToString(), "temp", "unity.zip"));
+
+        private async Task StartPatching(string unityDepsPath)
         {
-        private class PatchLogger : IPatchLogger
+            _patchLogger.Clear();
+
+            string baseAppPath = GetExternalFilesDir(null).ToString();
+
+            string packageTempPath = Path.Combine(baseAppPath, "temp", _applicationData.PackageName);
+            string lemonDataPath = Path.Combine(baseAppPath, "temp", "dependencies.zip");
+            string il2cppEtcPath = Path.Combine(baseAppPath, "temp", "il2cpp_etc.zip");
+            string unityAssetsPath = unityDepsPath;
+
+            // File selection stuff :P
+            if (unityAssetsPath.StartsWith("content://"))
+            {
+                Stream inStream = ContentResolver.OpenInputStream(Uri.Parse(unityAssetsPath))
+                    ?? throw new Exception("Unity assets path does not exist!");
+
+                string outPath = Path.Combine(GetExternalFilesDir(null).ToString(), "temp", "unity.zip");
+                Stream outStream = ContentResolver.OpenOutputStream(Uri.FromFile(new Java.IO.File(outPath)), "w");
+
+                inStream.CopyTo(outStream);
+
+                inStream.Dispose();
+                outStream.Dispose();
+
+                unityAssetsPath = outPath;
+                Logger.Instance.Info($"Copied unity assets to [ {unityAssetsPath} ]");
+            }
+
+            // TODO: is the PublishedBase stuff needed?
+
+            Button patchButton = FindViewById<Button>(Resource.Id.patchButton);
+
+            SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+            patchButton.Enabled = false;
+            patchButton.Text = "PATCHING";
+
+            Task task = Task.Run(() =>
+            {
+                if (Directory.Exists(packageTempPath))
+                    Directory.Delete(packageTempPath, true);
+
+                _patchLogger.Log($"Build Directory: [ {baseAppPath} ]");
+                _patchLogger.Log("Preparing Assets");
+
+#if DEBUG
+                bool localFile = true;
+#else
+                bool localFile = false;
+#endif
+
+                if (localFile && Assets.List("").Any(a => a.Contains("installer_deps")))
+                {
+                    _patchLogger.Log("Using embedded installer dependencies");
+                    CopyAsset("installer_deps.zip", lemonDataPath);
+                }
+                else
+                {
+                    bool downloadResult = DependencyDownloader.Run(lemonDataPath, _patchLogger);
+                    if (!downloadResult)
+                        RunOnUiThread(() => { patchButton.Text = "FAILED"; });
+                }
+
+                CopyAsset("il2cpp_etc.zip", il2cppEtcPath);
+
+                _patchLogger.Log("Starting patch");
+
+                Directory.CreateDirectory(packageTempPath);
+
+                string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
+
+                bool success = Patcher.Run(new PatchArguments()
+                {
+                    TargetApkPath = _applicationData.ApkLocation,
+                    LibraryApkPath = _applicationData.SplitLibAPKLocation,
+                    IsSplit = _applicationData.IsSplit,
+                    OutputApkDirectory = outputDir,
+                    TempDirectory = packageTempPath,
+                    LemonDataPath = lemonDataPath,
+                    Il2CppEtcPath = il2cppEtcPath,
+                    UnityDependenciesPath = unityAssetsPath
+                }, _patchLogger);
+
+                if (success)
+                {
+                    // TODO: here would probably be a good place to add some stuff to handle multi-split apks
+                    _patchLogger.Log("Application patched successfully, reinstalling.");
+
+                    RunOnUiThread(() => 
+                    {
+                        // TODO: install
+                        // since I'm moving to a "pass in dir instead of base.apk path", I should just be able to check
+                        // if file.count > 1: split, else: single
+                    });
+                }
+                else
+                    RunOnUiThread(() => { patchButton.Text = "FAILED"; });
+            });
+
+            await task;
+        }
+
+        private bool CopyAsset(string assetName, string destinationPath)
+        {
+            try
+            {
+                Stream inStream = Assets.Open(assetName);
+                Stream outStream = File.OpenWrite(destinationPath);
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inStream.Read(buffer)) != -1)
+                    outStream.Write(buffer, 0, bytesRead);
+
+                inStream.Dispose();
+                outStream.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _patchLogger.Log("Failed to copy asset file: " + assetName + " -> " + ex.ToString());
+                return false;
+            }
+        }
+
+        public class PatchLogger : IPatchLogger
         {
             private Activity _context;
             private TextView _content;
