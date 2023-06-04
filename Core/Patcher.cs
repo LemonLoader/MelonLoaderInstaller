@@ -11,19 +11,14 @@ namespace MelonLoaderInstaller.Core
         private PatchInfo _info;
         private IPatchLogger _logger;
 
-        public static bool Run(PatchArguments arguments, IPatchLogger logger)
+        public Patcher(PatchArguments arguments, IPatchLogger logger)
         {
-            Patcher patcher = new Patcher
-            {
-                _args = arguments,
-                _info = new PatchInfo(arguments),
-                _logger = logger
-            };
-
-            return patcher.InternalRun();
+            _args = arguments;
+            _info = new PatchInfo(arguments);
+            _logger = logger;
         }
 
-        private bool InternalRun()
+        public bool Run()
         {
             bool success = true;
 

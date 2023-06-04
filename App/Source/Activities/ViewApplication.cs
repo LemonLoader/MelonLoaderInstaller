@@ -173,7 +173,7 @@ namespace MelonLoaderInstaller.App.Activities
 
                 string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
 
-                bool success = Patcher.Run(new PatchArguments()
+                Patcher patcher = new Patcher(new PatchArguments()
                 {
                     TargetApkPath = _applicationData.ApkLocation,
                     LibraryApkPath = _applicationData.SplitLibAPKLocation,
@@ -184,6 +184,8 @@ namespace MelonLoaderInstaller.App.Activities
                     Il2CppEtcPath = il2cppEtcPath,
                     UnityDependenciesPath = unityAssetsPath
                 }, _patchLogger);
+
+                bool success = patcher.Run();
 
                 if (success)
                 {
