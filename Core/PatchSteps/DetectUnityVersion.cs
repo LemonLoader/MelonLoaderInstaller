@@ -43,7 +43,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             }
             catch (Exception ex)
             {
-                patcher._logger.Log("Failed to get Unity version for package\n" + ex.ToString());
+                patcher._logger.Log("Failed to get Unity version, cannot patch.\n" + ex.ToString());
                 patcher._args.UnityVersion = UnityVersion.MinVersion;
                 return false;
             }
