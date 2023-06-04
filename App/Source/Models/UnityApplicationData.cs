@@ -100,8 +100,6 @@ namespace MelonLoaderInstaller.App.Models
                 BundleFileInstance bundle = uAssetsManager.LoadBundleFile(memoryStream, "/bin/Data/data.unity3d");
                 AssetsFileInstance instance = uAssetsManager.LoadAssetsFileFromBundle(bundle, "globalgamemanagers");
                 EngineVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
-
-                memoryStream.Dispose();
             }
             catch (Exception ex)
             {
