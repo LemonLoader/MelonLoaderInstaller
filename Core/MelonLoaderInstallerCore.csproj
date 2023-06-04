@@ -6,4 +6,8 @@
     <RootNamespace>MelonLoaderInstaller.Core</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AssetRipper.VersionUtilities" Version="1.4.0" />
+  </ItemGroup>
+
 </Project>

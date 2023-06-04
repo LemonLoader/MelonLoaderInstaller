@@ -183,7 +183,7 @@ namespace MelonLoaderInstaller.App.Activities
                     LemonDataPath = lemonDataPath,
                     Il2CppEtcPath = il2cppEtcPath,
                     UnityDependenciesPath = unityAssetsPath,
-                    UnityVersion = _applicationData.EngineVersion.ToStringWithoutType()
+                    UnityVersion = _applicationData.EngineVersion
                 }, _patchLogger);
 
                 bool success = patcher.Run();
