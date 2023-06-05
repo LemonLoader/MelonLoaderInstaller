@@ -2,7 +2,7 @@
 
 namespace MelonLoaderInstaller.Core.Utilities
 {
-    // Auto-converted from https://pastebin.com/c53DuqMt, writer unknown
+    // Auto-converted from https://pastebin.com/c53DuqMt (then I obliterated it), writer unknown
     // I do not know how this code works, please do not ask
     internal class ABXTools
     {
