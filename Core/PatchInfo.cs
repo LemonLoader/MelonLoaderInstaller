@@ -16,7 +16,7 @@ namespace MelonLoaderInstaller.Core
         public string OutputBaseApkPath { get; }
         public string OutputLibApkPath { get; }
 
-        public string KeystorePath { get; }
+        public string X509Certificate { get; set; }
 
         private PatchArguments _arguments;
 
@@ -32,8 +32,6 @@ namespace MelonLoaderInstaller.Core
 
             OutputBaseApkPath = Path.Combine(arguments.OutputApkDirectory, "base.apk");
             OutputLibApkPath = Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(arguments.LibraryApkPath));
-
-            KeystorePath = Path.Combine(arguments.TempDirectory, "key.keystore");
         }
 
         public void CreateDirectories()
