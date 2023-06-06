@@ -1,12 +1,10 @@
 ﻿using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using System;
 using System.IO;
-using System.Text;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.Crypto.Operators;
@@ -49,18 +47,18 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
         public bool Run(Patcher patcher)
         {
             RsaKeyPairGenerator kpg = new RsaKeyPairGenerator();
-            kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256"), 1024));
+            kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
 
             AsymmetricCipherKeyPair keyPair = kpg.GenerateKeyPair();
 
             var certificateGenerator = new X509V3CertificateGenerator();
             BigInteger serialNumber = BigInteger.ProbablePrime(120, new Random());
-            X509Name issuerDN = new X509Name("lemon");
-            X509Name subjectDN = new X509Name("lemon");
+            X509Name issuerDN = new X509Name("CN=lemon");
+            X509Name subjectDN = new X509Name("CN=lemon");
             certificateGenerator.SetSerialNumber(serialNumber);
             certificateGenerator.SetIssuerDN(issuerDN);
             certificateGenerator.SetSubjectDN(subjectDN);
-            certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
+            certificateGenerator.SetNotBefore(DateTime.UtcNow.Date.AddYears(-999));
             certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(999));
             certificateGenerator.SetPublicKey(keyPair.Public);
 
@@ -82,7 +80,7 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
             pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
             pemWriter.WriteObject(keyPair.Private);
-            patcher._info.PemData = pemWriter.ToString();
+            patcher._info.PemData = stringWriter.ToString();
 
             return true;
         }
