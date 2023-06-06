@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using Android.App;
 using Android.Content;
 using Android.Net;
@@ -10,7 +8,6 @@ using AndroidX.Activity.Result;
 using AndroidX.DocumentFile.Provider;
 using Java.Lang;
 using Xamarin.Essentials;
-using File = System.IO.File;
 
 namespace MelonLoaderInstaller.App.Utilities
 {
@@ -22,9 +19,6 @@ namespace MelonLoaderInstaller.App.Utilities
         public static ActivityResultLauncher l = null;
         public static void OpenDirectory(string dirInExtenalStorage)
         {
-            //if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2 && !Directory.Exists(dirInExtenalStorage))
-            //    Directory.CreateDirectory(dirInExtenalStorage);
-
             Intent intent = new Intent(Intent.ActionOpenDocumentTree).PutExtra(DocumentsContract.ExtraInitialUri, Uri.Parse(RemapPathForApi300OrAbove(dirInExtenalStorage)));
             l.Launch(intent);
         }
@@ -45,7 +39,7 @@ namespace MelonLoaderInstaller.App.Utilities
             return DocumentsContract.BuildDocumentUri("com.android.externalstorage.documents", documentId).ToString();
         }
 
-        public static DocumentFile GetAccessToFile(string dir)
+        public static DocumentFile GetAccessToFile(Activity context, string dir)
         {
             string text = "/sdcard/Android/data";
             if (dir.Contains("/Android/obb/"))
@@ -53,7 +47,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
             string diff = dir.Replace(text, "");
             string[] dirs = diff.Split('/');
-            DocumentFile docFile = DocumentFile.FromTreeUri(CurrentContext, Uri.Parse(RemapPathForApi300OrAbove(text).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/")));
+            DocumentFile docFile = DocumentFile.FromTreeUri(context, Uri.Parse(RemapPathForApi300OrAbove(text).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/")));
             foreach (string dirName in dirs)
             {
                 if (string.IsNullOrWhiteSpace(dirName))

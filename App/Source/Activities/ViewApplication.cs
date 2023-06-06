@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -22,6 +23,7 @@ namespace MelonLoaderInstaller.App.Activities
     {
         private UnityApplicationData _applicationData;
         private PatchLogger _patchLogger;
+        private APKInstaller _apkInstaller;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -189,19 +191,22 @@ namespace MelonLoaderInstaller.App.Activities
 
                 bool success = patcher.Run();
 
-                if (success)
+                if (!success)
                 {
-                    _patchLogger.Log("Application patched successfully, reinstalling.");
-
-                    RunOnUiThread(() => 
-                    {
-                        // TODO: install
-                        // since I'm moving to a "pass in dir instead of base.apk path", I should just be able to check
-                        // if file.count > 1: split, else: single
-                    });
+                    RunOnUiThread(() => patchButton.Text = "FAILED");
+                    return;
                 }
-                else
-                    RunOnUiThread(() => { patchButton.Text = "FAILED"; });
+
+                _patchLogger.Log("Application patched successfully, reinstalling.");
+
+                RunOnUiThread(() =>
+                {
+                    _apkInstaller = new APKInstaller(this, _applicationData.PackageName,
+                        () => patchButton.Text = "PATCHED",
+                        () => patchButton.Text = "FAILED");
+
+                    _apkInstaller.Install(outputDir);
+                });
             });
 
             await task;
