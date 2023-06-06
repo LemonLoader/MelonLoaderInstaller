@@ -164,9 +164,10 @@ namespace MelonLoaderInstaller.App.Activities
                 {
                     bool downloadResult = DependencyDownloader.Run(lemonDataPath, _patchLogger);
                     if (!downloadResult)
-                        RunOnUiThread(() => { patchButton.Text = "FAILED"; });
+                        RunOnUiThread(() => patchButton.Text = "FAILED");
                 }
 
+                _patchLogger.Log("Writing il2cpp_etc to file");
                 CopyAsset("il2cpp_etc.zip", il2cppEtcPath);
 
                 _patchLogger.Log("Starting patch");
@@ -219,9 +220,9 @@ namespace MelonLoaderInstaller.App.Activities
                 Stream inStream = Assets.Open(assetName);
                 Stream outStream = File.OpenWrite(destinationPath);
 
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[4096];
                 int bytesRead;
-                while ((bytesRead = inStream.Read(buffer)) != -1)
+                while ((bytesRead = inStream.Read(buffer, 0, buffer.Length)) > 0)
                     outStream.Write(buffer, 0, bytesRead);
 
                 inStream.Dispose();

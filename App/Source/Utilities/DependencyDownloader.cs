@@ -25,7 +25,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
                 patchLogger.Log($"Downloading [ {assetUrl} ]");
                 client.DownloadFile(assetUrl, destination);
-                patchLogger.Log($"Done");
+                patchLogger.Log("Done");
             }
             catch (Exception ex)
             {
