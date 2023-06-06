@@ -28,11 +28,11 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         public APKSigner(string pemData, IPatchLogger patchLogger)
         {
-            LoadCerts(pemData);
-            _sha = SHA256.Create();
-
             _encoding = new UTF8Encoding(false);
+            _sha = SHA256.Create();
             _logger = patchLogger;
+
+            LoadCerts(pemData);
         }
 
         private void LoadCerts(string pemData)
