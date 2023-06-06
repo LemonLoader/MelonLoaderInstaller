@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Net.Security;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
 {
@@ -29,7 +30,12 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
             try
             {
+                var originalValidator = ServicePointManager.ServerCertificateValidationCallback;
+                ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
+
                 client.DownloadFile(DEPS_PROVIDER + unityVersion + ".zip", patcher._args.UnityDependenciesPath);
+
+                ServicePointManager.ServerCertificateValidationCallback = originalValidator;
             }
             catch (WebException ex)
             {

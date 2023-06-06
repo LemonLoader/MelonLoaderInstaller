@@ -23590,10 +23590,13 @@ namespace MelonLoaderInstaller.App
 			public const int image_share_filepaths = 2131951616;
 			
 			// aapt resource value: 0x7F130001
-			public const int provider_paths = 2131951617;
+			public const int network_security_config = 2131951617;
 			
 			// aapt resource value: 0x7F130002
-			public const int xamarin_essentials_fileprovider_file_paths = 2131951618;
+			public const int provider_paths = 2131951618;
+			
+			// aapt resource value: 0x7F130003
+			public const int xamarin_essentials_fileprovider_file_paths = 2131951619;
 			
 			static Xml()
 			{

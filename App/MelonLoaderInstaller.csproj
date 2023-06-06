@@ -72,6 +72,7 @@
     <ProjectReference Include="..\Core\MelonLoaderInstallerCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="Resources\xml\network_security_config.xml" />
     <Compile Include="Source\Activities\ViewApplication.cs" />
     <Compile Include="Source\Adapters\ApplicationsAdapter.cs" />
     <Compile Include="Source\Models\UnityApplicationData.cs" />

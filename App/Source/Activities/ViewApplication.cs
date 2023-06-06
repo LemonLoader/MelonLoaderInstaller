@@ -172,9 +172,11 @@ namespace MelonLoaderInstaller.App.Activities
 
                 _patchLogger.Log("Starting patch");
 
-                Directory.CreateDirectory(packageTempPath);
-
                 string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
+
+                Directory.CreateDirectory(packageTempPath);         
+                Directory.CreateDirectory(outputDir);
+
                 // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
 
                 Patcher patcher = new Patcher(new PatchArguments()

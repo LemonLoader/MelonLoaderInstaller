@@ -31,7 +31,8 @@ namespace MelonLoaderInstaller.Core
             UnityManagedDirectory = Path.Combine(UnityBaseDirectory, "Managed");
 
             OutputBaseApkPath = Path.Combine(arguments.OutputApkDirectory, "base.apk");
-            OutputLibApkPath = Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(arguments.LibraryApkPath));
+            if (_arguments.IsSplit)
+                OutputLibApkPath = Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(arguments.LibraryApkPath));
         }
 
         public void CreateDirectories()
