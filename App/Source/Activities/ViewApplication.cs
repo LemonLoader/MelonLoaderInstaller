@@ -146,6 +146,10 @@ namespace MelonLoaderInstaller.App.Activities
 
             Task task = Task.Run(() =>
             {
+                string tempDir = Path.Combine(baseAppPath, "temp");
+                if (!Directory.Exists(tempDir))
+                    Directory.CreateDirectory(tempDir);
+
                 if (Directory.Exists(packageTempPath))
                     Directory.Delete(packageTempPath, true);
 
