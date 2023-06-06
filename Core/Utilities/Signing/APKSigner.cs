@@ -24,17 +24,21 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
         private SHA256 _sha;
 
         private UTF8Encoding _encoding;
+        private IPatchLogger _logger;
 
-        public APKSigner(string cert, string privateKey)
+        public APKSigner(string cert, string privateKey, IPatchLogger patchLogger)
         {
             LoadCerts(cert, privateKey);
             _sha = SHA256.Create();
 
             _encoding = new UTF8Encoding(false);
+            _logger = patchLogger;
         }
 
         private void LoadCerts(string certStr, string privateKeyStr)
         {
+            _logger.Log("Reading certificates");
+
             string pemData = certStr + "\n" + privateKeyStr;
 
             using (var reader = new StringReader(pemData))
@@ -57,8 +61,13 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         public void Sign(string apkPath)
         {
-            //SignV1(apkPath);
+            _logger.Log("Signing an APK, this can take a few minutes.");
+
+            SignV1(apkPath);
+            _logger.Log("V1 signing complete");
+
             SignV2(apkPath);
+            _logger.Log("V2 signing complete");
         }
 
         #region V1
