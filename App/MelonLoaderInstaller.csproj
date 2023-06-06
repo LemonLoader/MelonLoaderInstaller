@@ -75,6 +75,7 @@
     <Compile Include="Source\Activities\ViewApplication.cs" />
     <Compile Include="Source\Adapters\ApplicationsAdapter.cs" />
     <Compile Include="Source\Models\UnityApplicationData.cs" />
+    <Compile Include="Source\Utilities\APKInstaller.cs" />
     <Compile Include="Source\Utilities\DependencyDownloader.cs" />
     <Compile Include="Source\Utilities\FolderPermission.cs" />
     <Compile Include="Source\Utilities\PackageWarnings.cs" />
