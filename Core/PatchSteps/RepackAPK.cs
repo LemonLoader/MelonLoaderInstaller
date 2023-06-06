@@ -44,7 +44,11 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             foreach (string file in Directory.GetFiles(source, matcher, SearchOption.AllDirectories))
             {
                 string entryPath = Path.Combine(dest, Path.GetRelativePath(source, file)).Replace('\\', '/');
-                Console.WriteLine(entryPath);
+
+                // I don't think this is supposed to be needed, but I had an issue with an apk having two libmain.so files
+                ZipArchiveEntry entry = archive.GetEntry(entryPath);
+                entry?.Delete();
+
                 archive.CreateEntryFromFile(file, entryPath);
             }
         }

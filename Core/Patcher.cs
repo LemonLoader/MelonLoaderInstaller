@@ -45,10 +45,10 @@ namespace MelonLoaderInstaller.Core
                     new ExtractDependencies(),
                     new ExtractUnityLibs(),
                     new PatchManifest(),
-                    new RemoveStaleFiles(),
                     new RepackAPK(),
                     new GenerateCertificate(),
                     new AlignSign(),
+                    new CleanUp(),
                 };
 
                 foreach (IPatchStep step in steps)
