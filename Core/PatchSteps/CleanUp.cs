@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.IO;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
 {
@@ -9,6 +7,14 @@ namespace MelonLoaderInstaller.Core.PatchSteps
         public bool Run(Patcher patcher)
         {
             patcher._logger.Log("Cleaning up");
+
+            File.Delete(patcher._args.LemonDataPath);
+            File.Delete(patcher._args.Il2CppEtcPath);
+            File.Delete(patcher._args.UnityDependenciesPath);
+
+            Directory.Delete(patcher._info.LemonDataDirectory);
+            Directory.Delete(patcher._info.UnityBaseDirectory);
+
             return true;
         }
     }
