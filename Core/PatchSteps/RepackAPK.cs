@@ -12,19 +12,19 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Update);
 
             // assets/melonloader data
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "core"), "assets/melonloader/etc", "*.dll");
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "managed"), "assets/melonloader/etc/managed", "*.dll");
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "mono", "bcl"), "assets/melonloader/etc/managed", "*.dll");
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "support_modules"), "assets/melonloader/etc/support", "*.dll");
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "assembly_generation"), "assets/melonloader/etc/assembly_generation/managed", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "core"), "assets/melonloader/etc", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "managed"), "assets/melonloader/etc/managed", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "mono", "bcl"), "assets/melonloader/etc/managed", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "support_modules"), "assets/melonloader/etc/support", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "assembly_generation"), "assets/melonloader/etc/assembly_generation/managed", "*.dll");
 
             // assets/bin data
-            CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "etc"), "assets/bin/Data/Managed/etc");
+            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "etc"), "assets/bin/Data/Managed/etc");
 
             // libs data
             if (!patcher._args.IsSplit)
             {
-                CopyTo(archive, Path.Combine(patcher._args.LemonDataPath, "native"), "lib/arm64-v8a", "*.so");
+                CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
                 CopyTo(archive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
             }
             else
@@ -32,7 +32,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
                 using FileStream libApkStream = new FileStream(patcher._info.OutputLibApkPath, FileMode.Open);
                 using ZipArchive libArchive = new ZipArchive(libApkStream, ZipArchiveMode.Update);
 
-                CopyTo(libArchive, Path.Combine(patcher._args.LemonDataPath, "native"), "lib/arm64-v8a", "*.so");
+                CopyTo(libArchive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
                 CopyTo(libArchive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
             }
 
