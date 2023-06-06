@@ -15,6 +15,10 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             Directory.Delete(patcher._info.LemonDataDirectory);
             Directory.Delete(patcher._info.UnityBaseDirectory);
 
+            string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
+            if (File.Exists(extraLibPath))
+                File.Delete(extraLibPath);
+
             return true;
         }
     }
