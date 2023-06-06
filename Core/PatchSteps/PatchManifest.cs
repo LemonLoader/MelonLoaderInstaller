@@ -13,7 +13,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
                 return true;
 
             using FileStream apkStream = new FileStream(patcher._info.OutputBaseApkPath, FileMode.Open);
-            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Read);
+            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Update);
 
             ZipArchiveEntry manifestEntry = archive.GetEntry("AndroidManifest.xml");
             using Stream manifestStream = manifestEntry.Open();

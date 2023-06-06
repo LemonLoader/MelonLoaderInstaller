@@ -18,7 +18,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             };
 
             using FileStream apkStream = new FileStream(patcher._info.OutputBaseApkPath, FileMode.Open);
-            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Read);
+            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Update);
 
             for (int i = archive.Entries.Count - 1; i >= 0; i--)
             {
