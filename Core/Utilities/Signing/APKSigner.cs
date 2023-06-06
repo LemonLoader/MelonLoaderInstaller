@@ -60,7 +60,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         public void Sign(string apkPath)
         {
-            _logger.Log("Signing an APK, this can take a few minutes.");
+            _logger.Log("Signing, this can take a few minutes.");
 
             SignV1(apkPath);
             _logger.Log("V1 signing complete");
