@@ -47,7 +47,7 @@ namespace MelonLoaderInstaller.Core
                     new PatchManifest(),
                     new RemoveStaleFiles(),
                     new RepackAPK(),
-                    new GenerateKeystore(),
+                    new GenerateCertificate(),
                     new AlignSign(),
                 };
 

@@ -12,7 +12,7 @@ using Org.BouncyCastle.OpenSsl;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
 {
-    internal class GenerateKeystore : IPatchStep
+    internal class GenerateCertificate : IPatchStep
     {
         private const string FALLBACK_CERT = @"-----BEGIN CERTIFICATE-----
 MIICNTCCAZ6gAwIBAgIUeXP9Gyg714ZW2GVMXKbZzAKZIhEwDQYJKoZIhvcNAQEL
@@ -46,6 +46,8 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
         public bool Run(Patcher patcher)
         {
+            patcher._logger.Log("Generating certificate");
+
             RsaKeyPairGenerator kpg = new RsaKeyPairGenerator();
             kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
 
@@ -71,6 +73,7 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
             if (certificate == null)
             {
+                patcher._logger.Log("Generation failed, using fallback");
                 patcher._info.PemData = FALLBACK_CERT;
                 return true;
             }
@@ -81,6 +84,8 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
             pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
             pemWriter.WriteObject(keyPair.Private);
             patcher._info.PemData = stringWriter.ToString();
+
+            patcher._logger.Log("Done");
 
             return true;
         }
