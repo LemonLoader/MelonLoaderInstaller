@@ -75,7 +75,7 @@ namespace MelonLoaderInstaller.App.Activities
         {
             switch (item.ItemId)
             {
-                case Resource.Id.home:
+                case Id.Home:
                     Finish();
                     return true;
                 case Resource.Id.action_patch_local_deps:
