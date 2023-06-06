@@ -58,6 +58,9 @@ namespace MelonLoaderInstaller.App.Activities
             appName.Text = _applicationData.AppName;
 
             _patchLogger = new PatchLogger(this);
+            _apkInstaller = new APKInstaller(this, _applicationData.PackageName,
+                        () => patchButton.Text = "PATCHED",
+                        () => patchButton.Text = "FAILED");
 
             CheckWarnings(packageName);
         }
@@ -164,7 +167,7 @@ namespace MelonLoaderInstaller.App.Activities
                 {
                     bool downloadResult = DependencyDownloader.Run(lemonDataPath, _patchLogger);
                     if (!downloadResult)
-                        RunOnUiThread(() => patchButton.Text = "FAILED");
+                        RunOnUiThread(SetFailed);
                 }
 
                 _patchLogger.Log("Writing il2cpp_etc to file");
@@ -196,7 +199,7 @@ namespace MelonLoaderInstaller.App.Activities
 
                 if (!success)
                 {
-                    RunOnUiThread(() => patchButton.Text = "FAILED");
+                    RunOnUiThread(SetFailed);
                     return;
                 }
 
@@ -204,10 +207,6 @@ namespace MelonLoaderInstaller.App.Activities
 
                 RunOnUiThread(() =>
                 {
-                    _apkInstaller = new APKInstaller(this, _applicationData.PackageName,
-                        () => patchButton.Text = "PATCHED",
-                        () => patchButton.Text = "FAILED");
-
                     _apkInstaller.Install(outputDir);
                 });
             });
@@ -237,6 +236,13 @@ namespace MelonLoaderInstaller.App.Activities
                 _patchLogger.Log("Failed to copy asset file: " + assetName + " -> " + ex.ToString());
                 return false;
             }
+        }
+
+        private void SetFailed()
+        {
+            Button patchButton = FindViewById<Button>(Resource.Id.patchButton);
+            patchButton.Text = "FAILED";
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
         }
 
         public class PatchLogger : IPatchLogger
