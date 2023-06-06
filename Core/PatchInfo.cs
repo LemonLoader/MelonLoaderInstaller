@@ -16,7 +16,7 @@ namespace MelonLoaderInstaller.Core
         public string OutputBaseApkPath { get; }
         public string OutputLibApkPath { get; }
 
-        public string X509Certificate { get; set; }
+        public string PemData { get; set; }
 
         private PatchArguments _arguments;
 

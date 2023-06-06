@@ -73,7 +73,7 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
             if (certificate == null)
             {
-                patcher._info.X509Certificate = FALLBACK_CERT;
+                patcher._info.PemData = FALLBACK_CERT;
                 return true;
             }
 
@@ -82,7 +82,7 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
             pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
             pemWriter.WriteObject(keyPair.Private);
-            patcher._info.X509Certificate = pemWriter.ToString();
+            patcher._info.PemData = pemWriter.ToString();
 
             return true;
         }

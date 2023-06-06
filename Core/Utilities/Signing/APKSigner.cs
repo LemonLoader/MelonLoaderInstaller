@@ -26,20 +26,18 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
         private UTF8Encoding _encoding;
         private IPatchLogger _logger;
 
-        public APKSigner(string cert, string privateKey, IPatchLogger patchLogger)
+        public APKSigner(string pemData, IPatchLogger patchLogger)
         {
-            LoadCerts(cert, privateKey);
+            LoadCerts(pemData);
             _sha = SHA256.Create();
 
             _encoding = new UTF8Encoding(false);
             _logger = patchLogger;
         }
 
-        private void LoadCerts(string certStr, string privateKeyStr)
+        private void LoadCerts(string pemData)
         {
             _logger.Log("Reading certificates");
-
-            string pemData = certStr + "\n" + privateKeyStr;
 
             using (var reader = new StringReader(pemData))
             {
@@ -52,6 +50,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
                     _privateKey ??= (pemObject as AsymmetricCipherKeyPair)?.Private;
                 }
             }
+
             if (_xCert == null)
                 throw new System.Security.SecurityException("Certificate could not be loaded from PEM data.");
 
@@ -212,7 +211,9 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         #endregion
 
-        public void SignV2(string path)
+        #region V2
+
+        private void SignV2(string path)
         {
             FileStream fs = new FileStream(path, FileMode.Open);
             using FileMemory memory = new FileMemory(fs);
@@ -306,5 +307,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             }
             return digests;
         }
+
+        #endregion
     }
 }
