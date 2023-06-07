@@ -13,13 +13,6 @@ namespace MelonLoaderInstaller.Core.PatchSteps
                 using FileStream zipStream = new FileStream(patcher._args.LemonDataPath, FileMode.Open);
                 using ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
                 archive.ExtractToDirectory(patcher._info.LemonDataDirectory);
-
-                // We are going to be replacing libmain, we don't need any that are included by Unity
-                foreach (string file in Directory.GetFiles(patcher._info.UnityBaseDirectory, "*.so", SearchOption.AllDirectories))
-                {
-                    if (Path.GetFileName(file) == "libmain.so")
-                        File.Delete(file);
-                }
             }
 
             patcher._logger.Log("Extracting il2cpp/etc");
