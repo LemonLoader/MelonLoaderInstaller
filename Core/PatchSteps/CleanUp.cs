@@ -12,8 +12,8 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             File.Delete(patcher._args.Il2CppEtcPath);
             File.Delete(patcher._args.UnityDependenciesPath);
 
-            Directory.Delete(patcher._info.LemonDataDirectory);
-            Directory.Delete(patcher._info.UnityBaseDirectory);
+            Directory.Delete(patcher._info.LemonDataDirectory, true);
+            Directory.Delete(patcher._info.UnityBaseDirectory, true);
 
             string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
             if (File.Exists(extraLibPath))
