@@ -8,18 +8,29 @@ namespace MelonLoaderInstaller.Core.PatchSteps
         {
             patcher._logger.Log("Cleaning up");
 
-            File.Delete(patcher._args.LemonDataPath);
-            File.Delete(patcher._args.Il2CppEtcPath);
-            File.Delete(patcher._args.UnityDependenciesPath);
+            DeleteFile(patcher._args.LemonDataPath);
+            DeleteFile(patcher._args.Il2CppEtcPath);
+            DeleteFile(patcher._args.UnityDependenciesPath);
 
-            Directory.Delete(patcher._info.LemonDataDirectory, true);
-            Directory.Delete(patcher._info.UnityBaseDirectory, true);
+            DeleteDir(patcher._info.LemonDataDirectory);
+            DeleteDir(patcher._info.UnityBaseDirectory);
 
             string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
-            if (File.Exists(extraLibPath))
-                File.Delete(extraLibPath);
+            DeleteFile(extraLibPath);
 
             return true;
+        }
+
+        private void DeleteFile(string path)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+        private void DeleteDir(string path)
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
         }
     }
 }
