@@ -5,6 +5,7 @@ using Android.Provider;
 using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
+using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
 using System;
 using System.IO;
@@ -60,9 +61,10 @@ namespace MelonLoaderInstaller.App.Utilities
 
             _context.RunOnUiThread(() =>
             {
-                Uri fileUri = Uri.Parse(apks[0]);
+                Uri fileUri = FileProvider.GetUriForFile(_context, _context.PackageName + ".provider", new Java.IO.File(apks[0]));
 
-                Intent install = new Intent(Intent.ActionView);
+                _pending = Intent.ActionView;
+                Intent install = new Intent(_pending);
                 install.SetDataAndType(fileUri, "application/vnd.android.package-archive");
 
                 install.SetFlags(ActivityFlags.NewTask);
@@ -273,7 +275,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
             public void OnActivityResult(Result resultCode, Intent data)
             {
-                switch (data.Action)
+                switch (_parent._pending)
                 {
                     case Intent.ActionDelete:
                         _parent.TryFileMoveBack();
@@ -283,6 +285,8 @@ namespace MelonLoaderInstaller.App.Utilities
                         _parent.PostInstallAttempt();
                         break;
                 }
+
+                _parent._pending = string.Empty;
             }
 
             public void OnActivityResult(Java.Lang.Object result)
