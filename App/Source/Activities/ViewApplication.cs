@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
@@ -79,12 +80,26 @@ namespace MelonLoaderInstaller.App.Activities
                     Finish();
                     return true;
                 case Resource.Id.action_patch_local_deps:
-                    // TODO: patch with local deps
-                    // requires patching to work obviously
+                    Intent intent = new Intent()
+                        .SetType("application/zip")
+                        .SetAction(Intent.ActionGetContent);
+                    StartActivityForResult(Intent.CreateChooser(intent, "Select a file"), 123);
                     return true;
             }
 
             return base.OnOptionsItemSelected(item);
+        }
+
+        protected override async void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            if (requestCode == 123 && resultCode == Result.Ok)
+            {
+                Uri selectedFile = data.Data;
+                Logger.Instance.Verbose("User selected file " + selectedFile.ToString());
+                await StartPatching(selectedFile.ToString());
+                return;
+            }
         }
 
         private void CheckWarnings(string packageName)
@@ -117,28 +132,9 @@ namespace MelonLoaderInstaller.App.Activities
             string lemonDataPath = Path.Combine(packageTempPath, "dependencies.zip");
             string il2cppEtcPath = Path.Combine(packageTempPath, "il2cpp_etc.zip");
 
-            string unityOutPath = Path.Combine(packageTempPath, "unity.zip");
+            string wantedUnityOutPath = Path.Combine(packageTempPath, "unity.zip");
             if (string.IsNullOrEmpty(unityDepsPath))
-                unityDepsPath = unityOutPath;
-
-            // File selection stuff :P
-            if (unityDepsPath.StartsWith("content://"))
-            {
-                Stream inStream = ContentResolver.OpenInputStream(Uri.Parse(unityDepsPath))
-                    ?? throw new Exception("Unity assets path does not exist!");
-
-                Stream outStream = ContentResolver.OpenOutputStream(Uri.FromFile(new Java.IO.File(unityOutPath)), "w");
-
-                inStream.CopyTo(outStream);
-
-                inStream.Dispose();
-                outStream.Dispose();
-
-                unityDepsPath = unityOutPath;
-                Logger.Instance.Info($"Copied unity assets to [ {unityDepsPath} ]");
-            }
-
-            // TODO: is the PublishedBase stuff needed?
+                unityDepsPath = wantedUnityOutPath;
 
             Button patchButton = FindViewById<Button>(Resource.Id.patchButton);
 
@@ -162,6 +158,8 @@ namespace MelonLoaderInstaller.App.Activities
 
                 Directory.CreateDirectory(packageTempPath);
                 Directory.CreateDirectory(outputDir);
+
+                unityDepsPath = TryCopyDocument(unityDepsPath, wantedUnityOutPath);
 
 #if DEBUG
                 bool localFile = true;
@@ -218,6 +216,27 @@ namespace MelonLoaderInstaller.App.Activities
             });
 
             await task;
+        }
+
+        private string TryCopyDocument(string from, string to)
+        {
+            if (from.StartsWith("content://"))
+            {
+                Stream inStream = ContentResolver.OpenInputStream(Uri.Parse(from))
+                    ?? throw new Exception("Unity assets path does not exist!");
+
+                Stream outStream = File.OpenWrite(to);
+
+                inStream.CopyTo(outStream);
+
+                inStream.Dispose();
+                outStream.Dispose();
+
+                Logger.Instance.Info($"Copied unity assets to [ {to} ]");
+                return to;
+            }
+            else
+                return from;
         }
 
         private bool CopyAsset(string assetName, string destinationPath)
