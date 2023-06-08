@@ -1,5 +1,6 @@
-﻿using System.IO.Compression;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
+using Ionic.Zip;
 using MelonLoaderInstaller.Core.Utilities;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
@@ -12,19 +13,19 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             if (!patcher._args.IsSplit)
                 return true;
 
-            using FileStream apkStream = new FileStream(patcher._info.OutputBaseApkPath, FileMode.Open);
-            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Update);
+            using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
 
-            ZipArchiveEntry manifestEntry = archive.GetEntry("AndroidManifest.xml");
-            using Stream manifestStream = manifestEntry.Open();
+            ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
+            using Stream manifestStream = manifestEntry.OpenReader();
             using MemoryStream memoryStream = new MemoryStream();
 
             manifestStream.CopyTo(memoryStream);
 
             byte[] patchedManifest = ABXTools.EnableExtractNativeLibs(memoryStream.ToArray());
 
-            manifestStream.SetLength(0);
-            manifestStream.Write(patchedManifest, 0, patchedManifest.Length);
+            archive.UpdateEntry(manifestEntry.FileName, patchedManifest);
+
+            archive.Save();
 
             return true;
         }

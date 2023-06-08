@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO.Compression;
+﻿using Ionic.Zip;
+using System;
 using System.IO;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
@@ -8,8 +8,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
     {
         public bool Run(Patcher patcher)
         {
-            using FileStream apkStream = new FileStream(patcher._info.OutputBaseApkPath, FileMode.Open);
-            using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Update);
+            using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
 
             // assets/melonloader data
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "core"), "assets/melonloader/etc", "*.dll");
@@ -29,27 +28,30 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             }
             else
             {
-                using FileStream libApkStream = new FileStream(patcher._info.OutputLibApkPath, FileMode.Open);
-                using ZipArchive libArchive = new ZipArchive(libApkStream, ZipArchiveMode.Update);
+                using ZipFile libArchive = new ZipFile(patcher._info.OutputLibApkPath);
 
                 CopyTo(libArchive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
                 CopyTo(libArchive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
+
+                libArchive.Save();
             }
+
+            archive.Save();
 
             return true;
         }
 
-        private void CopyTo(ZipArchive archive, string source, string dest, string matcher = "*.*")
+        private void CopyTo(ZipFile archive, string source, string dest, string matcher = "*.*")
         {
             foreach (string file in Directory.GetFiles(source, matcher, SearchOption.AllDirectories))
             {
                 string entryPath = Path.Combine(dest, Path.GetRelativePath(source, file)).Replace('\\', '/');
 
                 // I don't think this is supposed to be needed, but I had an issue with an apk having two libmain.so files
-                ZipArchiveEntry entry = archive.GetEntry(entryPath);
-                entry?.Delete();
+                if (archive.ContainsEntry(entryPath))
+                    archive.RemoveEntry(entryPath);
 
-                archive.CreateEntryFromFile(file, entryPath);
+                archive.AddEntry(entryPath, File.ReadAllBytes(file));
             }
         }
     }

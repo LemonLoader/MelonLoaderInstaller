@@ -6,7 +6,6 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Store;
-using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using Org.BouncyCastle.Asn1.Cms;
@@ -14,6 +13,7 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Ionic.Zip;
 
 namespace MelonLoaderInstaller.Core.Utilities.Signing
 {
@@ -78,8 +78,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         private void SignV1(string apkPath)
         {
-            using FileStream apkStream = new FileStream(apkPath, FileMode.Open);
-            using ZipArchive apkArchive = new ZipArchive(apkStream, ZipArchiveMode.Update);
+            using ZipFile apkArchive = new ZipFile(apkPath);
 
             #region Create MANIFEST.MF
 
@@ -95,9 +94,9 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
             manifestWriter.Close();
 
-            foreach (ZipArchiveEntry entry in apkArchive.Entries)
+            foreach (ZipEntry entry in apkArchive.Entries)
             {
-                if (entry.FullName.StartsWith("META-INF"))
+                if (entry.FileName.StartsWith("META-INF"))
                     continue;
 
                 WriteDigests(entry, manifestStream, sigHolderWriter);
@@ -130,44 +129,38 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             #region Add to APK
 
             // Remove old META-INF files
-            for (int i = apkArchive.Entries.Count - 1; i >= 0; i--)
-            {
-                ZipArchiveEntry file = apkArchive.Entries[i];
-                if (file.FullName.StartsWith("META-INF"))
-                    file.Delete();
-            }
+            apkArchive.RemoveEntries(apkArchive.Entries.Where(a => a.FileName.StartsWith("META-INF")).ToList());
 
             // Add the new
             manifestStream.Seek(0, SeekOrigin.Begin);
             sigStream.Seek(0, SeekOrigin.Begin);
 
-            ZipArchiveEntry manifestEntry = apkArchive.CreateEntry("META-INF/MANIFEST.MF");
-            ZipArchiveEntry sigEntry = apkArchive.CreateEntry("META-INF/LEMON.SF");
-            ZipArchiveEntry rsaEntry = apkArchive.CreateEntry("META-INF/LEMON.RSA");
+            ZipEntry manifestEntry = apkArchive.AddFile("META-INF/MANIFEST.MF");
+            ZipEntry sigEntry = apkArchive.AddFile("META-INF/LEMON.SF");
+            ZipEntry rsaEntry = apkArchive.AddFile("META-INF/LEMON.RSA");
 
-            using (Stream stream = manifestEntry.Open())
-                manifestStream.CopyTo(stream);
-            using (Stream stream = sigEntry.Open())
-                sigStream.CopyTo(stream);
+            apkArchive.UpdateEntry(manifestEntry.FileName, manifestStream);
+            apkArchive.UpdateEntry(sigEntry.FileName, sigStream);
 
             sigStream.Seek(0, SeekOrigin.Begin);
 
             byte[] signedSig = GetSignatureFileSig(sigStream.ToArray());
-            using (Stream stream = rsaEntry.Open())
-                stream.Write(signedSig);
+            apkArchive.UpdateEntry(rsaEntry.FileName, signedSig);
 
             #endregion
+
+            apkArchive.Save();
         }
 
-        private void WriteDigests(ZipArchiveEntry entry, Stream manifestStream, StreamWriter sigHolderWriter)
+        private void WriteDigests(ZipEntry entry, Stream manifestStream, StreamWriter sigHolderWriter)
         {
-            using Stream entryStream = entry.Open();
+            using Stream entryStream = entry.OpenReader();
             string entryDigest = Convert.ToBase64String(_sha.ComputeHash(entryStream));
 
             using MemoryStream proxyStream = new MemoryStream();
             using StreamWriter proxyWriter = AsStreamWriter(proxyStream);
 
-            proxyWriter.WriteLine($"Name: {entry.FullName}");
+            proxyWriter.WriteLine($"Name: {entry.FileName}");
             proxyWriter.WriteLine($"SHA-256-Digest: {entryDigest}");
             proxyWriter.WriteLine();
 
@@ -175,7 +168,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
             proxyStream.Seek(0, SeekOrigin.Begin);
 
-            sigHolderWriter.WriteLine($"Name: {entry.FullName}");
+            sigHolderWriter.WriteLine($"Name: {entry.FileName}");
             sigHolderWriter.WriteLine($"SHA-256-Digest: {Convert.ToBase64String(_sha.ComputeHash(proxyStream))}");
             sigHolderWriter.WriteLine();
             proxyStream.Seek(0, SeekOrigin.Begin);
