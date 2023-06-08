@@ -105,7 +105,7 @@ namespace MelonLoaderInstaller.App.Activities
             }
         }
 
-        public async void OnClick(View v) => await StartPatching(Path.Combine(GetExternalFilesDir(null).ToString(), "temp", "unity.zip"));
+        public async void OnClick(View v) => await StartPatching("");
 
         private async Task StartPatching(string unityDepsPath)
         {
@@ -114,26 +114,28 @@ namespace MelonLoaderInstaller.App.Activities
             string baseAppPath = GetExternalFilesDir(null).ToString();
 
             string packageTempPath = Path.Combine(baseAppPath, "temp", _applicationData.PackageName);
-            string lemonDataPath = Path.Combine(baseAppPath, "temp", "dependencies.zip");
-            string il2cppEtcPath = Path.Combine(baseAppPath, "temp", "il2cpp_etc.zip");
-            string unityAssetsPath = unityDepsPath;
+            string lemonDataPath = Path.Combine(packageTempPath, "dependencies.zip");
+            string il2cppEtcPath = Path.Combine(packageTempPath, "il2cpp_etc.zip");
+
+            string unityOutPath = Path.Combine(packageTempPath, "unity.zip");
+            if (string.IsNullOrEmpty(unityDepsPath))
+                unityDepsPath = unityOutPath;
 
             // File selection stuff :P
-            if (unityAssetsPath.StartsWith("content://"))
+            if (unityDepsPath.StartsWith("content://"))
             {
-                Stream inStream = ContentResolver.OpenInputStream(Uri.Parse(unityAssetsPath))
+                Stream inStream = ContentResolver.OpenInputStream(Uri.Parse(unityDepsPath))
                     ?? throw new Exception("Unity assets path does not exist!");
 
-                string outPath = Path.Combine(GetExternalFilesDir(null).ToString(), "temp", "unity.zip");
-                Stream outStream = ContentResolver.OpenOutputStream(Uri.FromFile(new Java.IO.File(outPath)), "w");
+                Stream outStream = ContentResolver.OpenOutputStream(Uri.FromFile(new Java.IO.File(unityOutPath)), "w");
 
                 inStream.CopyTo(outStream);
 
                 inStream.Dispose();
                 outStream.Dispose();
 
-                unityAssetsPath = outPath;
-                Logger.Instance.Info($"Copied unity assets to [ {unityAssetsPath} ]");
+                unityDepsPath = unityOutPath;
+                Logger.Instance.Info($"Copied unity assets to [ {unityDepsPath} ]");
             }
 
             // TODO: is the PublishedBase stuff needed?
@@ -148,6 +150,18 @@ namespace MelonLoaderInstaller.App.Activities
             {
                 _patchLogger.Log($"Build Directory: [ {baseAppPath} ]");
                 _patchLogger.Log("Preparing Assets");
+
+                string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
+                string tempDir = Path.Combine(baseAppPath, "temp");
+
+                if (!Directory.Exists(tempDir))
+                    Directory.CreateDirectory(tempDir);
+
+                if (Directory.Exists(packageTempPath))
+                    Directory.Delete(packageTempPath, true);
+
+                Directory.CreateDirectory(packageTempPath);
+                Directory.CreateDirectory(outputDir);
 
 #if DEBUG
                 bool localFile = true;
@@ -172,9 +186,7 @@ namespace MelonLoaderInstaller.App.Activities
 
                 _patchLogger.Log("Starting patch");
 
-                string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
-                string tempDir = Path.Combine(baseAppPath, "temp");
-
+                // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
                 Patcher patcher = new Patcher(new PatchArguments()
                 {
                     TargetApkPath = _applicationData.ApkLocation,
@@ -184,22 +196,10 @@ namespace MelonLoaderInstaller.App.Activities
                     TempDirectory = packageTempPath,
                     LemonDataPath = lemonDataPath,
                     Il2CppEtcPath = il2cppEtcPath,
-                    UnityDependenciesPath = unityAssetsPath,
+                    UnityDependenciesPath = unityDepsPath,
                     UnityVersion = _applicationData.EngineVersion,
                     PackageName = _applicationData.PackageName,
                 }, _patchLogger);
-
-
-                if (!Directory.Exists(tempDir))
-                    Directory.CreateDirectory(tempDir);
-
-                if (Directory.Exists(packageTempPath))
-                    Directory.Delete(packageTempPath, true);
-
-                Directory.CreateDirectory(packageTempPath);         
-                Directory.CreateDirectory(outputDir);
-
-                // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
 
                 bool success = patcher.Run();
 
