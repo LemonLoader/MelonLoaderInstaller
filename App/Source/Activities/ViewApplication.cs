@@ -25,6 +25,7 @@ namespace MelonLoaderInstaller.App.Activities
         private UnityApplicationData _applicationData;
         private PatchLogger _patchLogger;
         private APKInstaller _apkInstaller;
+        private bool _patching;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -90,6 +91,14 @@ namespace MelonLoaderInstaller.App.Activities
             return base.OnOptionsItemSelected(item);
         }
 
+        public override void OnBackPressed()
+        {
+            if (_patching)
+                return;
+
+            base.OnBackPressed();
+        }
+
         protected override async void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
@@ -124,6 +133,8 @@ namespace MelonLoaderInstaller.App.Activities
 
         private async Task StartPatching(string unityDepsPath)
         {
+            _patching = true;
+
             _patchLogger.Clear();
 
             string baseAppPath = GetExternalFilesDir(null).ToString();
@@ -216,6 +227,8 @@ namespace MelonLoaderInstaller.App.Activities
             });
 
             await task;
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+            _patching = false;
         }
 
         private string TryCopyDocument(string from, string to)
