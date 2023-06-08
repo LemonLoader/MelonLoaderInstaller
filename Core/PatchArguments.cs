@@ -17,6 +17,7 @@
         public string UnityDependenciesPath;
 
         public AssetRipper.VersionUtilities.UnityVersion? UnityVersion;
+        public string PackageName;
 
         public bool IsSplit;
 

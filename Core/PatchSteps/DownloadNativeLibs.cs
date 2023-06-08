@@ -9,7 +9,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
         public bool Run(Patcher patcher)
         {
-            string packageName = Path.GetFileName(patcher._args.TempDirectory);
+            string packageName = patcher._args.PackageName;
             patcher._logger.Log($"Checking for extra native libraries [ {packageName} ]");
 
             try
