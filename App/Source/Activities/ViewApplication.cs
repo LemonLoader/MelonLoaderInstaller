@@ -146,13 +146,6 @@ namespace MelonLoaderInstaller.App.Activities
 
             Task task = Task.Run(() =>
             {
-                string tempDir = Path.Combine(baseAppPath, "temp");
-                if (!Directory.Exists(tempDir))
-                    Directory.CreateDirectory(tempDir);
-
-                if (Directory.Exists(packageTempPath))
-                    Directory.Delete(packageTempPath, true);
-
                 _patchLogger.Log($"Build Directory: [ {baseAppPath} ]");
                 _patchLogger.Log("Preparing Assets");
 
@@ -180,11 +173,7 @@ namespace MelonLoaderInstaller.App.Activities
                 _patchLogger.Log("Starting patch");
 
                 string outputDir = Path.Combine(packageTempPath, "OutputAPKs");
-
-                Directory.CreateDirectory(packageTempPath);         
-                Directory.CreateDirectory(outputDir);
-
-                // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
+                string tempDir = Path.Combine(baseAppPath, "temp");
 
                 Patcher patcher = new Patcher(new PatchArguments()
                 {
@@ -199,6 +188,18 @@ namespace MelonLoaderInstaller.App.Activities
                     UnityVersion = _applicationData.EngineVersion,
                     PackageName = _applicationData.PackageName,
                 }, _patchLogger);
+
+
+                if (!Directory.Exists(tempDir))
+                    Directory.CreateDirectory(tempDir);
+
+                if (Directory.Exists(packageTempPath))
+                    Directory.Delete(packageTempPath, true);
+
+                Directory.CreateDirectory(packageTempPath);         
+                Directory.CreateDirectory(outputDir);
+
+                // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
 
                 bool success = patcher.Run();
 

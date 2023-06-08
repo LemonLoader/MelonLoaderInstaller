@@ -39,7 +39,6 @@ namespace MelonLoaderInstaller.Core
 
                 IPatchStep[] steps = new IPatchStep[]
                 {
-                    new CleanUp(true),
                     new DetectUnityVersion(),
                     new DownloadUnityDeps(),
                     new DownloadNativeLibs(),
