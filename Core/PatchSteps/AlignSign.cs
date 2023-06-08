@@ -11,12 +11,10 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
         public bool Run(Patcher patcher)
         {
+            // Aligning occurs after V1 signing
+
             _logger = patcher._logger;
             _pemData = patcher._info.PemData;
-
-            bool align = Align(patcher._info.OutputBaseApkPath);
-            if (patcher._args.IsSplit)
-                align = align && Align(patcher._info.OutputLibApkPath);
 
             bool sign = Sign(patcher._info.OutputBaseApkPath);
             if (patcher._args.IsSplit)
@@ -24,23 +22,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
             // TODO: sign all other APKs for >2 splits
 
-            return align && sign;
-        }
-
-        private bool Align(string apk)
-        {
-            _logger.Log($"Aligning [ {Path.GetFileName(apk)} ]");
-
-            try
-            {
-                APKAligner.AlignApk(apk);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"Aligning failed\n{ex}");
-                return false;
-            }
+            return sign;
         }
 
         private bool Sign(string apk)

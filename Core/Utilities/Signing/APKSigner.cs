@@ -62,11 +62,16 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
         {
             _logger.Log("Signing, this can take a few minutes.");
 
+            _logger.Log("Signing with V1");
             SignV1(apkPath);
-            _logger.Log("V1 signing complete");
 
+            _logger.Log("Aligning");
+            APKAligner.AlignApk(apkPath);
+
+            _logger.Log("Signing with V2");
             SignV2(apkPath);
-            _logger.Log("V2 signing complete");
+
+            _logger.Log("Done");
         }
 
         #region V1
