@@ -4,6 +4,13 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 {
     internal class CleanUp : IPatchStep
     {
+        private bool _firstStep;
+
+        public CleanUp(bool firstStep = false)
+        {
+            _firstStep = firstStep;
+        }
+
         public bool Run(Patcher patcher)
         {
             patcher._logger.Log("Cleaning up");
@@ -14,6 +21,8 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
             DeleteDir(patcher._info.LemonDataDirectory);
             DeleteDir(patcher._info.UnityBaseDirectory);
+            if (_firstStep)
+                DeleteDir(patcher._args.OutputApkDirectory);
 
             string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
             DeleteFile(extraLibPath);
