@@ -20,7 +20,11 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             if (patcher._args.IsSplit)
                 sign = sign && Sign(patcher._info.OutputLibApkPath);
 
-            // TODO: sign all other APKs for >2 splits
+            if (patcher._info.OutputExtraApkPaths != null)
+            {
+                foreach (string apk in patcher._info.OutputExtraApkPaths)
+                    sign = sign && Sign(apk);
+            }
 
             return sign;
         }

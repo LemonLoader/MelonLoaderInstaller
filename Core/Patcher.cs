@@ -37,6 +37,18 @@ namespace MelonLoaderInstaller.Core
                     File.Copy(_args.LibraryApkPath, _info.OutputLibApkPath);
                 }
 
+                if (_args.ExtraSplitApkPaths != null)
+                {
+                    for (int i = 0; i < _args.ExtraSplitApkPaths.Length; i++)
+                    {
+                        string from = _args.ExtraSplitApkPaths[i];
+                        string to = _info.OutputExtraApkPaths[i];
+
+                        _logger.Log($"Copying [ {from} ] to [ {to} ]");
+                        File.Copy(from, to);
+                    }
+                }
+
                 IPatchStep[] steps = new IPatchStep[]
                 {
                     new DetectUnityVersion(),

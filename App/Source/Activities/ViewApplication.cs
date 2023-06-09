@@ -195,11 +195,11 @@ namespace MelonLoaderInstaller.App.Activities
 
                 _patchLogger.Log("Starting patch");
 
-                // TODO: for apks with extra split apks, we will want to pass them into the patcher so they can be signed with the same key as the others
                 Patcher patcher = new Patcher(new PatchArguments()
                 {
                     TargetApkPath = _applicationData.ApkLocation,
-                    LibraryApkPath = _applicationData.SplitLibAPKLocation,
+                    LibraryApkPath = _applicationData.SplitLibApkLocation,
+                    ExtraSplitApkPaths = _applicationData.ExtraSplitApkLocations,
                     IsSplit = _applicationData.IsSplit,
                     OutputApkDirectory = outputDir,
                     TempDirectory = packageTempPath,

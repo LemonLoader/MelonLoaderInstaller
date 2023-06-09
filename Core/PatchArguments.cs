@@ -7,6 +7,7 @@
     {
         public string TargetApkPath;
         public string LibraryApkPath;
+        public string[] ExtraSplitApkPaths;
 
         public string OutputApkDirectory;
 

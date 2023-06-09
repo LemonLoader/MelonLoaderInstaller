@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 namespace MelonLoaderInstaller.Core
 {
@@ -15,6 +16,7 @@ namespace MelonLoaderInstaller.Core
 
         public string OutputBaseApkPath { get; }
         public string OutputLibApkPath { get; }
+        public string[] OutputExtraApkPaths { get; }
 
         public string PemData { get; set; }
 
@@ -33,6 +35,8 @@ namespace MelonLoaderInstaller.Core
             OutputBaseApkPath = Path.Combine(arguments.OutputApkDirectory, "base.apk");
             if (_arguments.IsSplit)
                 OutputLibApkPath = Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(arguments.LibraryApkPath));
+            if (_arguments.ExtraSplitApkPaths != null)
+                OutputExtraApkPaths = _arguments.ExtraSplitApkPaths.Select(p => Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(p))).ToArray();
         }
 
         public void CreateDirectories()

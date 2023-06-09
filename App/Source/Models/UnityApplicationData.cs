@@ -20,7 +20,8 @@ namespace MelonLoaderInstaller.App.Models
         public string AppName { get; private set; }
         public string PackageName { get; private set; }
         public string ApkLocation { get; private set; }
-        public string SplitLibAPKLocation { get; private set; }
+        public string SplitLibApkLocation { get; private set; }
+        public string[] ExtraSplitApkLocations { get; private set; }
         public bool IsPatched { get; private set; }
         public bool IsSupported { get; private set; }
         public bool IsSplit { get; private set; }
@@ -35,7 +36,8 @@ namespace MelonLoaderInstaller.App.Models
             AppName = pm.GetApplicationLabel(info);
             PackageName = info.PackageName;
             ApkLocation = info.PublicSourceDir;
-            SplitLibAPKLocation = info.SplitSourceDirs?.FirstOrDefault(d => d.Contains("arm64"));
+            SplitLibApkLocation = info.SplitSourceDirs?.FirstOrDefault(d => d.Contains("arm64"));
+            ExtraSplitApkLocations = info.SplitSourceDirs?.Where(d => !d.Contains("arm64"))?.ToArray();
 
             _applicationInfo = info;
             _assetManager = pm.GetResourcesForApplication(info)?.Assets;
