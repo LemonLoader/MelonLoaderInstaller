@@ -1,8 +1,10 @@
 ﻿using Android.App;
+using Android.Appwidget;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
+using Android.Widget;
 using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
@@ -30,6 +32,7 @@ namespace MelonLoaderInstaller.App.Utilities
         private Action _afterInstall;
 
         private DataInfo _dataInfo;
+        private APKInstallerCallback _installerCallback;
         private ActivityResultLauncher _activityResultLauncher;
 
         public APKInstaller(AppCompatActivity context, string packageName, Action afterInstall, Action onInstallFail)
@@ -39,7 +42,8 @@ namespace MelonLoaderInstaller.App.Utilities
             _afterInstall = afterInstall;
             _onInstallFail = onInstallFail;
             _installLoopCount = 0;
-            _activityResultLauncher = context.RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new APKInstallerCallback(this));
+            _installerCallback = new APKInstallerCallback(this);
+            _activityResultLauncher = context.RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), _installerCallback);
         }
 
         public void Install(string apkDirectory)
@@ -202,7 +206,34 @@ namespace MelonLoaderInstaller.App.Utilities
 
         private void HandleBridge()
         {
-            // TODO: adbbridge
+            string baseAppPath = _context.GetExternalFilesDir(null).ToString();
+            string packageTempPath = Path.Combine(baseAppPath, "temp", _packageName);
+            ADBBridge.AttemptConnect(packageTempPath, _packageName, () =>
+            {
+                _pending = Intent.ActionDelete;
+                _installerCallback.OnActivityResult(Result.Ok, null);
+            });
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(_context)
+                .SetTitle("ADB Bridge")
+                .SetMessage("Waiting...\nIf you haven't, please confirm your device on the ADB Bridge client.")
+                .SetPositiveButton("Use Standard Uninstall", (d, i) =>
+                {
+                    ADBBridge.Kill();
+                    HandleStandard();
+                })
+                .SetNegativeButton("Cancel", (d, i) =>
+                {
+                    ADBBridge.Kill();
+                    TryFileMoveBack();
+                    Fail();
+                })
+                .SetIcon(Android.Resource.Drawable.IcDialogInfo);
+
+            AlertDialog alert = builder.Create();
+            alert.SetCancelable(false);
+            alert.Show();
+            ADBBridge.AlertDialog = alert;
         }
 
         private void TryFileMoveBack()
@@ -237,12 +268,13 @@ namespace MelonLoaderInstaller.App.Utilities
 
                 _pending = Intent.ActionDelete;
                 Intent intent = new Intent(_pending);
-                intent.SetData(Android.Net.Uri.Parse("package:" + _packageName));
+                intent.SetData(Uri.Parse("package:" + _packageName));
                 _activityResultLauncher.Launch(intent);
             }
             catch (Exception ex)
             {
-                
+                Logger.Instance.Info($"Restore failed\n{ex}");
+                Toast.MakeText(_context, "Failed to restore data, check for data folders in Android/data/" + _context.PackageName + "/files!", ToastLength.Long).Show();
             }
         }
 
