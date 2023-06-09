@@ -101,7 +101,6 @@ namespace MelonLoaderInstaller.App.Utilities
                 {
                     string apk = apks[i];
                     using FileStream apkStream = new FileStream(apk, FileMode.Open);
-                    Logger.Instance.Info(apk + " : " + apkStream.Length);
                     using Stream outStream = session.OpenWrite($"{i + 1}.apk", 0, apkStream.Length);
                     apkStream.CopyTo(outStream);
                     session.Fsync(outStream);

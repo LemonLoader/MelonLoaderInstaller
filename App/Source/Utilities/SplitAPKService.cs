@@ -24,7 +24,7 @@ namespace MelonLoaderInstaller.App.Utilities
                     catch { }
                     break;
                 case PackageInstallStatus.Success:
-                    AlertDialog.Builder successDialog = new AlertDialog.Builder(this)
+                    AlertDialog.Builder successDialog = new AlertDialog.Builder(FolderPermission.CurrentContext)
                         .SetTitle("Success")
                         .SetMessage("The app was successfully reinstalled")
                         .SetPositiveButton("Cool", new System.EventHandler<DialogClickEventArgs>((o,b) => { }));
@@ -33,7 +33,7 @@ namespace MelonLoaderInstaller.App.Utilities
                     break;
                 default:
                     Logger.Instance.Info(GetErrorString(status));
-                    AlertDialog.Builder failDialog = new AlertDialog.Builder(this)
+                    AlertDialog.Builder failDialog = new AlertDialog.Builder(FolderPermission.CurrentContext)
                         .SetTitle("Failed")
                         .SetMessage("The app was unable to be installed\n" + GetErrorString(status))
                         .SetPositiveButton("Cool", new System.EventHandler<DialogClickEventArgs>((o, b) => { }));
