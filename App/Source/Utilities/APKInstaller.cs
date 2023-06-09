@@ -206,9 +206,8 @@ namespace MelonLoaderInstaller.App.Utilities
 
         private void HandleBridge()
         {
-            string baseAppPath = _context.GetExternalFilesDir(null).ToString();
-            string packageTempPath = Path.Combine(baseAppPath, "temp", _packageName);
-            ADBBridge.AttemptConnect(packageTempPath, _packageName, () =>
+            string tempPath = Path.Combine(_context.GetExternalFilesDir(null).ToString(), "temp");
+            ADBBridge.AttemptConnect(tempPath, _packageName, () =>
             {
                 _pending = Intent.ActionDelete;
                 _installerCallback.OnActivityResult(Result.Ok, null);
