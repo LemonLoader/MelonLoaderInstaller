@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
 using AndroidX.Activity.Result;
@@ -54,14 +55,18 @@ namespace MelonLoaderInstaller.App.Utilities
             string[] apks = Directory.GetFiles(apkDirectory, "*.apk");
             if (apks.Length > 1)
             {
-                // TODO: split install
-                Fail();
+                InternalInstall_Split(apks);
                 return;
             }
 
+            InternalInstall_Single(apks[0]);
+        }
+
+        private void InternalInstall_Single(string apk)
+        {
             _context.RunOnUiThread(() =>
             {
-                Uri fileUri = FileProvider.GetUriForFile(_context, _context.PackageName + ".provider", new Java.IO.File(apks[0]));
+                Uri fileUri = FileProvider.GetUriForFile(_context, _context.PackageName + ".provider", new Java.IO.File(apk));
 
                 _pending = Intent.ActionView;
                 Intent install = new Intent(_pending);
@@ -79,6 +84,37 @@ namespace MelonLoaderInstaller.App.Utilities
                     Logger.Instance.Error($"Error in opening file.\n{ex}");
                 }
             });
+        }
+
+        private void InternalInstall_Split(string[] apks)
+        {
+            PackageInstaller packageInstaller = _context.PackageManager.PackageInstaller;
+            try
+            {
+                PackageInstaller.SessionParams param = new PackageInstaller.SessionParams(PackageInstallMode.FullInstall);
+                param.SetInstallReason(PackageInstallReason.User);
+
+                int sessionId = packageInstaller.CreateSession(param);
+                PackageInstaller.Session session = packageInstaller.OpenSession(sessionId);
+
+                for (int i = 0; i < apks.Length; i++)
+                {
+                    string apk = apks[i];
+                    using FileStream apkStream = new FileStream(apk, FileMode.Open);
+                    Logger.Instance.Info(apk + " : " + apkStream.Length);
+                    using Stream outStream = session.OpenWrite($"{i + 1}.apk", 0, apkStream.Length);
+                    apkStream.CopyTo(outStream);
+                    session.Fsync(outStream);
+                }
+
+                Intent callbackIntent = new Intent(_context, typeof(SplitAPKService));
+                PendingIntent pending = PendingIntent.GetService(_context, 0, callbackIntent, PendingIntentFlags.Mutable);
+                session.Commit(pending.IntentSender);
+            }
+            catch (Exception e)
+            {
+                Logger.Instance.Error($"Failed to install split APKs\n{e}");
+            }
         }
 
         private void UninstallPackage(Action nxt = null)
