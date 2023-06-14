@@ -125,17 +125,7 @@ namespace MelonLoaderInstaller.App.Utilities
             if (nxt != null)
                 _next = nxt;
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(_context);
-            builder
-                .SetTitle("ADB Bridge")
-                .SetMessage("Do you want to use the Lemon ADB Bridge® to save game data and OBBs, if they exist?")
-                .SetPositiveButton("Yes", (o, i) => HandleBridge())
-                .SetNegativeButton("No", (o, i) => _context.RunOnUiThread(HandleStandard))
-                .SetIcon(Android.Resource.Drawable.IcDialogAlert);
-
-            AlertDialog alert = builder.Create();
-            alert.SetCancelable(false);
-            alert.Show();
+            _context.RunOnUiThread(HandleStandard);
         }
 
         private void HandleStandard()
@@ -204,6 +194,7 @@ namespace MelonLoaderInstaller.App.Utilities
             }
         }
 
+        [Obsolete]
         private void HandleBridge()
         {
             string tempPath = Path.Combine(_context.GetExternalFilesDir(null).ToString(), "temp");
