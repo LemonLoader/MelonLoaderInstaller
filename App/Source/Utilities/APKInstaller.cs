@@ -237,7 +237,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
         private void TryFileMoveBack()
         {
-            if (!_dataInfo.ShouldMoveBack)
+            if (_dataInfo == null || !_dataInfo.ShouldMoveBack)
                 return;
 
             try

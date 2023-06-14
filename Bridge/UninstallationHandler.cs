@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SharpAdbClient;
+using SharpAdbClient.DeviceCommands;
 using System.Diagnostics;
 using System.Net;
 using Websocket.Client;
@@ -53,14 +54,20 @@ namespace LemonADBBridge
                 };
                 proc.Start();
                 proc.WaitForExit();
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
                 adbClient.ExecuteRemoteCommand($"mv /sdcard/Android/obb/{packageToUninstall} /sdcard/Android/obb/{packageToUninstall}_BACKUP", deviceData, receiver);
 
                 adbClient.ExecuteRemoteCommand("pm uninstall " + packageToUninstall, deviceData, receiver);
 
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/data/{packageToUninstall}", deviceData, receiver);
                 proc.StartInfo.Arguments = $"push \"{Directory.GetCurrentDirectory()}\\{packageToUninstall}\" /sdcard/Android/data/";
                 proc.Start();
                 proc.WaitForExit();
                 adbClient.ExecuteRemoteCommand($"mv /sdcard/Android/obb/{packageToUninstall}_BACKUP /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
+
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/data/{packageToUninstall}", deviceData, receiver);
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
+
                 try
                 {
                     File.Delete(Path.Combine(Directory.GetCurrentDirectory(), packageToUninstall));
@@ -80,8 +87,14 @@ namespace LemonADBBridge
 
                 adbClient.ExecuteRemoteCommand("pm uninstall " + packageToUninstall, deviceData, receiver);
 
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/data/{packageToUninstall}", deviceData, receiver);
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
+
                 adbClient.ExecuteRemoteCommand($"mv /sdcard/Android/data/{packageToUninstall}_BACKUP /sdcard/Android/data/{packageToUninstall}", deviceData, receiver);
                 adbClient.ExecuteRemoteCommand($"mv /sdcard/Android/obb/{packageToUninstall}_BACKUP /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
+
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/data/{packageToUninstall}", deviceData, receiver);
+                adbClient.ExecuteRemoteCommand($"chmod 777 /sdcard/Android/obb/{packageToUninstall}", deviceData, receiver);
             }
 
             adbClient.ExecuteRemoteCommand($"rm /sdcard/Android/data/com.melonloader.installer/files/temp/adbbridge.txt", deviceData, receiver);
