@@ -16,6 +16,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "mono", "bcl"), "assets/melonloader/etc/managed", "*.dll");
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "support_modules"), "assets/melonloader/etc/support", "*.dll");
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "assembly_generation"), "assets/melonloader/etc/assembly_generation/managed", "*.dll");
+            CopyTo(archive, Path.Combine(patcher._info.UnityManagedDirectory), "assets/melonloader/etc/assembly_generation/unity", "*.dll");
 
             // assets/bin data
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "etc"), "assets/bin/Data/Managed/etc");
