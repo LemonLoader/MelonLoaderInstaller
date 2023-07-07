@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Android.App;
+using Android.App.AppSearch;
 using Android.Content;
 using Android.Net;
 using Android.OS;
@@ -26,6 +27,7 @@ namespace MelonLoaderInstaller.App.Utilities
         public static string RemapPathForApi300OrAbove(string path)
         {
             string text = path;
+
             if (text.StartsWith("/sdcard"))
                 text = text["/sdcard".Length..];
 
@@ -41,13 +43,21 @@ namespace MelonLoaderInstaller.App.Utilities
 
         public static DocumentFile GetAccessToFile(Activity context, string dir)
         {
-            string text = "/sdcard/Android/data";
+            string text = "/Android/data/";
             if (dir.Contains("/Android/obb/"))
-                text = "/sdcard/Android/obb";
+                text = "/Android/obb/";
+
+            int idx = dir.IndexOf(text);
+            if (idx != -1)
+                dir = dir[idx..];
 
             string diff = dir.Replace(text, "");
             string[] dirs = diff.Split('/');
-            DocumentFile docFile = DocumentFile.FromTreeUri(context, Uri.Parse(RemapPathForApi300OrAbove(text).Replace("com.android.externalstorage.documents/document/", "com.android.externalstorage.documents/tree/")));
+
+            string docStr = "com.android.externalstorage.documents/document/";
+            string treeStr = "com.android.externalstorage.documents/tree/";
+            DocumentFile docFile = DocumentFile.FromTreeUri(context, Uri.Parse(RemapPathForApi300OrAbove(text[..^1]).Replace(docStr, treeStr)));
+
             foreach (string dirName in dirs)
             {
                 if (string.IsNullOrWhiteSpace(dirName))
@@ -58,6 +68,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
                 docFile = docFile.FindFile(dirName);
             }
+
             return docFile;
         }
 
