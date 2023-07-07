@@ -206,38 +206,6 @@ namespace MelonLoaderInstaller.App.Utilities
             }
         }
 
-        [Obsolete]
-        private void HandleBridge()
-        {
-            string tempPath = Path.Combine(_context.GetExternalFilesDir(null).ToString(), "temp");
-            ADBBridge.AttemptConnect(tempPath, _packageName, () =>
-            {
-                _pending = Intent.ActionDelete;
-                _installerCallback.OnActivityResult(Result.Ok, null);
-            });
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(_context)
-                .SetTitle("ADB Bridge")
-                .SetMessage("Waiting...\nIf you haven't, please confirm your device on the ADB Bridge client.")
-                .SetPositiveButton("Use Standard Uninstall", (d, i) =>
-                {
-                    ADBBridge.Kill();
-                    HandleStandard();
-                })
-                .SetNegativeButton("Cancel", (d, i) =>
-                {
-                    ADBBridge.Kill();
-                    TryFileMoveBack();
-                    Fail();
-                })
-                .SetIcon(Android.Resource.Drawable.IcDialogInfo);
-
-            AlertDialog alert = builder.Create();
-            alert.SetCancelable(false);
-            alert.Show();
-            ADBBridge.AlertDialog = alert;
-        }
-
         private void TryFileMoveBack()
         {
             if (_dataInfo == null || !_dataInfo.ShouldMoveBack)
@@ -315,10 +283,7 @@ namespace MelonLoaderInstaller.App.Utilities
             }
         }
 
-        private string GetDirectoryName(string path)
-        {
-            return Path.GetFileName(Path.GetDirectoryName(path));
-        }
+        private string GetDirectoryName(string path) => Path.GetFileName(Path.GetDirectoryName(path));
 
         private void Fail() => _onInstallFail?.Invoke();
 
