@@ -236,13 +236,6 @@ namespace MelonLoaderInstaller.App.Utilities
                 }
                 else
                     throw new Exception("In-app backups are unsupported past API 32.");
-
-                _dataInfo.ShouldMoveBack = true;
-
-                _pending = Intent.ActionDelete;
-                Intent intent = new Intent(_pending);
-                intent.SetData(Uri.Parse("package:" + _packageName));
-                _activityResultLauncher.Launch(intent);
             }
             catch (Exception ex)
             {
