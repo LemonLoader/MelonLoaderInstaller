@@ -151,8 +151,8 @@ namespace MelonLoaderInstaller.App.Utilities
                 // Before /Android protections
                 if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
                 {
-                    Directory.Move(_dataInfo.DataPath, Path.Combine(_dataInfo.NewDataPath, Path.GetFileName(_dataInfo.DataPath)));
-                    Directory.Move(_dataInfo.ObbPath, Path.Combine(_dataInfo.NewObbPath, Path.GetFileName(_dataInfo.ObbPath)));
+                    Directory.Move(_dataInfo.DataPath, Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)));
+                    Directory.Move(_dataInfo.ObbPath, Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)));
                 }
                 // The DocumentFile era
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2)
@@ -248,20 +248,22 @@ namespace MelonLoaderInstaller.App.Utilities
                 // Before /Android protections
                 if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
                 {
-                    Directory.Move(_dataInfo.DataPath, _dataInfo.NewDataPath);
-                    Directory.Move(_dataInfo.ObbPath, _dataInfo.NewObbPath);
+                    Directory.Move(Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath);
+                    Directory.Move(Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)), _dataInfo.ObbPath);
                 }
                 // The DocumentFile era
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2)
                 {
-                    _dataInfo.DataDF = FolderPermission.GetAccessToFile(_context, _dataInfo.DataPath);
-                    _dataInfo.NewDataDF = FolderPermission.GetAccessToFile(_context, _dataInfo.NewDataPath);
+                    int pkgIdx = _dataInfo.DataPath.IndexOf(_packageName);
+                    _dataInfo.DataDF = FolderPermission.GetAccessToFile(_context, _dataInfo.DataPath[..pkgIdx]);
+                    _dataInfo.NewDataDF = FolderPermission.GetAccessToFile(_context, Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)));
 
-                    _dataInfo.ObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.ObbPath);
-                    _dataInfo.NewObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.NewObbPath);
+                    pkgIdx = _dataInfo.ObbPath.IndexOf(_packageName);
+                    _dataInfo.ObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.ObbPath[..pkgIdx]);
+                    _dataInfo.NewObbDF = FolderPermission.GetAccessToFile(_context, Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)));
 
-                    DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.DataDF.Uri, _dataInfo.DataDF.ParentFile.Uri, _dataInfo.NewDataDF.Uri);
-                    DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.ObbDF.Uri, _dataInfo.ObbDF.ParentFile.Uri, _dataInfo.NewObbDF.Uri);
+                    DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
+                    DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewObbDF.Uri, _dataInfo.NewObbDF.ParentFile.Uri, _dataInfo.ObbDF.Uri);
                 }
                 else
                     throw new Exception("In-app backups are unsupported past API 32.");
@@ -311,6 +313,11 @@ namespace MelonLoaderInstaller.App.Utilities
             {
                 return false;
             }
+        }
+
+        private string GetDirectoryName(string path)
+        {
+            return Path.GetFileName(Path.GetDirectoryName(path));
         }
 
         private void Fail() => _onInstallFail?.Invoke();
