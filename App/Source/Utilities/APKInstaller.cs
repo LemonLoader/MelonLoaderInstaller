@@ -141,6 +141,11 @@ namespace MelonLoaderInstaller.App.Utilities
                 NewObbPath = Path.Combine(selfBaseDir, "obb_backup"),
             };
 
+            if (!Directory.Exists(_dataInfo.NewDataPath))
+                Directory.CreateDirectory(_dataInfo.NewDataPath);
+            if (!Directory.Exists(_dataInfo.NewObbPath))
+                Directory.CreateDirectory(_dataInfo.NewObbPath);
+
             try
             {
                 // Before /Android protections
