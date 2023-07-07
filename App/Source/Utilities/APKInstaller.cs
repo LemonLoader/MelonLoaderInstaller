@@ -143,8 +143,6 @@ namespace MelonLoaderInstaller.App.Utilities
 
             if (!Directory.Exists(_dataInfo.NewDataPath))
                 Directory.CreateDirectory(_dataInfo.NewDataPath);
-            if (!Directory.Exists(_dataInfo.NewObbPath))
-                Directory.CreateDirectory(_dataInfo.NewObbPath);
 
             try
             {
@@ -162,6 +160,9 @@ namespace MelonLoaderInstaller.App.Utilities
 
                     _dataInfo.ObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.ObbPath);
                     _dataInfo.NewObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.NewObbPath);
+
+                    if (!_dataInfo.NewObbDF.Exists())
+                        _dataInfo.NewObbDF.ParentFile.CreateDirectory(_context.PackageName);
 
                     DocumentFile newDataPackage = _dataInfo.NewDataDF.FindFile(_packageName);
                     if (newDataPackage?.Exists() ?? false)
