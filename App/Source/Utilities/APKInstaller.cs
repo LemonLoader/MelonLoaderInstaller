@@ -151,8 +151,8 @@ namespace MelonLoaderInstaller.App.Utilities
                 // Before /Android protections
                 if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
                 {
-                    Directory.Move(_dataInfo.DataPath, _dataInfo.NewDataPath);
-                    Directory.Move(_dataInfo.ObbPath, _dataInfo.NewObbPath);
+                    Directory.Move(_dataInfo.DataPath, Path.Combine(_dataInfo.NewDataPath, Path.GetFileName(_dataInfo.DataPath)));
+                    Directory.Move(_dataInfo.ObbPath, Path.Combine(_dataInfo.NewObbPath, Path.GetFileName(_dataInfo.ObbPath)));
                 }
                 // The DocumentFile era
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2)
