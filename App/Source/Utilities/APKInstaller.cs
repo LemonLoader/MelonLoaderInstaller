@@ -138,7 +138,7 @@ namespace MelonLoaderInstaller.App.Utilities
                 DataPath = $"/sdcard/Android/data/{_packageName}/",
                 ObbPath = $"/sdcard/Android/obb/{_packageName}/",
                 NewDataPath = Path.Combine(selfBaseDir, "data_backup"),
-                NewObbPath = Path.Combine(selfBaseDir, "obb_backup"),
+                NewObbPath = Path.Combine($"/sdcard/Android/obb/{_context.PackageName}/"),
             };
 
             if (!Directory.Exists(_dataInfo.NewDataPath))
@@ -162,6 +162,13 @@ namespace MelonLoaderInstaller.App.Utilities
 
                     _dataInfo.ObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.ObbPath);
                     _dataInfo.NewObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.NewObbPath);
+
+                    DocumentFile newDataPackage = _dataInfo.NewDataDF.FindFile(_packageName);
+                    if (newDataPackage?.Exists() ?? false)
+                        newDataPackage.Delete();
+                    DocumentFile newObbPackage = _dataInfo.NewObbDF.FindFile(_packageName);
+                    if (newObbPackage?.Exists() ?? false)
+                        newObbPackage.Delete();
 
                     DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.DataDF.Uri, _dataInfo.DataDF.ParentFile.Uri, _dataInfo.NewDataDF.Uri);
                     DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.ObbDF.Uri, _dataInfo.ObbDF.ParentFile.Uri, _dataInfo.NewObbDF.Uri);
