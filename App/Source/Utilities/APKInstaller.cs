@@ -240,6 +240,8 @@ namespace MelonLoaderInstaller.App.Utilities
                     new Thread(() =>
                     {
                         RestoreFolder(_dataInfo.DataDF, _dataInfo.NewDataDF);
+                        if (_dataInfo.NewDataDF.Exists())
+                            _dataInfo.NewDataDF.Delete();
                         _next?.Invoke();
                     }).Start();
                     DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewObbDF.Uri, _dataInfo.NewObbDF.ParentFile.Uri, _dataInfo.ObbDF.Uri);
