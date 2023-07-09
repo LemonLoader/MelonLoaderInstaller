@@ -236,7 +236,7 @@ namespace MelonLoaderInstaller.App.Utilities
 
                     // We can't use MoveDocument since it causes permission issues, instead we move stuff using streams
                     //DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
-                    Toast.MakeText(_context, "Restoring data, this may take a few.", ToastLength.Long);
+                    Toast.MakeText(_context, "Restoring data, this may take a few.", ToastLength.Long).Show();
                     new Thread(() =>
                     {
                         RestoreFolder(_dataInfo.DataDF, _dataInfo.NewDataDF);
