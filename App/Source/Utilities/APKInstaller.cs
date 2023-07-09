@@ -10,8 +10,10 @@ using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
+using Java.IO;
 using System;
 using System.IO;
+using System.Threading;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 using Uri = Android.Net.Uri;
 
@@ -72,12 +74,12 @@ namespace MelonLoaderInstaller.App.Utilities
             {
                 Uri fileUri = FileProvider.GetUriForFile(_context, _context.PackageName + ".provider", new Java.IO.File(apk));
 
-                _pending = Intent.ActionView;
+                _pending = Intent.ActionInstallPackage;
                 Intent install = new Intent(_pending);
                 install.SetDataAndType(fileUri, "application/vnd.android.package-archive");
 
-                install.SetFlags(ActivityFlags.NewTask);
                 install.SetFlags(ActivityFlags.GrantReadUriPermission);
+                install.PutExtra(Intent.ExtraReturnResult, true);
 
                 try
                 {
@@ -219,19 +221,27 @@ namespace MelonLoaderInstaller.App.Utilities
                 {
                     Directory.Move(Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath);
                     Directory.Move(Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)), _dataInfo.ObbPath);
+                    _next?.Invoke();
                 }
                 // The DocumentFile era
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.SV2)
                 {
                     int pkgIdx = _dataInfo.DataPath.IndexOf(_packageName);
-                    _dataInfo.DataDF = FolderPermission.GetAccessToFile(_context, _dataInfo.DataPath[..pkgIdx]);
+                    _dataInfo.DataDF = FolderPermission.GetAccessToFile(_context, _dataInfo.DataPath);
                     _dataInfo.NewDataDF = FolderPermission.GetAccessToFile(_context, Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)));
 
                     pkgIdx = _dataInfo.ObbPath.IndexOf(_packageName);
                     _dataInfo.ObbDF = FolderPermission.GetAccessToFile(_context, _dataInfo.ObbPath[..pkgIdx]);
                     _dataInfo.NewObbDF = FolderPermission.GetAccessToFile(_context, Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)));
 
-                    DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
+                    // We can't use MoveDocument since it causes permission issues, instead we move stuff using streams
+                    //DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
+                    Toast.MakeText(_context, "Restoring data, this may take a few.", ToastLength.Long);
+                    new Thread(() =>
+                    {
+                        RestoreFolder(_dataInfo.DataDF, _dataInfo.NewDataDF);
+                        _next?.Invoke();
+                    }).Start();
                     DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewObbDF.Uri, _dataInfo.NewObbDF.ParentFile.Uri, _dataInfo.ObbDF.Uri);
                 }
                 else
@@ -240,7 +250,43 @@ namespace MelonLoaderInstaller.App.Utilities
             catch (Exception ex)
             {
                 Logger.Instance.Info($"Restore failed\n{ex}");
-                Toast.MakeText(_context, "Failed to restore data, check for data folders in Android/data/" + _context.PackageName + "/files!", ToastLength.Long).Show();
+                Toast.MakeText(_context, "Failed to restore data, check for data folders in Android/[obb][data]/" + _context.PackageName + "/!", ToastLength.Long).Show();
+                _next?.Invoke();
+            }
+        }
+
+        private void RestoreFolder(DocumentFile destinationFolder, DocumentFile sourceFolder)
+        {
+            if (!destinationFolder.Exists())
+            {
+                destinationFolder.ParentFile.CreateDirectory(destinationFolder.Name);
+            }
+
+            DocumentFile[] files = sourceFolder.ListFiles();
+            foreach (DocumentFile file in files)
+            {
+                Logger.Instance.Info("Restoring " + file.Name);
+                if (file.IsDirectory)
+                {
+                    // Recursively restore subfolders
+                    DocumentFile destinationSubfolder = destinationFolder.CreateDirectory(file.Name);
+                    RestoreFolder(destinationSubfolder, file);
+                }
+                else
+                {
+                    // Restore individual file
+                    DocumentFile destinationFile = destinationFolder.CreateFile(file.Type, file.Name);
+                    using Stream inputStream = _context.ContentResolver.OpenInputStream(file.Uri);
+                    using Stream outputStream = _context.ContentResolver.OpenOutputStream(destinationFile.Uri);
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        outputStream.Write(buffer, 0, bytesRead);
+                    }
+                }
+
+                file.Delete();
             }
         }
 
@@ -314,14 +360,11 @@ namespace MelonLoaderInstaller.App.Utilities
                 {
                     case Intent.ActionDelete:
                         _parent.TryFileMoveBack();
-                        _parent._next?.Invoke();
                         break;
-                    case Intent.ActionView:
+                    case Intent.ActionInstallPackage:
                         _parent.PostInstallAttempt();
                         break;
                 }
-
-                _parent._pending = string.Empty;
             }
 
             public void OnActivityResult(Java.Lang.Object result)
