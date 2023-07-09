@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\il2cpp_etc.zip" />
+    <AndroidAsset Include="Assets\installer_deps.zip" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
     <None Include="Assets\AboutAssets.txt" />
