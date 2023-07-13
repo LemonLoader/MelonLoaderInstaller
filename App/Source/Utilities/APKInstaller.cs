@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.Appwidget;
 using Android.Content;
 using Android.Content.PM;
@@ -237,11 +238,20 @@ namespace MelonLoaderInstaller.App.Utilities
                     // We can't use MoveDocument since it causes permission issues, instead we move stuff using streams
                     //DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
                     Toast.MakeText(_context, "Restoring data, this may take a few.", ToastLength.Long).Show();
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(_context)
+                        .SetTitle("Please wait")
+                        .SetMessage("Restoring data, this can take a few.")
+                        .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+
+                    AlertDialog restoreDialog = builder.Show();
+
                     new Thread(() =>
                     {
                         RestoreFolder(_dataInfo.DataDF, _dataInfo.NewDataDF);
                         if (_dataInfo.NewDataDF.Exists())
                             _dataInfo.NewDataDF.Delete();
+                        restoreDialog.Dismiss();
                         _next?.Invoke();
                     }).Start();
                     DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewObbDF.Uri, _dataInfo.NewObbDF.ParentFile.Uri, _dataInfo.ObbDF.Uri);
