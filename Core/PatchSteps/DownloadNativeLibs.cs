@@ -16,7 +16,20 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             {
                 using WebClient client = new WebClient();
                 string outPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
-                client.DownloadFile(REPO_BASE + packageName + ".zip", outPath);
+                var downloadTask = client.DownloadFileTaskAsync(REPO_BASE + packageName + ".zip", outPath);
+
+                int waitedMilliseconds = 0;
+                while (downloadTask.IsCompleted)
+                {
+                    downloadTask.Wait(2000);
+                    waitedMilliseconds += 2000;
+
+                    if (waitedMilliseconds >= 30000) // 30 seconds
+                    {
+                        throw new WebException("Timed out after 30 seconds.");
+                    }
+                }
+
                 patcher._logger.Log("Downloaded");
             }
             catch (WebException)
