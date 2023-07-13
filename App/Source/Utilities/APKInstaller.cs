@@ -241,7 +241,8 @@ namespace MelonLoaderInstaller.App.Utilities
                     AlertDialog.Builder builder = new AlertDialog.Builder(_context)
                         .SetTitle("Please wait")
                         .SetMessage("Restoring data, this can take a few.")
-                        .SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                        .SetIcon(Android.Resource.Drawable.IcDialogAlert)
+                        .SetCancelable(false);
 
                     AlertDialog restoreDialog = builder.Show();
 
