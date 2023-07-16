@@ -8,15 +8,22 @@ namespace MelonLoaderInstaller.Core.PatchSteps
         {
             patcher._logger.Log("Cleaning up");
 
-            DeleteFile(patcher._args.LemonDataPath);
-            DeleteFile(patcher._args.Il2CppEtcPath);
-            DeleteFile(patcher._args.UnityDependenciesPath);
+            try
+            {
+                DeleteFile(patcher._args.LemonDataPath);
+                DeleteFile(patcher._args.Il2CppEtcPath);
+                DeleteFile(patcher._args.UnityDependenciesPath);
 
-            DeleteDir(patcher._info.LemonDataDirectory);
-            DeleteDir(patcher._info.UnityBaseDirectory);
+                DeleteDir(patcher._info.LemonDataDirectory);
+                DeleteDir(patcher._info.UnityBaseDirectory);
 
-            string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
-            DeleteFile(extraLibPath);
+                string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
+                DeleteFile(extraLibPath);
+            }
+            catch
+            {
+                patcher._logger.Log("Failed to clean up leftover data.");
+            }
 
             return true;
         }

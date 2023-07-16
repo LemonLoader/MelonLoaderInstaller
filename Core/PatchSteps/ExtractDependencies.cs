@@ -25,6 +25,7 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
             patcher._logger.Log("Extracting Libraries");
 
+            try
             {
                 string outPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
                 if (!File.Exists(outPath))
@@ -33,6 +34,10 @@ namespace MelonLoaderInstaller.Core.PatchSteps
                 using FileStream zipStream = new FileStream(outPath, FileMode.Open);
                 using ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
                 archive.ExtractToDirectory(patcher._info.LemonDataDirectory);
+            }
+            catch
+            {
+                patcher._logger.Log("Failed to extract extra libraries, this is probably fine.");
             }
 
             return true;

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
@@ -26,7 +27,8 @@ namespace MelonLoaderInstaller.Core.PatchSteps
 
                     if (waitedMilliseconds >= 30000) // 30 seconds
                     {
-                        throw new WebException("Timed out after 30 seconds.");
+                        client.Dispose();
+                        throw new TimeoutException();
                     }
                 }
 
@@ -35,6 +37,10 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             catch (WebException)
             {
                 patcher._logger.Log("No extra libraries found");
+            }
+            catch (TimeoutException)
+            {
+                patcher._logger.Log("Timed out after 30 seconds, skipping extra libraries.");
             }
 
             return true;
