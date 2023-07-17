@@ -1,6 +1,9 @@
 ﻿using Ionic.Zip;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
+using System.Data;
 using System.IO;
+using System.Linq;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
 {
@@ -9,6 +12,27 @@ namespace MelonLoaderInstaller.Core.PatchSteps
         public bool Run(Patcher patcher)
         {
             using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
+
+            // Handle old installer files
+            var dexEntries = archive.Entries.Where(a => a.FileName.Contains("originalDex")).ToArray();
+            if (dexEntries.Count() > 0)
+            {
+                patcher._logger.Log("Found reminats of Java patching, replacing patched dex.");
+                for (int i = dexEntries.Count() - 1; i >= 0; i--)
+                {
+                    ZipEntry dex = dexEntries[i];
+                    string path = dex.FileName;
+                    dex.Extract(patcher._args.TempDirectory);
+                    byte[] dexData = File.ReadAllBytes(Path.Combine(patcher._args.TempDirectory, path));
+
+                    archive.RemoveEntry(dex);
+                    archive.RemoveEntry(archive.Entries.First(a => a.FileName == Path.GetFileName(path)));
+
+                    archive.AddEntry(Path.GetFileName(path), dexData);
+                }
+
+                patcher._logger.Log("Done");
+            }
 
             // assets/melonloader data
             CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "core"), "assets/melonloader/etc", "*.dll");
