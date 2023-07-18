@@ -1,6 +1,4 @@
-﻿using Android;
-using Android.App;
-using Android.Appwidget;
+﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
@@ -11,7 +9,6 @@ using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
-using Java.IO;
 using System;
 using System.IO;
 using System.Threading;
@@ -38,12 +35,15 @@ namespace MelonLoaderInstaller.App.Utilities
         private APKInstallerCallback _installerCallback;
         private ActivityResultLauncher _activityResultLauncher;
 
-        public APKInstaller(AppCompatActivity context, string packageName, Action afterInstall, Action onInstallFail)
+        private Activities.ViewApplication.PatchLogger _logger;
+
+        public APKInstaller(AppCompatActivity context, string packageName, Action afterInstall, Action onInstallFail, Activities.ViewApplication.PatchLogger logger)
         {
             _context = context;
             _packageName = packageName;
             _afterInstall = afterInstall;
             _onInstallFail = onInstallFail;
+            _logger = logger;
             _installLoopCount = 0;
             _installerCallback = new APKInstallerCallback(this);
             _activityResultLauncher = context.RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), _installerCallback);
@@ -238,13 +238,8 @@ namespace MelonLoaderInstaller.App.Utilities
                     // We can't use MoveDocument since it causes permission issues, instead we move stuff using streams
                     //DocumentsContract.MoveDocument(_context.ContentResolver, _dataInfo.NewDataDF.Uri, _dataInfo.NewDataDF.ParentFile.Uri, _dataInfo.DataDF.Uri);
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(_context)
-                        .SetTitle("Please wait")
-                        .SetMessage("Restoring data, this can take a few.")
-                        .SetIcon(Android.Resource.Drawable.IcDialogAlert)
-                        .SetCancelable(false);
-
-                    AlertDialog restoreDialog = builder.Show();
+                    ProgressDialog restoreDialog = ProgressDialog.Show(_context, "Please wait", "Restoring data, this can take a few");
+                    restoreDialog.SetCancelable(false);
 
                     new Thread(() =>
                     {
@@ -277,7 +272,6 @@ namespace MelonLoaderInstaller.App.Utilities
             DocumentFile[] files = sourceFolder.ListFiles();
             foreach (DocumentFile file in files)
             {
-                Logger.Instance.Info("Restoring " + file.Name);
                 if (file.IsDirectory)
                 {
                     // Recursively restore subfolders
@@ -287,10 +281,11 @@ namespace MelonLoaderInstaller.App.Utilities
                 else
                 {
                     // Restore individual file
+                    _logger.Log("Restoring " + file.Name);
                     DocumentFile destinationFile = destinationFolder.CreateFile(file.Type, file.Name);
                     using Stream inputStream = _context.ContentResolver.OpenInputStream(file.Uri);
                     using Stream outputStream = _context.ContentResolver.OpenOutputStream(destinationFile.Uri);
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[8192];
                     int bytesRead;
                     while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
                     {

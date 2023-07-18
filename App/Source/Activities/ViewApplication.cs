@@ -61,8 +61,17 @@ namespace MelonLoaderInstaller.App.Activities
 
             _patchLogger = new PatchLogger(this);
             _apkInstaller = new APKInstaller(this, _applicationData.PackageName,
-                        () => patchButton.Text = "PATCHED",
-                        () => patchButton.Text = "FAILED");
+                        () =>
+                        {
+                            patchButton.Text = "PATCHED";
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                                .SetTitle("Completed")
+                                .SetMessage("The app was patched successfully.")
+                                .SetPositiveButton("OK", (a, b) => { });
+                            builder.Show();
+                        },
+                        () => patchButton.Text = "FAILED",
+                        _patchLogger);
 
             CheckWarnings(packageName);
         }
