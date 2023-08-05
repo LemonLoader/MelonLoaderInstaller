@@ -12,10 +12,7 @@ namespace MelonLoaderInstaller.App.Utilities
     {
         public static List<UnityApplicationData> Find(Activity context)
         {
-            PackageManager? pm = context.PackageManager;
-            if (pm == null)
-                throw new Exception("PackageManager is null, how does this happen?");
-
+            PackageManager pm = context.PackageManager ?? throw new Exception("PackageManager is null, how does this happen?");
             IList<ApplicationInfo> allPackages = pm.GetInstalledApplications(PackageInfoFlags.MetaData);
 
             List<UnityApplicationData> unityApps = new List<UnityApplicationData>();
