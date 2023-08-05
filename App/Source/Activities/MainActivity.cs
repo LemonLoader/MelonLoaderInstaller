@@ -87,7 +87,7 @@ namespace MelonLoaderInstaller.App.Activities
 
             if (!PackageManager.CanRequestPackageInstalls())
                 RequestInstallUnknownSources();
-            if (!Environment.IsExternalStorageManager)
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.R && !Environment.IsExternalStorageManager)
                 RequestManageAllFiles();
         }
 
