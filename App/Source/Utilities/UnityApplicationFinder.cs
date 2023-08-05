@@ -25,7 +25,8 @@ namespace MelonLoaderInstaller.App.Utilities
                 try
                 {
                     bool isUnity = Directory.GetFiles(package.NativeLibraryDir).Any(f => f.Contains("libunity.so"));
-                    if (!isUnity)
+                    bool hasPlayer = pm.GetLaunchIntentForPackage(package.PackageName)?.Component?.ClassName?.Contains("UnityPlayer") ?? false;
+                    if (!isUnity && !hasPlayer)
                         continue;
                 }
                 catch (IOException)
