@@ -113,6 +113,7 @@ namespace MelonLoaderInstaller.App.Utilities
                     session.Fsync(outStream);
                 }
 
+                // TODO: does not throw errors
                 Intent callbackIntent = new Intent(_context, typeof(SplitAPKService));
                 PendingIntent pending = PendingIntent.GetService(_context, 0, callbackIntent, PendingIntentFlags.Mutable);
                 session.Commit(pending.IntentSender);

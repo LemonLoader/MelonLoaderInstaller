@@ -13,19 +13,39 @@ namespace MelonLoaderInstaller.Core.PatchSteps
             if (!patcher._args.IsSplit)
                 return true;
 
-            using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
+            // base.apk
+            {
+                using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
 
-            ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
-            using Stream manifestStream = manifestEntry.OpenReader();
-            using MemoryStream memoryStream = new MemoryStream();
+                ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
+                using Stream manifestStream = manifestEntry.OpenReader();
+                using MemoryStream memoryStream = new MemoryStream();
 
-            manifestStream.CopyTo(memoryStream);
+                manifestStream.CopyTo(memoryStream);
 
-            byte[] patchedManifest = ABXTools.EnableExtractNativeLibs(memoryStream.ToArray());
+                byte[] patchedManifest = ABXTools.EnableExtractNativeLibs(memoryStream.ToArray());
 
-            archive.UpdateEntry(manifestEntry.FileName, patchedManifest);
+                archive.UpdateEntry(manifestEntry.FileName, patchedManifest);
 
-            archive.Save();
+                archive.Save();
+            }
+
+            // split_config.*.apk
+            {
+                using ZipFile archive = new ZipFile(patcher._info.OutputLibApkPath);
+
+                ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
+                using Stream manifestStream = manifestEntry.OpenReader();
+                using MemoryStream memoryStream = new MemoryStream();
+
+                manifestStream.CopyTo(memoryStream);
+
+                byte[] patchedManifest = ABXTools.EnableExtractNativeLibs(memoryStream.ToArray());
+
+                archive.UpdateEntry(manifestEntry.FileName, patchedManifest);
+
+                archive.Save();
+            }
 
             return true;
         }
