@@ -2,7 +2,7 @@
 using Android.Graphics;
 using Android.Views;
 using Android.Widget;
-using AssetRipper.VersionUtilities;
+using AssetRipper.Primitives;
 using MelonLoaderInstaller.App.Models;
 using System.Collections.Generic;
 

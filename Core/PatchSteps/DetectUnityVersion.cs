@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using UnityVersion = AssetRipper.VersionUtilities.UnityVersion;
+using UnityVersion = AssetRipper.Primitives.UnityVersion;
 
 namespace MelonLoaderInstaller.Core.PatchSteps
 {

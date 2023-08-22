@@ -17,7 +17,7 @@
         public string Il2CppEtcPath;
         public string UnityDependenciesPath;
 
-        public AssetRipper.VersionUtilities.UnityVersion? UnityVersion;
+        public AssetRipper.Primitives.UnityVersion? UnityVersion;
         public string PackageName;
 
         public bool IsSplit;

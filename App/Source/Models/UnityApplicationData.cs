@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Android.Content.PM;
 using Android.Content.Res;
 using Android.Graphics.Drawables;
-using AndroidX.ConstraintLayout.Core.Motion.Utils;
 using AssetsTools.NET.Extra;
 using MelonLoaderInstaller.App.Utilities;
 using Stream = System.IO.Stream;
-using UnityVersion = AssetRipper.VersionUtilities.UnityVersion;
+using UnityVersion = AssetRipper.Primitives.UnityVersion;
 
 namespace MelonLoaderInstaller.App.Models
 {
