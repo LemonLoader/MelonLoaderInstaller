@@ -72,7 +72,7 @@ namespace MelonLoaderInstaller.App.Models
                 stream.Dispose();
 
                 AssetsFileInstance instance = uAssetsManager.LoadAssetsFile(memoryStream, "/bin/Data/globalgamemanagers", true);
-                EngineVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
+                EngineVersion = TryParseUnityVersion(instance.file.Metadata.UnityVersion);
 
                 return;
             }
@@ -98,12 +98,25 @@ namespace MelonLoaderInstaller.App.Models
 
                 BundleFileInstance bundle = uAssetsManager.LoadBundleFile(memoryStream, "/bin/Data/data.unity3d");
                 AssetsFileInstance instance = uAssetsManager.LoadAssetsFileFromBundle(bundle, "globalgamemanagers");
-                EngineVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
+                EngineVersion = TryParseUnityVersion(instance.file.Metadata.UnityVersion);
             }
             catch (Exception ex)
             {
                 Logger.Instance.Error("Failed to get Unity version for package " + PackageName + "\n" + ex.ToString());
                 EngineVersion = UnityVersion.MinVersion;
+            }
+        }
+
+        private UnityVersion TryParseUnityVersion(string version)
+        {
+            try
+            {
+                return UnityVersion.Parse(version);
+            }
+            catch
+            {
+                System.Diagnostics.Debug.WriteLine($"Package {_applicationInfo.PackageName} has unparsable version of {version}");
+                return UnityVersion.MinVersion;
             }
         }
     }
