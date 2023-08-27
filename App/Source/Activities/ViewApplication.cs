@@ -24,7 +24,8 @@ namespace MelonLoaderInstaller.App.Activities
     {
         private UnityApplicationData _applicationData;
         private PatchLogger _patchLogger;
-        private APKInstaller _apkInstaller;
+        private APKInstaller _patchApkInstaller;
+        private APKInstaller _restoreApkInstaller;
         private bool _patching;
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -60,7 +61,7 @@ namespace MelonLoaderInstaller.App.Activities
             appName.Text = _applicationData.AppName;
 
             _patchLogger = new PatchLogger(this);
-            _apkInstaller = new APKInstaller(this, _applicationData.PackageName,
+            _patchApkInstaller = new APKInstaller(this, _applicationData.PackageName,
                         () =>
                         {
                             patchButton.Text = "PATCHED";
@@ -71,6 +72,25 @@ namespace MelonLoaderInstaller.App.Activities
                             builder.Show();
                         },
                         () => patchButton.Text = "FAILED",
+                        _patchLogger);
+
+            _restoreApkInstaller = new APKInstaller(this, _applicationData.PackageName,
+                        () =>
+                        {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                                .SetTitle("Completed")
+                                .SetMessage("The app was restored successfully.")
+                                .SetPositiveButton("OK", (a, b) => { });
+                            builder.Show();
+                        },
+                        () =>
+                        {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                                .SetTitle("Failed")
+                                .SetMessage("The app could not be stored.")
+                                .SetPositiveButton("OK", (a, b) => { });
+                            builder.Show();
+                        },
                         _patchLogger);
 
             CheckWarnings(packageName);
@@ -94,6 +114,9 @@ namespace MelonLoaderInstaller.App.Activities
                         .SetType("application/zip")
                         .SetAction(Intent.ActionGetContent);
                     StartActivityForResult(Intent.CreateChooser(intent, "Select a file"), 123);
+                    return true;
+                case Resource.Id.action_restore_apk:
+                    RestoreAPKs();
                     return true;
             }
 
@@ -202,6 +225,33 @@ namespace MelonLoaderInstaller.App.Activities
                 _patchLogger.Log("Writing il2cpp_etc to file");
                 CopyAsset("il2cpp_etc.zip", il2cppEtcPath);
 
+                // If it's patched, backing up has basically has no reason
+                if (!_applicationData.IsPatched)
+                {
+                    _patchLogger.Log("Backing up APKs");
+
+                    string baseBackupPath = Path.Combine(baseAppPath, "Backups");
+
+                    if (!Directory.Exists(baseBackupPath))
+                        Directory.CreateDirectory(baseBackupPath);
+
+                    string backupPath = Path.Combine(baseBackupPath, _applicationData.PackageName);
+
+                    if (!Directory.Exists(backupPath))
+                        Directory.CreateDirectory(backupPath);
+
+                    BackupAPK(_applicationData.ApkLocation, backupPath);
+
+                    if (_applicationData.SplitLibApkLocation != null)
+                        BackupAPK(_applicationData.SplitLibApkLocation, backupPath);
+
+                    if (_applicationData.ExtraSplitApkLocations != null)
+                        foreach (string split in _applicationData.ExtraSplitApkLocations)
+                            BackupAPK(split, backupPath);
+                }
+                else
+                    _patchLogger.Log("App was previously patched, skipping back up");
+
                 _patchLogger.Log("Starting patch");
 
                 Patcher patcher = new Patcher(new PatchArguments()
@@ -231,7 +281,7 @@ namespace MelonLoaderInstaller.App.Activities
 
                 RunOnUiThread(() =>
                 {
-                    _apkInstaller.Install(outputDir);
+                    _patchApkInstaller.Install(outputDir);
                 });
             });
 
@@ -283,6 +333,36 @@ namespace MelonLoaderInstaller.App.Activities
                 _patchLogger.Log("Failed to copy asset file: " + assetName + " -> " + ex.ToString());
                 return false;
             }
+        }
+
+        private void BackupAPK(string apkPath, string backupDir)
+        {
+            string backupPath = Path.Combine(backupDir, Path.GetFileName(apkPath));
+            File.Copy(apkPath, backupPath, true);
+        }
+        
+        private void RestoreAPKs()
+        {
+            string baseAppPath = GetExternalFilesDir(null).ToString();
+            string baseBackupPath = Path.Combine(baseAppPath, "Backups");
+            string backupPath = Path.Combine(baseBackupPath, _applicationData.PackageName);
+
+            if (!Directory.Exists(backupPath) || Directory.GetFiles(backupPath, "*.apk").Length == 0)
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder
+                        .SetTitle("Cannot restore")
+                        .SetMessage("No backups are available for this package.")
+                        .SetPositiveButton("OK", (a, b) => { })
+                        .SetIcon(Drawable.IcDialogAlert);
+
+                AlertDialog alert = builder.Create();
+                alert.Show();
+
+                return;
+            }
+
+            _restoreApkInstaller.Install(backupPath);
         }
 
         private void SetFailed()

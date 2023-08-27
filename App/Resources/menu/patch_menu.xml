@@ -6,4 +6,8 @@
           android:title="Patch with local dependencies"
           app:showAsAction="collapseActionView"/>
 
+	<item android:id="@+id/action_restore_apk"
+          android:title="Restore unpatched APK(s)"
+          app:showAsAction="collapseActionView"/>
+
 </menu>
