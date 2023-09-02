@@ -65,6 +65,11 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>F:\Projects\GitHub\MelonLoaderInstaller\AndroidInstaller\keystore.jks</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>3ToAF#E^HAY!&amp;3!MtiT@r4</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>lemonman</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>3ToAF#E^HAY!&amp;3!MtiT@r4</AndroidSigningKeyPass>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
