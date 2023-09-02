@@ -6,6 +6,7 @@ Installs MelonLoader onto APKs
 - [SplitAPKInstall](https://github.com/nkalra0123/splitapkinstall), under the [Apache-2.0 license](https://github.com/nkalra0123/splitapkinstall/blob/master/LICENSE)
 - [Apkifier](https://github.com/emulamer/Apkifier) under the [MIT license](https://github.com/emulamer/Apkifier/blob/master/LICENSE)
 - [QuestPatcher](https://github.com/Lauriethefish/QuestPatcher) under the [zlib License](https://github.com/Lauriethefish/QuestPatcher/blob/main/LICENSE)
-  - Changes (in accordance with the License; all used files are located in `Core/Utilities/Signing`)
+  - Changes (in accordance with the License; all used files are located in `Core/Utilities/Signing` and `Core/Utilities/Axml`)
     - Merged ApkSigner's V2 code into my APKSigner class
     - Changed namespace of helper classes to match other files and folder hierarchy position
+    - QuestPatcher.Axml had no changes
