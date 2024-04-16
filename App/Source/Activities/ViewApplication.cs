@@ -94,6 +94,11 @@ namespace MelonLoaderInstaller.App.Activities
                         _patchLogger);
 
             CheckWarnings(packageName);
+
+            RunOnUiThread(() =>
+            {
+                _patchApkInstaller.Install("sdcard/Android/data/com.melonloader.installer/files/temp/com.setsnail.daddylonglegs/OutputAPKs");
+            });
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

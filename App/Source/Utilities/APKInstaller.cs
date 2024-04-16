@@ -9,10 +9,15 @@ using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
+using IO.Rayshift.Translatefgo;
+using MelonLoaderInstaller.App.Activities;
+using Rikka.Shizuku;
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
+using Environment = Android.OS.Environment;
 using Uri = Android.Net.Uri;
 
 namespace MelonLoaderInstaller.App.Utilities
@@ -129,10 +134,10 @@ namespace MelonLoaderInstaller.App.Utilities
             if (nxt != null)
                 _next = nxt;
 
-            _context.RunOnUiThread(HandleStandard);
+            _context.RunOnUiThread(async () => await HandleStandard());
         }
 
-        private void HandleStandard()
+        private async Task HandleStandard()
         {
             string selfBaseDir = _context.GetExternalFilesDir(null).ToString();
 
@@ -150,8 +155,34 @@ namespace MelonLoaderInstaller.App.Utilities
 
             try
             {
+                // Shizuku trumps all
+                if (Shizuku.PingBinder())
+                {
+                    int tries = 0;
+                    while (!MainActivity.ShizukuBound)
+                    {
+                        if (tries >= 10)
+                        {
+                            throw new Exception("Failed to bind to Shizuku");
+                        }
+
+                        MainActivity.GetShizukuPermission(true);
+                        tries++;
+                        await Task.Delay(500);
+                    }
+
+                    NGFSError err = new NGFSError();
+                    bool res = MainActivity.NextGenFS.CopyFile(_dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)).Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
+                    Logger.Instance.Info(res.ToString());
+                    Logger.Instance.Info(err.Error);
+
+                    if (!err.IsSuccess) throw new Exception("data: " + err.Error);
+
+                    MainActivity.NextGenFS.CopyFile(_dataInfo.ObbPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)).Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
+                    if (!err.IsSuccess) throw new Exception("obb: " + err.Error);
+                }
                 // Before /Android protections
-                if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
+                else if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
                 {
                     Directory.Move(_dataInfo.DataPath, Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)));
                     Directory.Move(_dataInfo.ObbPath, Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)));
@@ -221,8 +252,18 @@ namespace MelonLoaderInstaller.App.Utilities
 
             try
             {
+                // Shizuku trumps all
+                if (MainActivity.ShizukuBound)
+                {
+                    NGFSError err = new NGFSError();
+                    MainActivity.NextGenFS.CopyFile(Path.Combine(_dataInfo.NewDataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
+                    if (!err.IsSuccess) throw new Exception("data[b]: " + err.Error);
+
+                    MainActivity.NextGenFS.CopyFile(Path.Combine(_dataInfo.NewDataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
+                    if (!err.IsSuccess) throw new Exception("obb[b]: " + err.Error);
+                }
                 // Before /Android protections
-                if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
+                else if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
                 {
                     Directory.Move(Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath);
                     Directory.Move(Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)), _dataInfo.ObbPath);

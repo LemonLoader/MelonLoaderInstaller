@@ -7,14 +7,16 @@ using Android.Content.PM;
 using Android.Net;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.AppCompat.App;
-using AndroidX.Core.App;
+using IO.Rayshift.Translatefgo;
 using MelonLoaderInstaller.App.Adapters;
 using MelonLoaderInstaller.App.Models;
 using MelonLoaderInstaller.App.Utilities;
+using Rikka.Shizuku;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace MelonLoaderInstaller.App.Activities
@@ -22,6 +24,10 @@ namespace MelonLoaderInstaller.App.Activities
     [Activity(Label = "@string/app_name", Theme = "@style/Theme.MelonLoaderInstaller", MainLauncher = true)]
     public class MainActivity : AppCompatActivity, AdapterView.IOnItemClickListener
     {
+        public static bool ShizukuBound => NextGenFS.Binder != null;
+        public static NextGenFSServiceConnection NextGenFS = new NextGenFSServiceConnection();
+        public static ShizukuPermissionResultListener ShizukuListener = new ShizukuPermissionResultListener();
+
         private List<UnityApplicationData> _availableApps;
         private Toast _unsupportedToast;
 
@@ -45,9 +51,24 @@ namespace MelonLoaderInstaller.App.Activities
             FolderPermission.CurrentContext = this;
             FolderPermission.l = RegisterForActivityResult(new ActivityResultContracts.StartActivityForResult(), new FolderPermissionCallback());
 
-            // TODO: I feel like this mess of AlertDialogs on first start is a messy gross mess and should be cleaned or something
             TryRequestPermissions();
-            RequestFolderPermissions();
+
+            var shizukuActive = Shizuku.PingBinder();
+
+            if (shizukuActive)
+            {
+                Shizuku.AddRequestPermissionResultListener(ShizukuListener);
+                ShizukuProvider.EnableMultiProcessSupport(true);
+                Logger.Instance.Info("Shizuku");
+
+                GetShizukuPermission();
+            }
+            else
+            {
+                Logger.Instance.Info("No Shizuku");
+                // TODO: I feel like this mess of AlertDialogs on first start is a messy gross mess and should be cleaned or something
+                RequestFolderPermissions();
+            }
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
@@ -171,6 +192,81 @@ namespace MelonLoaderInstaller.App.Activities
             intent.SetClass(this, typeof(ViewApplication));
             intent.PutExtra("target.packageName", app.PackageName);
             StartActivity(intent);
+        }
+
+        internal static void BindShizuku()
+        {
+            if (NextGenFS.Binder == null)
+            {
+                Context context2 = Application.Context;
+                var nextClass = Java.Lang.Class.FromType(typeof(NGFSService)).Name;
+                var package = context2.PackageName!;
+
+                Logger.Instance.Info($"Classname: {nextClass}");
+                Logger.Instance.Info($"Package name: {package}");
+
+                var pckManager = context2.PackageManager;
+
+                if (pckManager == null) throw new System.Exception("Null package manager. This should never happen.");
+                var verCode = pckManager.GetPackageInfo(package, 0)?.LongVersionCode;
+
+                if (verCode == null) throw new System.Exception("Null verCode. This should never happen.");
+
+                var shizukuArgs = new Shizuku.UserServiceArgs(
+                    ComponentName.CreateRelative(package,
+                        nextClass)).ProcessNameSuffix("user_service").Debuggable(true).Version((int)verCode);
+
+                Logger.Instance.Info("Trying to bind NextGenFS.");
+
+                NextGenFS = new NextGenFSServiceConnection();
+
+                Shizuku.BindUserService(shizukuArgs, NextGenFS);
+            }
+        }
+
+        public static bool GetShizukuPermission(bool bind = false)
+        {
+            if (Shizuku.IsPreV11)
+            {
+                // Pre-v11 is unsupported
+                Toast.MakeText(Application.Context, "Your Shizuku version is too old. Please upgrade.", ToastLength.Long)?.Show();
+                return false;
+            }
+
+            if (Shizuku.CheckSelfPermission() == 0)
+            {
+                // Granted
+                if (bind)
+                    BindShizuku();
+
+                return true;
+            }
+            else if (Shizuku.ShouldShowRequestPermissionRationale())
+            {
+                // Users choose "Deny and don't ask again"
+                return false;
+            }
+            else
+            {
+                // Request the permission
+                Shizuku.RequestPermission(1000);
+                return false;
+            }
+        }
+    }
+
+    public class ShizukuPermissionResultListener : Java.Lang.Object, Shizuku.IOnRequestPermissionResultListener
+    {
+        public void OnRequestPermissionResult(int requestCode, int grantResult)
+        {
+            if (grantResult == (int)Permission.Granted)
+            {
+                MainActivity.BindShizuku();
+            }
+            else
+            {
+                Toast.MakeText(Application.Context, "Shizuku permission not granted.", ToastLength.Long)?.Show();
+            }
         }
     }
 }

@@ -47,6 +47,7 @@
     <AndroidSigningKeyAlias>lemonman</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass>3ToAF#E^HAY!&amp;3!MtiT@r4</AndroidSigningKeyPass>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -79,6 +80,11 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors" />
     <ProjectReference Include="..\Core\MelonLoaderInstallerCore.csproj" />
+    <ProjectReference Include="..\ShizukuAPI\Shizuku.AIDL\Shizuku.AIDL.csproj" />
+    <ProjectReference Include="..\ShizukuAPI\Shizuku.API\Shizuku.API.csproj" />
+    <ProjectReference Include="..\ShizukuAPI\Shizuku.Provider\Shizuku.Provider.csproj" />
+    <ProjectReference Include="..\ShizukuAPI\Shizuku.Shared\Shizuku.Shared.csproj" />
+    <ProjectReference Include="..\NextGenFS\NextGenFS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\xml\network_security_config.xml" />
@@ -89,6 +95,7 @@
     <Compile Include="Source\Utilities\APKInstaller.cs" />
     <Compile Include="Source\Utilities\DependencyDownloader.cs" />
     <Compile Include="Source\Utilities\FolderPermission.cs" />
+    <Compile Include="Source\Utilities\NextGenFSServiceConnection.cs" />
     <Compile Include="Source\Utilities\PackageWarnings.cs" />
     <Compile Include="Source\Utilities\Logger.cs" />
     <Compile Include="Source\Activities\MainActivity.cs" />
