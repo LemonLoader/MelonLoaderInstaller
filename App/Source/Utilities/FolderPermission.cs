@@ -108,7 +108,7 @@ namespace MelonLoaderInstaller.App.Utilities
         {
             if (result is ActivityResult activityResult && Build.VERSION.SdkInt >= BuildVersionCodes.Q)
             {
-                if (activityResult.Data.Data != null)
+                if (activityResult?.Data?.Data != null)
                 {
                     FolderPermission.CurrentContext.ContentResolver.TakePersistableUriPermission(
                         activityResult.Data.Data,

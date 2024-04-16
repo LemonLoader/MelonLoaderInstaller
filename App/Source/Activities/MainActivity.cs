@@ -153,12 +153,12 @@ namespace MelonLoaderInstaller.App.Activities
                         .SetTitle("Data Folder Permission")
                         .SetMessage("Lemon needs access to the Android data folder to backup game data.")
                         .SetPositiveButton("Setup", (o, di) => FolderPermission.OpenDirectory("/sdcard/Android/data"))
+                        .SetNegativeButton("Skip", (o, di) => { })
                         .SetIcon(Android.Resource.Drawable.IcDialogAlert);
 
                 AlertDialog alert = builder.Create();
                 alert.SetCancelable(false);
                 alert.Show();
-                return;
             }
 
             if (!FolderPermission.GotAccessTo("/sdcard/Android/obb"))
@@ -168,12 +168,12 @@ namespace MelonLoaderInstaller.App.Activities
                         .SetTitle("OBB Folder Permission")
                         .SetMessage("Lemon needs access to the Android obb folder to backup game data.")
                         .SetPositiveButton("Setup", (o, di) => FolderPermission.OpenDirectory("/sdcard/Android/obb"))
+                        .SetNegativeButton("Skip", (o, di) => { })
                         .SetIcon(Android.Resource.Drawable.IcDialogAlert);
 
                 AlertDialog alert = builder.Create();
                 alert.SetCancelable(false);
                 alert.Show();
-                return;
             }
         }
 
