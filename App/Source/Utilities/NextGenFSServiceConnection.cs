@@ -7,7 +7,6 @@ using Android.Systems;
 using Android.Util;
 using IO.Rayshift.Translatefgo;
 using Java.Interop;
-using Math = System.Math;
 
 namespace MelonLoaderInstaller.App.Utilities
 {
@@ -65,13 +64,8 @@ namespace MelonLoaderInstaller.App.Utilities
         public bool MoveDirectory(string source, string destination, NGFSError error)
         {
             var result = Binder?.MoveDirectory(source, destination, error);
-            if (result != null)
-            {
-                Logger.Instance.Info("Res all good");
-                return (bool)result;
-            }
+            if (result != null) return (bool)result;
 
-            Logger.Instance.Info("Res all bad");
             error.IsSuccess = false;
             error.Error = BinderError;
             return false;
@@ -136,43 +130,6 @@ namespace MelonLoaderInstaller.App.Utilities
             }
         }
 
-        /// <summary>
-        /// DO NOT USE
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public byte[] ReadExistingFileDirectly(string filename, NGFSError error)
-        {
-            // find length
-            var size = GetExistingFileSize(filename, error);
-
-            if (size == -1 || !error.IsSuccess) return null;
-
-            Log.Info("melonloader", $"Reading {filename} size {size} in chunks");
-
-            int currentOffset = 0;
-            int finalLength = size;
-
-            byte[] buffer = new byte[size];
-
-            while (currentOffset < finalLength)
-            {
-                var thisRead = Math.Min(finalLength - currentOffset, CHUNK_SIZE);
-                var readBytes = ReadExistingFile(filename, currentOffset, thisRead, error);
-
-                if (readBytes == null || !error.IsSuccess)
-                {
-                    return null;
-                }
-
-                Array.Copy(readBytes, 0, buffer, currentOffset, thisRead);
-                currentOffset += thisRead;
-            }
-
-            return buffer;
-        }
-
         public byte[] ReadExistingFile(string filename, NGFSError error)
         {
             var ctx = Android.App.Application.Context;
@@ -222,44 +179,8 @@ namespace MelonLoaderInstaller.App.Utilities
             }
         }
 
-        /// <summary>
-        /// Do not use as incredibly unstable
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="contents"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public bool WriteFileContentsDirectly(string filename, byte[] contents, NGFSError error)
-        {
-            int currentOffset = 0;
-            int finalLength = contents.Length;
-
-            byte[] buffer = new byte[CHUNK_SIZE];
-
-            Log.Info("melonloader", $"Writing {filename} size {finalLength} in chunks");
-
-            while (currentOffset < finalLength)
-            {
-                buffer.Initialize();
-                var thisWrite = Math.Min(finalLength - currentOffset, CHUNK_SIZE);
-                Array.Copy(contents, currentOffset, buffer, 0, thisWrite);
-
-                var result = WriteFileContents(filename, buffer, currentOffset, thisWrite, error);
-
-                if (!result || !error.IsSuccess)
-                {
-                    return false;
-                }
-                currentOffset += thisWrite;
-            }
-
-            return true;
-        }
-
         public bool WriteFileContents(string filename, byte[] contents, NGFSError error)
         {
-
-
             var ctx = Android.App.Application.Context;
             var cache = ctx.GetExternalCacheDirs()?.FirstOrDefault();
 

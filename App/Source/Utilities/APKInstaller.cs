@@ -134,7 +134,31 @@ namespace MelonLoaderInstaller.App.Utilities
             if (nxt != null)
                 _next = nxt;
 
-            _context.RunOnUiThread(async () => await HandleStandard());
+            _context.RunOnUiThread(async () =>
+            {
+                //await KillService();
+                //await Task.Delay(5000);
+                await HandleStandard();
+            });
+        }
+
+        private async Task KillService()
+        {
+            int tries = 0;
+            while (!MainActivity.ShizukuBound)
+            {
+                if (tries >= 10)
+                {
+                    throw new Exception("Failed to bind to Shizuku");
+                }
+
+                MainActivity.GetShizukuPermission(true);
+                tries++;
+                await Task.Delay(500);
+            }
+
+            MainActivity.NextGenFS.Destroy();
+            MainActivity.NextGenFS = new NextGenFSServiceConnection();
         }
 
         private async Task HandleStandard()
@@ -172,14 +196,21 @@ namespace MelonLoaderInstaller.App.Utilities
                     }
 
                     NGFSError err = new NGFSError();
-                    bool res = MainActivity.NextGenFS.CopyFile(_dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)).Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
-                    Logger.Instance.Info(res.ToString());
-                    Logger.Instance.Info(err.Error);
+                    if (MainActivity.NextGenFS.GetFileExists(_dataInfo.DataPath, err))
+                    {
+                        if (!err.IsSuccess) throw new Exception("data check: " + err.Error);
 
-                    if (!err.IsSuccess) throw new Exception("data: " + err.Error);
+                        bool res = MainActivity.NextGenFS.MoveDirectory(_dataInfo.DataPath, Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath)), err);
+                        if (!err.IsSuccess) throw new Exception("data: " + err.Error);
+                    }
 
-                    MainActivity.NextGenFS.CopyFile(_dataInfo.ObbPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)).Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
-                    if (!err.IsSuccess) throw new Exception("obb: " + err.Error);
+                    if (MainActivity.NextGenFS.GetFileExists(_dataInfo.ObbPath, err))
+                    {
+                        if (!err.IsSuccess) throw new Exception("obb check: " + err.Error);
+
+                        MainActivity.NextGenFS.MoveDirectory(_dataInfo.ObbPath, Path.Combine(_dataInfo.NewObbPath, GetDirectoryName(_dataInfo.ObbPath)), err);
+                        if (!err.IsSuccess) throw new Exception("obb: " + err.Error);
+                    }
                 }
                 // Before /Android protections
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
@@ -256,11 +287,23 @@ namespace MelonLoaderInstaller.App.Utilities
                 if (MainActivity.ShizukuBound)
                 {
                     NGFSError err = new NGFSError();
-                    MainActivity.NextGenFS.CopyFile(Path.Combine(_dataInfo.NewDataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
-                    if (!err.IsSuccess) throw new Exception("data[b]: " + err.Error);
+                    string data = Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath));
+                    if (MainActivity.NextGenFS.GetFileExists(data, err))
+                    {
+                        if (!err.IsSuccess) throw new Exception("data check[b]: " + err.Error);
 
-                    MainActivity.NextGenFS.CopyFile(Path.Combine(_dataInfo.NewDataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), GetDirectoryName(_dataInfo.DataPath)), _dataInfo.DataPath.Replace("/sdcard", Environment.ExternalStorageDirectory.AbsolutePath), err);
-                    if (!err.IsSuccess) throw new Exception("obb[b]: " + err.Error);
+                        MainActivity.NextGenFS.MoveDirectory(data, _dataInfo.DataPath, err);
+                        if (!err.IsSuccess) throw new Exception("data[b]: " + err.Error);
+                    }
+
+                    string obb = Path.Combine(_dataInfo.NewDataPath, GetDirectoryName(_dataInfo.DataPath));
+                    if (MainActivity.NextGenFS.GetFileExists(obb, err))
+                    {
+                        if (!err.IsSuccess) throw new Exception("obb check[b]: " + err.Error);
+
+                        MainActivity.NextGenFS.MoveDirectory(obb, _dataInfo.DataPath, err);
+                        if (!err.IsSuccess) throw new Exception("obb[b]: " + err.Error);
+                    }
                 }
                 // Before /Android protections
                 else if (Build.VERSION.SdkInt <= BuildVersionCodes.Q)
