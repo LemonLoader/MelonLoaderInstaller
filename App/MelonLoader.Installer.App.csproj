@@ -24,11 +24,39 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<Title></Title>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
+	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
+	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
+	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
+	  <AndroidKeyStore>False</AndroidKeyStore>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
+	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
+	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
+	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
+	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
+	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
+	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
+	  <AndroidKeyStore>False</AndroidKeyStore>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
+	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
+	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
+	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#52D681" />
+		<MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg_android.svg" Color="#ffffff" />
+		<MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'" Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#ffffff" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#52D681" BaseSize="128,128" />
@@ -47,9 +75,10 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="UraniumUI.Material" Version="2.8.1" />
-		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.8.1" />
-		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.8.1" />
+		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.9.0-pre.4" />
+		<PackageReference Include="UraniumUI.Material" Version="2.9.0-pre.4" />
+		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.9.0-pre.4" />
+		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.9.0-pre.4" />
 	</ItemGroup>
 
 </Project>

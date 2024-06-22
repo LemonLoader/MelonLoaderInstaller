@@ -19,7 +19,7 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 
 				fonts.AddMaterialSymbolsFonts();
-
+				fonts.AddMaterialIconFonts();
             });
 
 		builder.Services.AddMopupsDialogs();
