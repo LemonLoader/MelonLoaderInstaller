@@ -23,16 +23,10 @@
 
         <VerticalStackLayout Spacing="10">
 
-            <Button Text="Delete" StyleClass="FilledTonalButton"  Command="{Binding RemoveSelectedItemsCommand}" HorizontalOptions="Center" />
-            <material:DataGrid ItemsSource="{Binding Items}" SelectedItems="{Binding SelectedItems}" HorizontalOptions="FillAndExpand" VerticalOptions="Center">
+            <material:DataGrid ItemsSource="{Binding Items}" HorizontalOptions="FillAndExpand" VerticalOptions="Center">
                 <material:DataGrid.Columns>
-                    <material:DataGridSelectionColumn/>
 
-                    <material:DataGridColumn ValueBinding="{Binding Content}" Title="Todo" />
-
-                    <material:DataGridColumn ValueBinding="{Binding Type}" Title="Type"/>
-
-                    <material:DataGridColumn ValueBinding="{Binding IsDone}" Title="Done"/>
+                    <material:DataGridColumn ValueBinding="{Binding AppName}" />
 
                 </material:DataGrid.Columns>
             </material:DataGrid>
@@ -41,38 +35,6 @@
     </ScrollView>
 
     <uranium:UraniumContentPage.Attachments>
-        <material:BackdropView
-                Title="Add" 
-                IconImageSource="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static uranium:MaterialSharp.Add_circle}, Color={StaticResource OnPrimary}}"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Gray950}}">
-            <input:FormView SubmitCommand="{Binding AddNewItemCommand}" Spacing="10" Padding="25,30" HorizontalOptions="Center" MaximumWidthRequest="400">
-                <material:TextField 
-                    Title="What to do?"
-                    Text="{Binding NewItem.Content}"
-                    TextColor="{StaticResource OnPrimary}"
-                    AccentColor="{StaticResource OnPrimary}"
-                    Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static uranium:MaterialSharp.Sticky_note_2}}">
-                    <validation:RequiredValidation />
-                </material:TextField>
-
-                <input:CheckBox 
-                    IsChecked="{Binding NewItem.IsDone}" 
-                    Text="Is done" Color="{StaticResource Primary}" 
-                    BorderColor="{StaticResource OnPrimary}" 
-                    Type="Filled" 
-                    TextColor="{StaticResource OnPrimary}" />
-                <input:SelectionView 
-                    Color="{StaticResource Secondary}" 
-                    ItemsSource="{x:Static local:TodoItem.AvailableTypes}" 
-                    SelectedItem="{Binding NewItem.Type}" 
-                    ColumnSpacing="-2" 
-                    ColumnNumber="4"/>
-                <Button 
-                    input:FormView.IsSubmitButton="True"
-                    Text="Add"
-                    StyleClass="ElevatedButton"/>
-            </input:FormView>
-        </material:BackdropView>
         <material:BottomSheetView x:Name="bottomSheet">
             <TableView Intent="Menu" Margin="0,0,0,40" BackgroundColor="Transparent">
                 <TableRoot>
