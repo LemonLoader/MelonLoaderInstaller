@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MelonLoaderInstaller.Core
+namespace MelonLoader.Installer.Core
 {
     public interface IPatchLogger
     {

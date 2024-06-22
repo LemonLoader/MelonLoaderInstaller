@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using UnityVersion = AssetRipper.Primitives.UnityVersion;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class DetectUnityVersion : IPatchStep
     {

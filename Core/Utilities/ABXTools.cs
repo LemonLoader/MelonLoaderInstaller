@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace MelonLoaderInstaller.Core.Utilities
+namespace MelonLoader.Installer.Core.Utilities
 {
     // Auto-converted from https://pastebin.com/c53DuqMt (then I obliterated it), writer unknown
     // I do not know how this code works, please do not ask

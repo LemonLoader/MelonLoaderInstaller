@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class DownloadNativeLibs : IPatchStep
     {

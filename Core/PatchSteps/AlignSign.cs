@@ -1,8 +1,8 @@
-﻿using MelonLoaderInstaller.Core.Utilities.Signing;
+﻿using MelonLoader.Installer.Core.Utilities.Signing;
 using System;
 using System.IO;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class AlignSign : IPatchStep
     {

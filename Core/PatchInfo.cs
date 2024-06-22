@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 
-namespace MelonLoaderInstaller.Core
+namespace MelonLoader.Installer.Core
 {
     /// <summary>
     /// Class for storing information only used internally

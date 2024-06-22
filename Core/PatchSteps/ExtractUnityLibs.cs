@@ -1,7 +1,7 @@
 ﻿using System.IO.Compression;
 using System.IO;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class ExtractUnityLibs : IPatchStep
     {

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Security;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class DownloadUnityDeps : IPatchStep
     {

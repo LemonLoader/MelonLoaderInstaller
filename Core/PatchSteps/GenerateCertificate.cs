@@ -10,7 +10,7 @@ using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.OpenSsl;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class GenerateCertificate : IPatchStep
     {

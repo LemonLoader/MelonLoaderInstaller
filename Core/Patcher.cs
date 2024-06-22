@@ -1,8 +1,8 @@
-﻿using MelonLoaderInstaller.Core.PatchSteps;
+﻿using MelonLoader.Installer.Core.PatchSteps;
 using System;
 using System.IO;
 
-namespace MelonLoaderInstaller.Core
+namespace MelonLoader.Installer.Core
 {
     /// <summary>
     /// Main class that handles starting patches

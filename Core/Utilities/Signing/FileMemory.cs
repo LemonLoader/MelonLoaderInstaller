@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MelonLoaderInstaller.Core.Utilities.Signing
+namespace MelonLoader.Installer.Core.Utilities.Signing
 {
     public class FileMemory : IDisposable, IAsyncDisposable
     {

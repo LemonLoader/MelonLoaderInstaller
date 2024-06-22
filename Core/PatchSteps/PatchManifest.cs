@@ -5,7 +5,7 @@ using System.Linq;
 using Ionic.Zip;
 using QuestPatcher.Axml;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     // based a lot on
     // https://github.com/Lauriethefish/QuestPatcher/blob/main/QuestPatcher.Core/Patching/PatchingManager.cs

@@ -1,4 +1,4 @@
-﻿namespace MelonLoaderInstaller.Core
+﻿namespace MelonLoader.Installer.Core
 {
     /// <summary>
     /// Public-facing class for user set information

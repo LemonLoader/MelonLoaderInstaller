@@ -15,7 +15,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Ionic.Zip;
 
-namespace MelonLoaderInstaller.Core.Utilities.Signing
+namespace MelonLoader.Installer.Core.Utilities.Signing
 {
     public class APKSigner
     {

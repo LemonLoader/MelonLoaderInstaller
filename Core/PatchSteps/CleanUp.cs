@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps
 {
     internal class CleanUp : IPatchStep
     {

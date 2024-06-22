@@ -1,4 +1,4 @@
-﻿namespace MelonLoaderInstaller.Core
+﻿namespace MelonLoader.Installer.Core
 {
     internal interface IPatchStep
     {

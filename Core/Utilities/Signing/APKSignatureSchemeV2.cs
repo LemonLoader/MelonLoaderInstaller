@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace MelonLoaderInstaller.Core.Utilities.Signing
+namespace MelonLoader.Installer.Core.Utilities.Signing
 {
     public class APKSignatureSchemeV2
     {
