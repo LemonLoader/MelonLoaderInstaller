@@ -1,4 +1,5 @@
-﻿#if ANDROID
+﻿using System.Reflection;
+#if ANDROID
 using Android.Content.PM;
 using Android.Graphics;
 using Android.Graphics.Drawables;
@@ -108,17 +109,34 @@ namespace MelonLoader.Installer.App.Utils
 
         public class Data : BindableObject
         {
-            public byte[]? IconRaw { get; private set; }
-            public ImageSource Icon { get; private set; }
+            public byte[] RawIconData { get; private set; }
             public string AppName { get; private set; }
             public string PackageName { get; private set; }
+
+            private static byte[] PlaceholderIcon
+            {
+                get
+                {
+                    if (_placeholderIcon == null)
+                    {
+                        using var stream = Assembly.GetCallingAssembly().GetManifestResourceStream("MelonLoader.Installer.App.Resources.Images.test_app_icon.png");
+                        using MemoryStream memStr = new();
+
+                        stream!.CopyTo(memStr);
+
+                        _placeholderIcon = memStr.ToArray();
+                    }
+
+                    return _placeholderIcon;
+                }
+            }
+            private static byte[]? _placeholderIcon;
 
             public Data(string appName, string packageName, byte[]? icon = null)
             {
                 AppName = appName;
                 PackageName = packageName;
-                IconRaw = icon;
-                Icon = IconRaw == null ? ImageSource.FromResource("MelonLoader.Installer.App.Resources.Images.test_app_icon.png") : ImageSource.FromStream(() => new MemoryStream(IconRaw));
+                RawIconData = icon ?? PlaceholderIcon;
             }
         }
     }

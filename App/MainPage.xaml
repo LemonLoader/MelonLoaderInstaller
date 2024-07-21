@@ -30,7 +30,7 @@
                             <ColumnDefinition Width="1000" />
                         </Grid.ColumnDefinitions>
                         <Image Grid.RowSpan="2"
-                           Source="{Binding IconRaw, Mode=OneWay, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                           Source="{Binding RawIconData, Mode=OneWay, Converter={StaticResource ByteArrayToImageSourceConverter}}"
                            Aspect="AspectFill"
                            HeightRequest="60"
                            WidthRequest="60" />
