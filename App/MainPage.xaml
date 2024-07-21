@@ -27,7 +27,7 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="1000" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Image Grid.RowSpan="2"
                            Source="{Binding RawIconData, Mode=OneWay, Converter={StaticResource ByteArrayToImageSourceConverter}}"
@@ -42,6 +42,16 @@
                            Text="{Binding PackageName}"
                            FontAttributes="Italic"
                            VerticalOptions="End" />
+                        
+                        <Label Grid.Row="1"
+                           Grid.Column="2"
+                           Text="{Binding StatusString}"
+                           TextColor="{Binding StatusColor}"
+                           FontAttributes="Bold"
+                           VerticalOptions="CenterAndExpand"
+                               VerticalTextAlignment="Center"
+                               Padding="0 0 20 0"
+                           HorizontalOptions="EndAndExpand" />
                     </Grid>
                 </ViewCell>
             </DataTemplate>
