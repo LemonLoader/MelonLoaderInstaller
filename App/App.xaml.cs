@@ -1,6 +1,4 @@
-﻿using UraniumUI.Material.Resources;
-
-namespace MelonLoader.Installer.App;
+﻿namespace MelonLoader.Installer.App;
 
 public partial class App : Application
 {

@@ -1,19 +1,18 @@
 ﻿#if ANDROID
 using Android.Content.PM;
+using Android.Graphics;
+using Android.Graphics.Drawables;
 #endif
-using UraniumUI;
 
 namespace MelonLoader.Installer.App.Utils
 {
     public static class UnityApplicationFinder
     {
-#if ANDROID
-        public static List<Data> Find()
+        public static IEnumerable<Data> Find()
         {
+#if ANDROID
             PackageManager pm = Platform.CurrentActivity!.PackageManager ?? throw new Exception("PackageManager is null, how does this happen?");
             IList<ApplicationInfo> allPackages = pm.GetInstalledApplications(PackageInfoFlags.MetaData);
-
-            List<Data> unityApps = [];
 
             foreach (ApplicationInfo package in allPackages)
             {
@@ -33,41 +32,93 @@ namespace MelonLoader.Installer.App.Utils
                     continue;
                 }
 
-                unityApps.Add(new Data(package.PackageName!));
-            }
+                string name = pm.GetApplicationLabel(package);
 
-            return unityApps;
+                byte[]? iconData = null;
+                Drawable? iconDrawable = package.LoadIcon(pm);
+                if (iconDrawable != null)
+                {
+                    int width = iconDrawable.IntrinsicWidth > 0 ? iconDrawable.IntrinsicWidth : 128;
+                    int height = iconDrawable.IntrinsicHeight > 0 ? iconDrawable.IntrinsicHeight : 128;
+
+                    Bitmap bitmap = Bitmap.CreateBitmap(width, height, Bitmap.Config.Argb8888!);
+
+                    if (iconDrawable is BitmapDrawable bitmapDrawable)
+                    {
+                        bitmapDrawable.SetAntiAlias(true);
+                    }
+
+                    iconDrawable.SetBounds(0, 0, width, height);
+
+                    Canvas canvas = new(bitmap);
+                    iconDrawable.Draw(canvas);
+
+                    using MemoryStream ms = new();
+                    bitmap.Compress(Bitmap.CompressFormat.Png!, 100, ms);
+                    iconData = ms.ToArray();
+
+                    bitmap.Recycle();
+                }
+
+                yield return new Data(name, package.PackageName!, iconData);
+            }
+#else
+                List<Data> unityApps = [
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app"),
+                    new("Test App", "com.veryreal.app")];
+
+                foreach (var app in unityApps)
+                    yield return app;
+#endif
         }
 
         public static Data FromPackageName(string packageName)
         {
+#if ANDROID
             PackageManager pm = Platform.CurrentActivity!.PackageManager ?? throw new Exception("PackageManager is null, how does this happen?");
             ApplicationInfo packageInfo = pm.GetApplicationInfo(packageName, PackageInfoFlags.MetaData);
-            return new Data(packageInfo.Name!);
-        }
+            string name = pm.GetApplicationLabel(packageInfo);
+            return new Data(name, packageInfo.PackageName!);
 #else
-        // TODO: windows support
-
-        public static List<Data> Find()
-        {
-            List<Data> unityApps = [new("a"), new("b"), new("c"), new("d")];
-
-            return unityApps;
-        }
-
-        public static Data FromPackageName(string packageName)
-        {
-            return new Data("");
-        }
+            return new Data("", "");
 #endif
+        }
 
-        public class Data : UraniumBindableObject
+        public class Data : BindableObject
         {
+            public byte[]? IconRaw { get; private set; }
+            public ImageSource Icon { get; private set; }
             public string AppName { get; private set; }
+            public string PackageName { get; private set; }
 
-            public Data(string appName)
+            public Data(string appName, string packageName, byte[]? icon = null)
             {
                 AppName = appName;
+                PackageName = packageName;
+                IconRaw = icon;
+                Icon = IconRaw == null ? ImageSource.FromResource("MelonLoader.Installer.App.Resources.Images.test_app_icon.png") : ImageSource.FromStream(() => new MemoryStream(IconRaw));
             }
         }
     }

@@ -1,18 +1,12 @@
-﻿using InputKit.Shared.Controls;
-using UraniumUI.Pages;
+﻿using MelonLoader.Installer.App.Utils;
+using System.Collections.ObjectModel;
 
 namespace MelonLoader.Installer.App;
 
-public partial class MainPage : UraniumContentPage
+public partial class MainPage : ContentPage
 {
-	public MainPage()
+    public MainPage()
     {
-        SelectionView.GlobalSetting.CornerRadius = 0;
         InitializeComponent();
-	}
-
-	private void ShowBottomSheet(object sender, EventArgs e)
-	{
-		bottomSheet.IsPresented = true;
     }
 }

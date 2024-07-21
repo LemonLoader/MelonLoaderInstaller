@@ -1,5 +1,5 @@
-﻿using Mopups.Hosting;
-using UraniumUI;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Markup;
 
 namespace MelonLoader.Installer.App;
 
@@ -10,19 +10,14 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-			.ConfigureMopups()
-			.UseUraniumUI()
-			.UseUraniumUIMaterial()
+			.UseMauiCommunityToolkit()
+			.UseMauiCommunityToolkitMarkup()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-
-				fonts.AddMaterialSymbolsFonts();
-				fonts.AddMaterialIconFonts();
             });
 
-		builder.Services.AddMopupsDialogs();
 		return builder.Build();
 	}
 }
