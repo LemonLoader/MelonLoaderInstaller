@@ -1,4 +1,6 @@
-﻿using MelonLoader.Installer.App.Utils;
+﻿using CommunityToolkit.Maui.Alerts;
+using MelonLoader.Installer.App.Utils;
+using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -30,8 +32,26 @@ public class MainPageViewModel : BindableObject
         Application.Current!.Dispatcher.Dispatch(() => OnAppAddingComplete?.Invoke());
     }
 
-    private void OnItemTapped(UnityApplicationFinder.Data item)
+    private async void OnItemTapped(UnityApplicationFinder.Data item)
     {
         System.Diagnostics.Debug.WriteLine(item.AppName);
+
+        if (item.Status == UnityApplicationFinder.Status.Unsupported)
+        {
+            var toast = Toast.Make("This app is unsupported.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+            await toast.Show();
+            return;
+        }
+
+        if (!AndroidPermissionHandler.HaveRequired())
+        {
+            var toast = Toast.Make("Permissions are not setup.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+            await toast.Show();
+
+            await Shell.Current.GoToAsync(nameof(PermissionSetupPage));
+            return;
+        }
+
+        // TODO: app view page
     }
 }

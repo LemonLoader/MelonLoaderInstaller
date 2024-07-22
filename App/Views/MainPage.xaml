@@ -67,7 +67,7 @@
                                        HeightRequest="60"
                                        WidthRequest="60" />
 
-                                <Label Grid.Column="1" LineBreakMode="WordWrap">
+                                <Label Grid.Column="1" LineBreakMode="HeadTruncation">
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="{Binding AppName}"
@@ -83,7 +83,8 @@
                                 <Label Grid.Row="1"
                                        Grid.Column="1"
                                        Text="{Binding PackageName}"
-                                       FontAttributes="Italic" />
+                                       FontAttributes="Italic"
+                                       LineBreakMode="TailTruncation" />
                             </Grid>
                         </Border>
                     </Border>

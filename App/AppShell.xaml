@@ -5,10 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MelonLoader.Installer.App"
     xmlns:views="clr-namespace:MelonLoader.Installer.App.Views"
-    Shell.FlyoutBehavior="Disabled">
+    Shell.FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="False"
+    Shell.BackgroundColor="Transparent">
 
     <ShellContent
         ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
+
+    <ShellContent
+        ContentTemplate="{DataTemplate views:PermissionSetupPage}"
+        Route="PermissionSetupPage" />
 
 </Shell>

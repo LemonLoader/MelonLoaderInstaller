@@ -1,60 +1,80 @@
 ﻿#if ANDROID
+
 using Android;
 using Android.Content.PM;
+
 #endif
 
 namespace MelonLoader.Installer.App.Utils;
 
 public static class AndroidPermissionHandler
 {
-    public static void Check()
+    public static bool HaveRequired()
     {
-        // TODO: everything
+        return HasExternalStorage() && HasAccessToAllFiles() && CanInstallUnknownSources();
+    }
+
+    public static bool HasExternalStorage()
+    {
+        // these perms don't work, hopefully they aren't too important
+        return true;
 #if ANDROID
         bool canRead = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
-        bool canWrite = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
-
-        if (!canRead || !canWrite)
-        {
-            Platform.CurrentActivity!.RequestPermissions(
-            [
-                Manifest.Permission.ReadExternalStorage,
-                Manifest.Permission.WriteExternalStorage,
-            ], 100);
-        }
-
-        if (!Platform.CurrentActivity!.PackageManager!.CanRequestPackageInstalls())
-            RequestInstallUnknownSources();
+        bool canWrite = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.WriteExternalStorage) == Permission.Granted;
+        return canRead && canWrite;
+#else
+        return true;
 #endif
     }
 
+    public static bool HasAccessToAllFiles()
+    {
+#if ANDROID30_0_OR_GREATER
+#pragma warning disable CA1416 // Validate platform compatibility; I'm clearly already checking it
+        return Android.OS.Environment.IsExternalStorageManager;
+#pragma warning restore CA1416
+#else
+        return true;
+#endif
+    }
+
+    public static bool CanInstallUnknownSources()
+    {
 #if ANDROID
-    public static void RequestInstallUnknownSources()
-    {
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder
-                .SetTitle("Install Permission")
-                .SetMessage("Lemon needs permission to install apps from unknown sources to function!")
-                .SetPositiveButton("Setup", (o, di) => StartActivity(new Intent(Android.Provider.Settings.ActionManageUnknownAppSources, Uri.Parse("package:" + PackageName))))
-                .SetIcon(Android.Resource.Drawable.IcDialogAlert);
-
-        AlertDialog alert = builder.Create();
-        alert.SetCancelable(false);
-        alert.Show();*/
-    }
-
-    public static void RequestManageAllFiles()
-    {
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder
-                .SetTitle("Storage Permission")
-                .SetMessage("Lemon needs permission to manage all files to function!")
-                .SetPositiveButton("Setup", (o, di) => StartActivity(new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission, Uri.Parse("package:" + PackageName))))
-                .SetIcon(Android.Resource.Drawable.IcDialogAlert);
-
-        AlertDialog alert = builder.Create();
-        alert.SetCancelable(false);
-        alert.Show();*/
-    }
+        return Platform.CurrentActivity!.PackageManager!.CanRequestPackageInstalls();
+#else
+        return true;
 #endif
+    }
+
+    public static void TryGetExternalStorage()
+    {
+#if ANDROID
+        Platform.CurrentActivity!.RequestPermissions(
+                [
+                    Manifest.Permission.ReadExternalStorage,
+                    Manifest.Permission.WriteExternalStorage,
+                ], 100);
+#endif
+    }
+
+    public static void TryGetAccessToAllFiles()
+    {
+#if ANDROID30_0_OR_GREATER
+#pragma warning disable CA1416 // Validate platform compatibility; I'm clearly already checking it
+        var intent = new Android.Content.Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission, Android.Net.Uri.Parse("package:" + Platform.CurrentActivity!.PackageName));
+        intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+        Platform.CurrentActivity!.StartActivity(intent);
+#pragma warning restore CA1416
+#endif
+    }
+
+    public static void TryGetInstallUnknownSources()
+    {
+#if ANDROID
+        var intent = new Android.Content.Intent(Android.Provider.Settings.ActionManageUnknownAppSources, Android.Net.Uri.Parse("package:" + Platform.CurrentActivity!.PackageName));
+        intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+        Platform.CurrentActivity!.StartActivity(intent);
+#endif
+    }
 }

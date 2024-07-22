@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
+using MelonLoader.Installer.App.Views;
 
 namespace MelonLoader.Installer.App;
 
@@ -18,6 +19,9 @@ public static class MauiProgram
 				fonts.AddFont("Inter-SemiBold.ttf", "InterSemiBold");
             });
 
-		return builder.Build();
+        Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
+        Routing.RegisterRoute(nameof(PermissionSetupPage), typeof(PermissionSetupPage));
+
+        return builder.Build();
 	}
 }

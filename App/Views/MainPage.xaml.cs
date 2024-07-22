@@ -9,6 +9,9 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
 
+        if (!AndroidPermissionHandler.HaveRequired())
+            Shell.Current.GoToAsync(nameof(PermissionSetupPage));
+
         MainPageViewModel viewModel = new();
         BindingContext = viewModel;
 
