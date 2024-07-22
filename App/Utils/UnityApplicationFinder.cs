@@ -135,20 +135,7 @@ namespace MelonLoader.Installer.App.Utils
             public string PackageName { get; private set; }
             public Status Status { get; private set; }
 
-            public string StatusString => Status == Status.Unpatched ? "" : Status.ToString().ToUpper();
-
-            public Color StatusColor
-            {
-                get
-                {
-                    return Status switch
-                    {
-                        Status.Patched => new(0, 255, 0, 255),
-                        Status.Unsupported => new(255, 0, 0, 255),
-                        _ => new(255, 255, 255, 255),
-                    };
-                }
-            }
+            public string StatusString => Status == Status.Unpatched ? "" : " • " + Status.ToString().ToUpper();
 
             private static byte[] PlaceholderIcon
             {
