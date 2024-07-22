@@ -1,12 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MelonLoader.Installer.App.MainPage"
-             xmlns:local="clr-namespace:MelonLoader.Installer.App"
+             x:Class="MelonLoader.Installer.App.Views.MainPage"
+             xmlns:local="clr-namespace:MelonLoader.Installer.App.Views"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
-    <ContentPage.BindingContext>
-        <local:MainPageViewModel />
-    </ContentPage.BindingContext>
     <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
@@ -17,9 +14,9 @@
               SelectionMode="None"
               SeparatorVisibility="None">
         <ListView.Header>
-            <Grid Padding="25"
+            <Grid x:Name="HeaderGrid" Padding="25"
                   RowSpacing="10"
-                  RowDefinitions="2*,*">
+                  RowDefinitions="2*,2*,2*,*">
                 <Label Grid.Row="0"
                        Text="LemonLoader"
                        FontSize="Title"
@@ -29,6 +26,13 @@
                        Text="Select an app to patch."
                        FontSize="Caption"
                        FontAttributes="Italic"
+                       Padding="5,0,0,0"
+                       TextColor="{StaticResource ExtraLight}" />
+
+                <Label x:Name="LoadingLabel" Grid.Row="3"
+                       Text="Apps are loading, please wait."
+                       FontSize="Small"
+                       FontAttributes="Bold"
                        Padding="5,0,0,0"
                        TextColor="{StaticResource ExtraLight}" />
             </Grid>
