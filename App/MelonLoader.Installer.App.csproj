@@ -32,6 +32,7 @@
 	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
 	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
 	  <AndroidKeyStore>False</AndroidKeyStore>
+	  <SupportedOSPlatformVersion>27.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
@@ -44,6 +45,7 @@
 	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
 	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
 	  <ApplicationDisplayVersion>0.0.1</ApplicationDisplayVersion>
+	  <SupportedOSPlatformVersion>27.0</SupportedOSPlatformVersion>
 	  <AndroidKeyStore>False</AndroidKeyStore>
 	</PropertyGroup>
 
