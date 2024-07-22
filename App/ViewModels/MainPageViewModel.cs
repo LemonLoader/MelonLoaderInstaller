@@ -2,7 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
-namespace MelonLoader.Installer.App;
+namespace MelonLoader.Installer.App.ViewModels;
+
 public class MainPageViewModel : BindableObject
 {
     public ObservableCollection<UnityApplicationFinder.Data> Items { get; protected set; } = [];
@@ -13,7 +14,7 @@ public class MainPageViewModel : BindableObject
     {
         ItemTappedCommand = new Command<UnityApplicationFinder.Data>(OnItemTapped);
 
-        // todo: put this on a separate thread to load the ui asap
+        // todo: should probably move this to a loading screen or something that can show progress
         var apps = UnityApplicationFinder.Find();
         foreach (var app in apps)
         {

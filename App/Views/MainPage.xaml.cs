@@ -1,6 +1,6 @@
 ﻿using MelonLoader.Installer.App.Utils;
 
-namespace MelonLoader.Installer.App;
+namespace MelonLoader.Installer.App.Views;
 
 public partial class MainPage : ContentPage
 {
