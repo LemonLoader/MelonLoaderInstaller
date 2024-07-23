@@ -9,7 +9,7 @@ namespace MelonLoader.Installer.App.Utils
 {
     public static class UnityApplicationFinder
     {
-        public static IEnumerable<Data> Find()
+        public static IEnumerable<Data> Find(CancellationToken token = default)
         {
 #if ANDROID
             PackageManager pm = Platform.CurrentActivity!.PackageManager ?? throw new Exception("PackageManager is null, how does this happen?");
@@ -17,6 +17,9 @@ namespace MelonLoader.Installer.App.Utils
 
             foreach (ApplicationInfo package in allPackages)
             {
+                if (token.IsCancellationRequested)
+                    yield break;
+
                 if (package.NativeLibraryDir == null)
                     continue;
 

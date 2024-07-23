@@ -18,13 +18,13 @@ public static class AndroidPermissionHandler
     {
         // these perms don't work, hopefully they aren't too important
         return true;
-#if ANDROID
+/*#if ANDROID
         bool canRead = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
         bool canWrite = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.WriteExternalStorage) == Permission.Granted;
         return canRead && canWrite;
 #else
         return true;
-#endif
+#endif*/
     }
 
     public static bool HasAccessToAllFiles()

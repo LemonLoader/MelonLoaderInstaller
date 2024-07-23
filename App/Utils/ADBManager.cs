@@ -5,6 +5,8 @@ namespace MelonLoader.Installer.App.Utils;
 
 internal static class ADBManager
 {
+    public static Action? OnPrimaryDeviceChanged { get; set; } = null;
+
     private static AdbClient? _adbClient;
     private static DeviceData? _deviceData;
 
@@ -15,7 +17,7 @@ internal static class ADBManager
         if (!AdbServer.Instance.GetStatus().IsRunning)
         {
             AdbServer server = new();
-            StartServerResult result = server.StartServer(@"adb.exe", false); // TODO: add adb exe to build
+            StartServerResult result = server.StartServer(Path.Combine(Directory.GetCurrentDirectory(), "Resources", "platform-tools", "adb.exe"), false);
             if (result != StartServerResult.Started)
                 System.Diagnostics.Debug.WriteLine("Unable to start ADB server.");
         }
@@ -27,6 +29,7 @@ internal static class ADBManager
     public static void SetPrimaryDevice(DeviceData data)
     {
         _deviceData = data;
+        OnPrimaryDeviceChanged?.Invoke();
     }
 
     public static IEnumerable<DeviceData> GetDevices()

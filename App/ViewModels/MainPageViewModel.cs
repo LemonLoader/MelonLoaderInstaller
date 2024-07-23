@@ -14,21 +14,46 @@ public class MainPageViewModel : BindableObject
 
     public Action? OnAppAddingComplete { get; set; }
 
+    private CancellationTokenSource? _appSearchTokenSource = null;
+    private Thread? _appSearchThread = null;
+
     public MainPageViewModel()
     {
-        // TODO: hook into adbmanager to know when a new device is selected so getting apps can be redone
         ItemTappedCommand = new Command<UnityApplicationFinder.Data>(OnItemTapped);
         OnAppAddingComplete = null;
 
-        new Thread(AddAllApps).Start();
+        ADBManager.OnPrimaryDeviceChanged += StartNewAppSearchThread;
+        StartNewAppSearchThread();
     }
 
-    private void AddAllApps()
+    private void StartNewAppSearchThread()
+    {
+        _appSearchTokenSource?.Cancel();
+        _appSearchThread?.Join();
+
+        _appSearchTokenSource = new();
+        _appSearchThread = new(() => AddAllApps(_appSearchTokenSource.Token));
+        _appSearchThread.Start();
+    }
+
+    private void AddAllApps(CancellationToken token = default)
     {
         Items.Clear();
-        foreach (var app in UnityApplicationFinder.Find())
+        foreach (var app in UnityApplicationFinder.Find(token))
         {
+            if (token.IsCancellationRequested)
+            {
+                Items.Clear();
+                return;
+            }
+
             Items.AddOnUI(app);
+        }
+
+        if (token.IsCancellationRequested)
+        {
+            Items.Clear();
+            return;
         }
 
         Application.Current!.Dispatcher.Dispatch(() => OnAppAddingComplete?.Invoke());
