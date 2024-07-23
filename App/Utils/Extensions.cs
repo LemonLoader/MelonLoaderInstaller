@@ -2,6 +2,11 @@
 
 internal static class Extensions
 {
+    public static void ClearOnUI<T>(this ICollection<T> collection)
+    {
+        Application.Current!.Dispatcher.Dispatch(() => collection.Clear());
+    }
+
     public static void AddOnUI<T>(this ICollection<T> collection, T item)
     {
         Application.Current!.Dispatcher.Dispatch(() => collection.Add(item));

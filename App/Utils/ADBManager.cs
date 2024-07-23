@@ -1,5 +1,6 @@
 ﻿using AdvancedSharpAdbClient.Models;
 using AdvancedSharpAdbClient;
+using AdvancedSharpAdbClient.Receivers;
 
 namespace MelonLoader.Installer.App.Utils;
 
@@ -38,5 +39,16 @@ internal static class ADBManager
             Initialize();
 
         return _adbClient?.GetDevices() ?? Enumerable.Empty<DeviceData>();
+    }
+
+    public static bool IsArm64(DeviceData deviceData)
+    {
+        ConsoleOutputReceiver receiver = new();
+        _adbClient?.ExecuteRemoteCommand("getprop ro.product.cpu.abilist64", deviceData, receiver);
+        string output = receiver.ToString();
+        if (output.Contains("arm64-v8a"))
+            return true;
+
+        return false;
     }
 }

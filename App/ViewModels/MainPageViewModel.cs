@@ -38,12 +38,12 @@ public class MainPageViewModel : BindableObject
 
     private void AddAllApps(CancellationToken token = default)
     {
-        Items.Clear();
+        Items.ClearOnUI();
         foreach (var app in UnityApplicationFinder.Find(token))
         {
             if (token.IsCancellationRequested)
             {
-                Items.Clear();
+                Items.ClearOnUI();
                 return;
             }
 
@@ -52,7 +52,7 @@ public class MainPageViewModel : BindableObject
 
         if (token.IsCancellationRequested)
         {
-            Items.Clear();
+            Items.ClearOnUI();
             return;
         }
 
