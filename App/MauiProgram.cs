@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
 using MelonLoader.Installer.App.Views;
+using MauiIcons.SegoeFluent;
 
 namespace MelonLoader.Installer.App;
 
@@ -13,6 +14,7 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
 			.UseMauiCommunityToolkitMarkup()
+			.UseSegoeFluentMauiIcons()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("Inter-Regular.ttf", "InterRegular");
@@ -21,6 +23,7 @@ public static class MauiProgram
 
         Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
         Routing.RegisterRoute(nameof(PermissionSetupPage), typeof(PermissionSetupPage));
+        Routing.RegisterRoute(nameof(SelectADBDevicePage), typeof(SelectADBDevicePage));
 
         return builder.Build();
 	}

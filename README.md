@@ -4,6 +4,7 @@ Installs MelonLoader onto APKs
 # Redesign Licensing/Credits
 - [ReVanced Manager](https://github.com/ReVanced/revanced-manager) for design inspiration
 - [Inter](https://fonts.google.com/specimen/Inter), under the [Open Font License](https://openfontlicense.org/)
+- [ADB/Platform Tools](https://developer.android.com/tools/releases/platform-tools) and [AAPT2](https://developer.android.com/tools/aapt2), under the [Android Software Development Kit License Agreement](https://developer.android.com/tools/releases/platform-tools)
 
 # Licensing/Credits
 - [SAI](https://github.com/Aefyr/SAI), under the [GPL-3.0 license](https://github.com/Aefyr/SAI/blob/master/LICENSE)

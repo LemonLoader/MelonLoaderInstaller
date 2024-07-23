@@ -86,6 +86,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="3.0.0" />
+		<PackageReference Include="AdvancedSharpAdbClient" Version="3.3.12" />
 		<PackageReference Include="AssetRipper.Primitives" Version="3.1.2" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.2" />
 		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="4.0.0" />
@@ -95,6 +97,9 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="Views\PermissionSetupPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\SelectADBDevicePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

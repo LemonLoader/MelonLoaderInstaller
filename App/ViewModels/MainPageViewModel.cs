@@ -16,6 +16,7 @@ public class MainPageViewModel : BindableObject
 
     public MainPageViewModel()
     {
+        // TODO: hook into adbmanager to know when a new device is selected so getting apps can be redone
         ItemTappedCommand = new Command<UnityApplicationFinder.Data>(OnItemTapped);
         OnAppAddingComplete = null;
 
@@ -24,6 +25,7 @@ public class MainPageViewModel : BindableObject
 
     private void AddAllApps()
     {
+        Items.Clear();
         foreach (var app in UnityApplicationFinder.Find())
         {
             Items.AddOnUI(app);

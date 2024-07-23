@@ -12,6 +12,10 @@ public partial class MainPage : ContentPage
         if (!AndroidPermissionHandler.HaveRequired())
             Shell.Current.GoToAsync(nameof(PermissionSetupPage));
 
+#if WINDOWS
+        Shell.Current.GoToAsync(nameof(SelectADBDevicePage));
+#endif
+
         MainPageViewModel viewModel = new();
         BindingContext = viewModel;
 
