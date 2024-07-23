@@ -72,34 +72,34 @@ namespace MelonLoader.Installer.App.Utils
                 yield return new Data(name, package.PackageName!, status, iconData);
             }
 #else
-                List<Data> unityApps = [
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unsupported),
-                    new("Test App", "com.veryreal.app", Status.Patched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unsupported),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Patched),
-                    new("Test App", "com.veryreal.app", Status.Patched),
-                    new("Test App", "com.veryreal.app", Status.Unsupported),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unsupported),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Patched),
-                    new("Test App", "com.veryreal.app", Status.Patched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unpatched),
-                    new("Test App", "com.veryreal.app", Status.Unsupported),
-                    new("Test App", "com.veryreal.app", Status.Unpatched)];
+            // TODO: this is absurdly slow; need a better solution
 
-                foreach (var app in unityApps)
-                    yield return app;
+            var packages = ADBManager.GetPackages();
+            foreach (var package in packages)
+            {
+                string baseApkPath = ADBManager.GetPackageAPKPaths(package)[0];
+                if (!baseApkPath.StartsWith("/data/app/")) // probably not an app we want to mess with
+                    continue;
+
+                string name = ADBManager.GetApplicationLabel(baseApkPath);
+                if (string.IsNullOrWhiteSpace(name))
+                    continue; // also probably not an app we want to mess with
+
+                Status status = Status.Unpatched;
+
+                string[] libs = ADBManager.GetNativeLibraries(package, out _);
+                if (libs.Length <= 0)
+                    status = Status.Unsupported;
+
+                bool isUnity = libs.Any(f => f.Contains("libunity.so")) && libs.Any(f => f.Contains("libil2cpp.so"));
+                if (!isUnity)
+                    continue;
+
+                if (libs.Any(f => f.Contains("libBootstrap.so")) && libs.Any(f => f.Contains("libdobby.so")))
+                    status = Status.Patched;
+
+                yield return new(name, package, status);
+            }
 #endif
         }
 

@@ -21,8 +21,15 @@ public partial class MainPage : ContentPage
 
         viewModel.OnAppAddingComplete += () =>
         {
-            HeaderGrid.Remove(LoadingLabel);
-            HeaderGrid.RowDefinitions = [new(new(2, GridUnitType.Star)), new(new(1, GridUnitType.Star))]; // "2*, *"
+            LoadingLabel.IsEnabled = false;
+            HeaderGrid.RowDefinitions = [new(new(2, GridUnitType.Star)), new(GridLength.Star)]; // "2*, *"
+        };
+
+        viewModel.OnAppAddingReset += () =>
+        {
+            LoadingLabel.IsEnabled = true;
+            var twoStar = new RowDefinition(new(2, GridUnitType.Star));
+            HeaderGrid.RowDefinitions = [twoStar, twoStar, twoStar, new(GridLength.Star)]; // "2*, 2*, 2*, *"
         };
     }
 }

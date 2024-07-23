@@ -13,6 +13,7 @@ public class MainPageViewModel : BindableObject
     public ICommand ItemTappedCommand { get; }
 
     public Action? OnAppAddingComplete { get; set; }
+    public Action? OnAppAddingReset { get; set; }
 
     private CancellationTokenSource? _appSearchTokenSource = null;
     private Thread? _appSearchThread = null;
@@ -21,6 +22,7 @@ public class MainPageViewModel : BindableObject
     {
         ItemTappedCommand = new Command<UnityApplicationFinder.Data>(OnItemTapped);
         OnAppAddingComplete = null;
+        OnAppAddingReset = null;
 
         ADBManager.OnPrimaryDeviceChanged += StartNewAppSearchThread;
         StartNewAppSearchThread();
@@ -38,6 +40,8 @@ public class MainPageViewModel : BindableObject
 
     private void AddAllApps(CancellationToken token = default)
     {
+        Application.Current!.Dispatcher.Dispatch(() => OnAppAddingReset?.Invoke());
+
         Items.ClearOnUI();
         foreach (var app in UnityApplicationFinder.Find(token))
         {
