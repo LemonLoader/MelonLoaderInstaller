@@ -104,4 +104,8 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'">
+	  <Exec Command="XCOPY &quot;$(SolutionDir)Resources\WindowsResources&quot; &quot;$(TargetDir)\Resources\&quot; /S /Y" />
+	</Target>
+
 </Project>
