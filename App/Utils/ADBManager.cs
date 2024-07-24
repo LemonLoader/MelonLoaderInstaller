@@ -84,6 +84,7 @@ internal static partial class ADBManager
     }
 
     const string LISTING_TOOL_SPLIT = "-----------------------------------";
+    const string LISTING_TOOL_DNS = "DEVICE_NOT_SUPPORTED";
     public static List<UnityApplicationFinder.Data> GetAppDatasFromListingTool()
     {
         if (_deviceData == null || _adbClient == null)
@@ -94,6 +95,9 @@ internal static partial class ADBManager
 
         LineReceiver receiver = new();
         _adbClient?.ExecuteRemoteCommand("/system/bin/app_process -Djava.class.path=\"/data/local/tmp/melonapplisting.dex\" /system/bin --nice-name=NativeAppListing com.melonloader.nativeapplisting.Core", _deviceData.Value, receiver);
+
+        if (receiver.Listings.Count <= 0 || receiver.Listings[0] == LISTING_TOOL_DNS || receiver.Listings[0] != LISTING_TOOL_SPLIT)
+            return [];
 
         List<UnityApplicationFinder.Data> datas = [];
         for (int i = 0; i < receiver.Listings.Count; i++)
