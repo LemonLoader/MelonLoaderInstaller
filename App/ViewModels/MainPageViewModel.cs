@@ -84,7 +84,7 @@ public class MainPageViewModel : BindableObject
             if (result != null)
             {
                 System.Diagnostics.Debug.WriteLine(result.FullPath);
-                // TODO: app view page
+                // TODO: app view page apk support
             }
         }
         catch (Exception ex)
@@ -95,8 +95,6 @@ public class MainPageViewModel : BindableObject
 
     private async void OnItemTapped(UnityApplicationFinder.Data item)
     {
-        System.Diagnostics.Debug.WriteLine(item.AppName);
-
         if (item.Status == UnityApplicationFinder.Status.Unsupported)
         {
             var toast = Toast.Make("This app is unsupported.", CommunityToolkit.Maui.Core.ToastDuration.Long);
@@ -113,6 +111,7 @@ public class MainPageViewModel : BindableObject
             return;
         }
 
-        // TODO: app view page
+        PatchAppPageViewModel.CurrentAppData = item;
+        Shell.Current.GoToTabOnFirst(nameof(PatchAppPage));
     }
 }

@@ -74,15 +74,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiImage Remove="Resources\Images\test_app_icon.png" />
+	  <MauiImage Remove="Resources\Images\placeholder_icon.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\test_app_icon.png" />
+	  <None Remove="Resources\Images\placeholder_icon.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\Images\test_app_icon.png" />
+	  <EmbeddedResource Include="Resources\Images\placeholder_icon.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -97,6 +97,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Views\PatchAppPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\PermissionSetupPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

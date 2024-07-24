@@ -128,7 +128,7 @@ namespace MelonLoader.Installer.App.Utils
                 {
                     if (_placeholderIcon == null)
                     {
-                        using var stream = Assembly.GetCallingAssembly().GetManifestResourceStream("MelonLoader.Installer.App.Resources.Images.test_app_icon.png");
+                        using var stream = Assembly.GetCallingAssembly().GetManifestResourceStream("MelonLoader.Installer.App.Resources.Images.placeholder_icon.png");
                         using MemoryStream memStr = new();
 
                         stream!.CopyTo(memStr);
