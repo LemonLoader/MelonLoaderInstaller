@@ -1,9 +1,7 @@
 ﻿using AdvancedSharpAdbClient.Models;
 using AdvancedSharpAdbClient;
 using AdvancedSharpAdbClient.Receivers;
-using System.Text.RegularExpressions;
 using System.Reflection;
-using AdvancedSharpAdbClient.Exceptions;
 
 namespace MelonLoader.Installer.App.Utils;
 
@@ -15,7 +13,7 @@ internal static partial class ADBManager
     private static DeviceData? _deviceData;
 
     private static bool _initialized;
-    private static bool _aaptInstalled;
+    private static bool _listingToolInstalled;
 
     private static string _baseDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
 
@@ -40,30 +38,8 @@ internal static partial class ADBManager
     public static void SetPrimaryDevice(DeviceData data)
     {
         _deviceData = data;
-        _aaptInstalled = false;
+        _listingToolInstalled = false;
         OnPrimaryDeviceChanged?.Invoke();
-    }
-
-    public static void InstallAapt2()
-    {
-        if (_deviceData == null || _adbClient == null)
-            return;
-
-        string aaptPath = Path.Combine(_baseDir, "Resources", "lemon-aapt2-arm64");
-        using SyncService service = new(_deviceData.Value);
-        using FileStream stream = File.OpenRead(aaptPath);
-        service.Push(stream, "/data/local/tmp/lemon-aapt2-arm64", UnixFileStatus.AccessPermissions, DateTimeOffset.Now, null);
-        _aaptInstalled = true;
-    }
-
-    public static void UninstallAapt2()
-    {
-        if (_deviceData == null || _adbClient == null)
-            return;
-
-        string path = "/data/local/tmp/lemon-aapt2-arm64";
-        _adbClient.ExecuteRemoteCommand($"rm {path}", _deviceData.Value);
-        _aaptInstalled = false;
     }
 
     public static IEnumerable<DeviceData> GetDevices()
@@ -85,92 +61,84 @@ internal static partial class ADBManager
         return false;
     }
 
-    public static string[] GetPackages()
+    public static void InstallAppListingTool()
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        string aaptPath = Path.Combine(_baseDir, "Resources", "melonapplisting.dex");
+        using SyncService service = new(_deviceData.Value);
+        using FileStream stream = File.OpenRead(aaptPath);
+        service.Push(stream, "/data/local/tmp/melonapplisting.dex", UnixFileStatus.AccessPermissions, DateTimeOffset.Now, null);
+        _listingToolInstalled = true;
+    }
+
+    public static void UninstallAppListingTool()
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        string path = "/data/local/tmp/melonapplisting.dex";
+        _adbClient.ExecuteRemoteCommand($"rm {path}", _deviceData.Value);
+        _listingToolInstalled = false;
+    }
+
+    const string LISTING_TOOL_SPLIT = "-----------------------------------";
+    public static List<UnityApplicationFinder.Data> GetAppDatasFromListingTool()
     {
         if (_deviceData == null || _adbClient == null)
             return [];
 
-        LineReceiver receiver = new(true);
-        _adbClient.ExecuteRemoteCommand("cmd package list packages -e", _deviceData.Value, receiver);
-        return [.. receiver.Listings];
-    }
+        if (!_listingToolInstalled)
+            InstallAppListingTool();
 
-    public static string[] GetPackageAPKPaths(string package)
-    {
-        if (_deviceData == null || _adbClient == null)
-            return [];
+        LineReceiver receiver = new();
+        _adbClient?.ExecuteRemoteCommand("/system/bin/app_process -Djava.class.path=\"/data/local/tmp/melonapplisting.dex\" /system/bin --nice-name=NativeAppListing com.melonloader.nativeapplisting.Core", _deviceData.Value, receiver);
 
-        LineReceiver receiver = new(true);
-        _adbClient.ExecuteRemoteCommand("pm path " + package, _deviceData.Value, receiver);
-        return [.. receiver.Listings];
-    }
-
-    public static string GetApplicationLabel(string apkPath)
-    {
-        if (_deviceData == null || _adbClient == null)
-            return "";
-
-        if (!_aaptInstalled)
-            InstallAapt2();
-
-        ConsoleOutputReceiver receiver = new();
-        _adbClient?.ExecuteRemoteCommand($"/data/local/tmp/aapt2-arm64-v8a dump badging {apkPath} | grep application-label", _deviceData.Value, receiver);
-        string output = receiver.ToString();
-        string name = MatchApplicationLabel().Match(output).Groups[1].Value;
-
-        return name;
-    }
-
-    public static string[] GetNativeLibraries(string package, out string nativeLibPath)
-    {
-        if (_deviceData == null || _adbClient == null)
+        List<UnityApplicationFinder.Data> datas = [];
+        for (int i = 0; i < receiver.Listings.Count; i++)
         {
-            nativeLibPath = "";
-            return [];
+            if (receiver.Listings[i] == LISTING_TOOL_SPLIT)
+            {
+                i++; // go to AppName
+                string appName = receiver.Listings[i].ToString();
+
+                i++; // go to PackageName
+                string packageName = receiver.Listings[i].ToString();
+
+                i++; // go to Status
+                UnityApplicationFinder.Status status = Enum.Parse<UnityApplicationFinder.Status>(receiver.Listings[i], true);
+
+                i++; // go to RawIconData
+                byte[] iconData = Convert.FromBase64String(receiver.Listings[i]);
+                
+                i++; // rest are apk paths
+                List<string> apkPaths = [];
+                while (i < receiver.Listings.Count && receiver.Listings[i] != LISTING_TOOL_SPLIT)
+                {
+                    apkPaths.Add(receiver.Listings[i]);
+                    i++;
+                }
+
+                i--; // go back so this process can run again
+
+                UnityApplicationFinder.Data data = new(appName, packageName, status, iconData);
+                datas.Add(data);
+            }
         }
 
-        ConsoleOutputReceiver receiver = new();
-        _adbClient?.ExecuteRemoteCommand($"dumpsys package {package} | grep legacyNativeLibraryDir=", _deviceData.Value, receiver);
-        string output = receiver.ToString();
+        UninstallAppListingTool();
 
-        nativeLibPath = MatchNativeLibraryDir().Match(output).Groups[1].Value + "/arm64";
-
-        LineReceiver lineReceiver = new();
-        try
-        {
-            _adbClient?.ExecuteRemoteCommand($"ls {nativeLibPath}", _deviceData.Value, receiver);
-        }
-        catch (ShellCommandUnresponsiveException)
-        {
-            return [];
-        }
-
-        if (lineReceiver.Listings.Count <= 0 || lineReceiver.Listings[0].Contains("No such file or directory"))
-            return [];
-
-        return lineReceiver.Listings.ToArray();
+        return datas;
     }
 
-    private class LineReceiver(bool trimPackage = false) : MultiLineReceiver
+    private class LineReceiver : MultiLineReceiver
     {
         public List<string> Listings = [];
 
-        private bool _trimPackage = trimPackage;
-
         protected override void ProcessNewLines(IEnumerable<string> lines)
         {
-            foreach (var line in lines)
-            {
-                if (_trimPackage && line.StartsWith("package:"))
-                    Listings.Add(line[8..]);
-                else
-                    Listings.Add(line);
-            }
+            Listings.AddRange(lines);
         }
     }
-
-    [GeneratedRegex(@"^application-label:'([^']*)'")]
-    private static partial Regex MatchApplicationLabel();
-    [GeneratedRegex(@"legacyNativeLibraryDir=([^\s]*)")]
-    private static partial Regex MatchNativeLibraryDir();
 }

@@ -21,13 +21,13 @@ public partial class MainPage : ContentPage
 
         viewModel.OnAppAddingComplete += () =>
         {
-            LoadingLabel.IsEnabled = false;
+            LoadingLabel.IsVisible = false;
             HeaderGrid.RowDefinitions = [new(new(2, GridUnitType.Star)), new(GridLength.Star)]; // "2*, *"
         };
 
         viewModel.OnAppAddingReset += () =>
         {
-            LoadingLabel.IsEnabled = true;
+            LoadingLabel.IsVisible = true;
             var twoStar = new RowDefinition(new(2, GridUnitType.Star));
             HeaderGrid.RowDefinitions = [twoStar, twoStar, twoStar, new(GridLength.Star)]; // "2*, 2*, 2*, *"
         };

@@ -72,33 +72,10 @@ namespace MelonLoader.Installer.App.Utils
                 yield return new Data(name, package.PackageName!, status, iconData);
             }
 #else
-            // TODO: this is absurdly slow; need a better solution
-
-            var packages = ADBManager.GetPackages();
-            foreach (var package in packages)
+            List<Data> datas = ADBManager.GetAppDatasFromListingTool();
+            foreach (Data data in datas)
             {
-                string baseApkPath = ADBManager.GetPackageAPKPaths(package)[0];
-                if (!baseApkPath.StartsWith("/data/app/")) // probably not an app we want to mess with
-                    continue;
-
-                string name = ADBManager.GetApplicationLabel(baseApkPath);
-                if (string.IsNullOrWhiteSpace(name))
-                    continue; // also probably not an app we want to mess with
-
-                Status status = Status.Unpatched;
-
-                string[] libs = ADBManager.GetNativeLibraries(package, out _);
-                if (libs.Length <= 0)
-                    status = Status.Unsupported;
-
-                bool isUnity = libs.Any(f => f.Contains("libunity.so")) && libs.Any(f => f.Contains("libil2cpp.so"));
-                if (!isUnity)
-                    continue;
-
-                if (libs.Any(f => f.Contains("libBootstrap.so")) && libs.Any(f => f.Contains("libdobby.so")))
-                    status = Status.Patched;
-
-                yield return new(name, package, status);
+                yield return data;
             }
 #endif
         }
