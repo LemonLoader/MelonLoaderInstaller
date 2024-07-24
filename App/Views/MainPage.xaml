@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MelonLoader.Installer.App.Views.MainPage"
              xmlns:local="clr-namespace:MelonLoader.Installer.App.Views"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons">
     <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
@@ -14,9 +15,11 @@
               SelectionMode="None"
               SeparatorVisibility="None">
         <ListView.Header>
-            <Grid x:Name="HeaderGrid" Padding="25"
+            <Grid x:Name="HeaderGrid"
+                  Padding="25"
                   RowSpacing="10"
-                  RowDefinitions="2*,2*,2*,*">
+                  RowDefinitions="2*,2*,2*,*"
+                  ColumnDefinitions="2*,*">
                 <Label Grid.Row="0"
                        Text="LemonLoader"
                        FontSize="Title"
@@ -29,12 +32,20 @@
                        Padding="5,0,0,0"
                        TextColor="{StaticResource ExtraLight}" />
 
-                <Label x:Name="LoadingLabel" Grid.Row="3"
+                <Label x:Name="LoadingLabel"
+                       Grid.Row="3"
                        Text="Apps are loading, please wait."
                        FontSize="Small"
                        FontAttributes="Bold"
                        Padding="5,0,0,0"
                        TextColor="{StaticResource ExtraLight}" />
+                <Button Grid.Row="0"
+                        Grid.Column="1"
+                        HorizontalOptions="EndAndExpand"
+                        Text="{mi:SegoeFluent SDCard, IconSize=Medium, IconColor={StaticResource Light}}"
+                        BorderWidth="0"
+                        BorderColor="Transparent"
+                        Command="{Binding SelectAPKButtonCommand}" />
             </Grid>
         </ListView.Header>
         <ListView.ItemTemplate>
@@ -67,7 +78,8 @@
                                        HeightRequest="60"
                                        WidthRequest="60" />
 
-                                <Label Grid.Column="1" LineBreakMode="HeadTruncation">
+                                <Label Grid.Column="1"
+                                       LineBreakMode="HeadTruncation">
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="{Binding AppName}"
@@ -78,7 +90,6 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
-
 
                                 <Label Grid.Row="1"
                                        Grid.Column="1"

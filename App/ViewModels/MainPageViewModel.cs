@@ -11,6 +11,7 @@ public class MainPageViewModel : BindableObject
     public ObservableCollection<UnityApplicationFinder.Data> Items { get; protected set; } = [];
 
     public ICommand ItemTappedCommand { get; }
+    public ICommand SelectAPKButtonCommand { get; }
 
     public Action? OnAppAddingComplete { get; set; }
     public Action? OnAppAddingReset { get; set; }
@@ -21,6 +22,7 @@ public class MainPageViewModel : BindableObject
     public MainPageViewModel()
     {
         ItemTappedCommand = new Command<UnityApplicationFinder.Data>(OnItemTapped);
+        SelectAPKButtonCommand = new Command(OnTapSelectAPKButton);
         OnAppAddingComplete = null;
         OnAppAddingReset = null;
 
@@ -66,6 +68,29 @@ public class MainPageViewModel : BindableObject
         }
 
         Application.Current!.Dispatcher.Dispatch(() => OnAppAddingComplete?.Invoke());
+    }
+
+    private async void OnTapSelectAPKButton()
+    {
+        FilePickerFileType apkType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+        {
+            { DevicePlatform.Android, [ "application/vnd.android.package-archive" ] },
+            { DevicePlatform.WinUI, [ ".apk" ] }
+        });
+
+        try
+        {
+            var result = await FilePicker.Default.PickAsync(new PickOptions() { FileTypes = apkType });
+            if (result != null)
+            {
+                System.Diagnostics.Debug.WriteLine(result.FullPath);
+                // TODO: app view page
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+        }
     }
 
     private async void OnItemTapped(UnityApplicationFinder.Data item)
