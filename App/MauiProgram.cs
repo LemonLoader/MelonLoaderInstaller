@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Markup;
 using MelonLoader.Installer.App.Views;
 using MauiIcons.SegoeFluent;
+using MauiIcons.Fluent;
 
 namespace MelonLoader.Installer.App;
 
@@ -15,6 +16,7 @@ public static class MauiProgram
 			.UseMauiCommunityToolkit()
 			.UseMauiCommunityToolkitMarkup()
 			.UseSegoeFluentMauiIcons()
+            .UseFluentMauiIcons()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("Inter-Regular.ttf", "InterRegular");

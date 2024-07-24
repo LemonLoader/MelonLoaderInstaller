@@ -1,4 +1,5 @@
 ﻿using MelonLoader.Installer.App.Utils;
+using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -43,9 +44,9 @@ public class PermissionSetupPageViewModel : BindableObject
         item.Request?.Invoke();
     }
 
-    private async void OnContinueTapped()
+    private void OnContinueTapped()
     {
-        await Shell.Current.GoToAsync("..");
+        Shell.Current.GoToTabOnFirst(nameof(MainPage));
     }
 
     public class RequiredPermission

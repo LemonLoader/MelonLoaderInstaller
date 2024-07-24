@@ -24,7 +24,12 @@ public class MainPageViewModel : BindableObject
         OnAppAddingComplete = null;
         OnAppAddingReset = null;
 
-        ADBManager.OnPrimaryDeviceChanged += StartNewAppSearchThread;
+        try
+        {
+            ADBManager.OnPrimaryDeviceChanged += StartNewAppSearchThread;
+        }
+        catch { } // this throws a null-ref on Android for some reason
+
         StartNewAppSearchThread();
     }
 
@@ -79,7 +84,7 @@ public class MainPageViewModel : BindableObject
             var toast = Toast.Make("Permissions are not setup.", CommunityToolkit.Maui.Core.ToastDuration.Long);
             await toast.Show();
 
-            await Shell.Current.GoToAsync(nameof(PermissionSetupPage));
+            Shell.Current.GoToTabOnFirst(nameof(PermissionSetupPage));
             return;
         }
 

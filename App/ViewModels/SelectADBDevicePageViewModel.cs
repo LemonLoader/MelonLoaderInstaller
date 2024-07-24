@@ -1,6 +1,7 @@
 ﻿using AdvancedSharpAdbClient.Models;
 using CommunityToolkit.Maui.Alerts;
 using MelonLoader.Installer.App.Utils;
+using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -40,7 +41,7 @@ public class SelectADBDevicePageViewModel : BindableObject
         }
 
         ADBManager.SetPrimaryDevice(item);
-        await Shell.Current.GoToAsync("..");
+        Shell.Current.GoToTabOnFirst(nameof(MainPage));
     }
 
     private void RefreshDevices()
@@ -51,8 +52,8 @@ public class SelectADBDevicePageViewModel : BindableObject
             Devices.Add(device);
     }
 
-    private async void GoBackToMain()
+    private void GoBackToMain()
     {
-        await Shell.Current.GoToAsync("..");
+        Shell.Current.GoToTabOnFirst(nameof(MainPage));
     }
 }

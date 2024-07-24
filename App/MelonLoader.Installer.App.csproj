@@ -86,6 +86,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Fluent" Version="3.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="3.0.0" />
 		<PackageReference Include="AdvancedSharpAdbClient" Version="3.3.12" />
 		<PackageReference Include="AssetRipper.Primitives" Version="3.1.2" />
