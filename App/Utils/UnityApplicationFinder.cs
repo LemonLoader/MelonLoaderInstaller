@@ -9,6 +9,8 @@ namespace MelonLoader.Installer.App.Utils
 {
     public static class UnityApplicationFinder
     {
+        private static Dictionary<string, Data> _cachedDatas = [];
+
         public static IEnumerable<Data> Find(CancellationToken token = default)
         {
 #if ANDROID
@@ -69,28 +71,30 @@ namespace MelonLoader.Installer.App.Utils
                     bitmap.Recycle();
                 }
 
-                yield return new Data(name, package.PackageName!, status, iconData);
+                List<string> apks = [ package.PublicSourceDir! ];
+                if (package.SplitPublicSourceDirs != null)
+                    apks.AddRange(package.SplitPublicSourceDirs);
+
+                Data data = new(name, package.PackageName!, status, [.. apks], iconData);
+                yield return data;
+                _cachedDatas.Add(package.PackageName!, data);
             }
 #else
             List<Data> datas = ADBManager.GetAppDatasFromListingTool();
             foreach (Data data in datas)
             {
                 yield return data;
+                _cachedDatas.Add(data.PackageName, data);
             }
 #endif
         }
 
-        public static Data FromPackageName(string packageName)
+        public static Data? FromPackageName(string packageName)
         {
-#if ANDROID
-            PackageManager pm = Platform.CurrentActivity!.PackageManager ?? throw new Exception("PackageManager is null, how does this happen?");
-            ApplicationInfo packageInfo = pm.GetApplicationInfo(packageName, PackageInfoFlags.MetaData);
-            string name = pm.GetApplicationLabel(packageInfo);
-            Status status = GetStatusFromInfo(packageInfo);
-            return new Data(name, packageInfo.PackageName!, status);
-#else
-            return new Data("", "", Status.Unpatched);
-#endif
+            if (_cachedDatas.TryGetValue(packageName, out Data? data) && data != null)
+                return data;
+
+            return null;
         }
 
 #if ANDROID
@@ -114,6 +118,7 @@ namespace MelonLoader.Installer.App.Utils
             public string AppName { get; private set; }
             public string PackageName { get; private set; }
             public Status Status { get; private set; }
+            public string[] APKPaths { get; private set; }
 
             public string StatusString => Status == Status.Unpatched ? "" : " • " + Status.ToString().ToUpper();
 
@@ -136,11 +141,12 @@ namespace MelonLoader.Installer.App.Utils
             }
             private static byte[]? _placeholderIcon;
 
-            public Data(string appName, string packageName, Status status, byte[]? icon = null)
+            public Data(string appName, string packageName, Status status, string[] apkPaths, byte[]? icon = null)
             {
                 AppName = appName;
                 PackageName = packageName;
                 Status = status;
+                APKPaths = apkPaths;
                 RawIconData = icon ?? PlaceholderIcon;
             }
         }
