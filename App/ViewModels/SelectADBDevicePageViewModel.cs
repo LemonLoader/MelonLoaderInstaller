@@ -28,15 +28,13 @@ public class SelectADBDevicePageViewModel : BindableObject
     {
         if (item.State is DeviceState.NoPermissions or DeviceState.Unknown or DeviceState.Offline or DeviceState.Unauthorized)
         {
-            var toast = Toast.Make("Selected device is unavailable. Make sure you gave permissions on your device.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-            await toast.Show();
+            await PopupHelper.Toast("Selected device is unavailable. Make sure you gave permissions on your device.");
             return;
         }
 
         if (!ADBManager.IsArm64(item))
         {
-            var toast = Toast.Make("Selected device does not support ARM64, which is required for the loader to function.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-            await toast.Show();
+            await PopupHelper.Toast("Selected device does not support ARM64, which is required for the loader to function.");
             return;
         }
 

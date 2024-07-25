@@ -16,17 +16,15 @@
         <viewmodels:PermissionSetupPageViewModel />
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout>
-        <Grid Padding="25"
-              RowSpacing="10"
-              RowDefinitions="2*">
-            <Label Grid.Row="0"
-                   Text="Patching"
-                   FontSize="Title"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource Light}" />
-        </Grid>
-        <Border x:Name="AppDisplay"
+    <Grid RowDefinitions="Auto, Auto, Auto, *">
+        <Label Grid.Row="0"
+               Text="Patching"
+               FontSize="Title"
+               FontAttributes="Bold"
+               TextColor="{StaticResource Light}"
+               Padding="25" />
+        <Border Grid.Row="1"
+                x:Name="AppDisplay"
                 Stroke="{StaticResource Primary}"
                 Background="{StaticResource Primary}"
                 StrokeShape="RoundRectangle 15,15,15,15"
@@ -67,7 +65,8 @@
                        LineBreakMode="TailTruncation" />
             </Grid>
         </Border>
-        <Border Stroke="{StaticResource Light}"
+        <Border Grid.Row="2"
+                Stroke="{StaticResource Light}"
                 Background="{StaticResource Light}"
                 StrokeShape="RoundRectangle 15,15,15,15"
                 Padding="10"
@@ -82,5 +81,42 @@
                    FontSize="Small"
                    HorizontalTextAlignment="Center" />
         </Border>
-    </VerticalStackLayout>
+
+        <Grid Grid.Row="3"
+              RowDefinitions="Auto, Auto"
+              VerticalOptions="EndAndExpand">
+            <Border  Grid.Row="0"
+                     Stroke="{StaticResource Primary}"
+                     Background="{StaticResource Primary}"
+                     StrokeShape="RoundRectangle 15,15,15,15"
+                     Padding="10"
+                     Margin="20,0,20,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PatchAppPage}}, Path=BindingContext.PatchLocalTappedCommand}"
+                                          CommandParameter="{Binding}" />
+                </Border.GestureRecognizers>
+
+                <Label Text="Patch with Local Dependencies"
+                       TextColor="{StaticResource Light}"
+                       FontSize="Small"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+            <Border  x:Name="RestoreAPKButton" Grid.Row="1"
+                     Stroke="{StaticResource Primary}"
+                     Background="{StaticResource Primary}"
+                     StrokeShape="RoundRectangle 15,15,15,15"
+                     Padding="10"
+                     Margin="20,0,20,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PatchAppPage}}, Path=BindingContext.RestoreTappedCommand}"
+                                          CommandParameter="{Binding}" />
+                </Border.GestureRecognizers>
+
+                <Label Text="Restore Unpatched APK"
+                       TextColor="{StaticResource Light}"
+                       FontSize="Small"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+        </Grid>
+    </Grid>
 </ContentPage>

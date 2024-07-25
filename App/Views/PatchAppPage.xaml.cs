@@ -8,6 +8,7 @@ public partial class PatchAppPage : ContentPage
 	{
 		InitializeComponent();
         BindingContext = new PatchAppPageViewModel();
+        // TODO: toggle RestoreAPKButton dependnding on if an unpatched apk exists
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

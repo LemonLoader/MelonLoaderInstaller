@@ -93,8 +93,7 @@ public class MainPageViewModel : BindableObject
 
                     if (!hasArm64Dir)
                     {
-                        var toast = Toast.Make("Selected APK does not support ARM64 and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-                        await toast.Show();
+                        await PopupHelper.Toast("Selected APK does not support ARM64 and cannot be patched.");
                         return;
                     }
 
@@ -103,22 +102,19 @@ public class MainPageViewModel : BindableObject
 
                     if (unityLib == null)
                     {
-                        var toast = Toast.Make("Selected APK is not a Unity app and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-                        await toast.Show();
+                        await PopupHelper.Toast("Selected APK is not a Unity app and cannot be patched.");
                         return;
                     }
 
                     if (il2cppLib == null)
                     {
-                        var toast = Toast.Make("Selected APK is not IL2CPP and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-                        await toast.Show();
+                        await PopupHelper.Toast("Selected APK is not IL2CPP and cannot be patched.");
                         return;
                     }
                 }
                 catch (Exception ex)
                 {
-                    var toast = Toast.Make("Selected APK is invalid or unsupported.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-                    await toast.Show();
+                    await PopupHelper.Toast("Selected APK is invalid or unsupported.");
 
                     System.Diagnostics.Debug.WriteLine(ex);
 
@@ -140,15 +136,13 @@ public class MainPageViewModel : BindableObject
     {
         if (item.Status == UnityApplicationFinder.Status.Unsupported)
         {
-            var toast = Toast.Make("This app is unsupported.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-            await toast.Show();
+            await PopupHelper.Toast("This app is unsupported.");
             return;
         }
 
         if (!AndroidPermissionHandler.HaveRequired())
         {
-            var toast = Toast.Make("Permissions are not setup.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-            await toast.Show();
+            await PopupHelper.Toast("Permissions are not setup.");
 
             Shell.Current.GoToTabOnFirst(nameof(PermissionSetupPage));
             return;

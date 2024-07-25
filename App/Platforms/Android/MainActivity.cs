@@ -2,6 +2,7 @@
 using Android.Content.PM;
 using Android.Runtime;
 using CommunityToolkit.Maui.Alerts;
+using MelonLoader.Installer.App.Utils;
 
 namespace MelonLoader.Installer.App;
 
@@ -16,8 +17,7 @@ public class MainActivity : MauiAppCompatActivity
 
         if (grantResults.Length > 0 && grantResults.Any(a => a != Permission.Granted))
         {
-            var toast = Toast.Make("At least one permission was not granted.", CommunityToolkit.Maui.Core.ToastDuration.Long);
-            await toast.Show();
+            await PopupHelper.Toast("At least one permission was not granted.");
         }
     }
 }
