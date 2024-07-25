@@ -126,7 +126,7 @@ internal static partial class ADBManager
 
                 i--; // go back so this process can run again
 
-                UnityApplicationFinder.Data data = new(appName, packageName, status, [.. apkPaths], iconData);
+                UnityApplicationFinder.Data data = new(appName, packageName, status, UnityApplicationFinder.Source.ADB, [.. apkPaths], iconData);
                 datas.Add(data);
             }
         }

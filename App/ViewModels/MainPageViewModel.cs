@@ -2,6 +2,7 @@
 using MelonLoader.Installer.App.Utils;
 using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;
+using System.IO.Compression;
 using System.Windows.Input;
 
 namespace MelonLoader.Installer.App.ViewModels;
@@ -83,8 +84,50 @@ public class MainPageViewModel : BindableObject
             var result = await FilePicker.Default.PickAsync(new PickOptions() { FileTypes = apkType });
             if (result != null)
             {
-                System.Diagnostics.Debug.WriteLine(result.FullPath);
-                // TODO: app view page apk support
+                try
+                {
+                    using FileStream apkStream = new(result.FullPath, FileMode.Open);
+                    using ZipArchive archive = new(apkStream, ZipArchiveMode.Read);
+
+                    bool hasArm64Dir = archive.Entries.Any(a => a.FullName.Contains("arm64-v8a"));
+
+                    if (!hasArm64Dir)
+                    {
+                        var toast = Toast.Make("Selected APK does not support ARM64 and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+                        await toast.Show();
+                        return;
+                    }
+
+                    var unityLib = archive.GetEntry("lib/arm64-v8a/libunity.so");
+                    var il2cppLib = archive.GetEntry("lib/arm64-v8a/libil2cpp.so");
+
+                    if (unityLib == null)
+                    {
+                        var toast = Toast.Make("Selected APK is not a Unity app and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+                        await toast.Show();
+                        return;
+                    }
+
+                    if (il2cppLib == null)
+                    {
+                        var toast = Toast.Make("Selected APK is not IL2CPP and cannot be patched.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+                        await toast.Show();
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var toast = Toast.Make("Selected APK is invalid or unsupported.", CommunityToolkit.Maui.Core.ToastDuration.Long);
+                    await toast.Show();
+
+                    System.Diagnostics.Debug.WriteLine(ex);
+
+                    return;
+                }
+
+                UnityApplicationFinder.Data data = new(Path.GetFileNameWithoutExtension(result.FullPath), "", UnityApplicationFinder.Status.Unpatched, UnityApplicationFinder.Source.File, [result.FullPath], null);
+                PatchAppPageViewModel.CurrentAppData = data;
+                Shell.Current.GoToTabOnFirst(nameof(PatchAppPage));
             }
         }
         catch (Exception ex)

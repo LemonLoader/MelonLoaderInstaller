@@ -75,7 +75,7 @@ namespace MelonLoader.Installer.App.Utils
                 if (package.SplitPublicSourceDirs != null)
                     apks.AddRange(package.SplitPublicSourceDirs);
 
-                Data data = new(name, package.PackageName!, status, [.. apks], iconData);
+                Data data = new(name, package.PackageName!, status, Source.PackageManager, [.. apks], iconData);
                 yield return data;
                 _cachedDatas.Add(package.PackageName!, data);
             }
@@ -118,6 +118,7 @@ namespace MelonLoader.Installer.App.Utils
             public string AppName { get; private set; }
             public string PackageName { get; private set; }
             public Status Status { get; private set; }
+            public Source Source { get; private set; }
             public string[] APKPaths { get; private set; }
 
             public string StatusString => Status == Status.Unpatched ? "" : " • " + Status.ToString().ToUpper();
@@ -141,11 +142,12 @@ namespace MelonLoader.Installer.App.Utils
             }
             private static byte[]? _placeholderIcon;
 
-            public Data(string appName, string packageName, Status status, string[] apkPaths, byte[]? icon = null)
+            public Data(string appName, string packageName, Status status, Source source, string[] apkPaths, byte[]? icon = null)
             {
                 AppName = appName;
                 PackageName = packageName;
                 Status = status;
+                Source = source;
                 APKPaths = apkPaths;
                 RawIconData = icon ?? PlaceholderIcon;
             }
@@ -156,6 +158,14 @@ namespace MelonLoader.Installer.App.Utils
             Unpatched,
             Patched,
             Unsupported,
+        }
+
+        public enum Source
+        {
+            None,
+            PackageManager,
+            File,
+            ADB
         }
     }
 }

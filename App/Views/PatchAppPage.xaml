@@ -67,5 +67,20 @@
                        LineBreakMode="TailTruncation" />
             </Grid>
         </Border>
+        <Border Stroke="{StaticResource Light}"
+                Background="{StaticResource Light}"
+                StrokeShape="RoundRectangle 15,15,15,15"
+                Padding="10"
+                Margin="20,0,20,10">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PatchAppPage}}, Path=BindingContext.PatchTappedCommand}"
+                                      CommandParameter="{Binding}" />
+            </Border.GestureRecognizers>
+
+            <Label Text="Patch"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="Small"
+                   HorizontalTextAlignment="Center" />
+        </Border>
     </VerticalStackLayout>
 </ContentPage>
