@@ -37,7 +37,8 @@ public partial class PatchAppPage : ContentPage
         }
 #endif
 
-        // TODO: package warnings
+        if (PackageWarningManager.AvailableWarnings.TryGetValue(PatchAppPageViewModel.CurrentAppData.PackageName, out string? warning) && warning != null)
+            await PopupHelper.Alert(warning, "Warning");
 
         base.OnNavigatedTo(args);
     }

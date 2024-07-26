@@ -1,4 +1,6 @@
-﻿namespace MelonLoader.Installer.App;
+﻿using MelonLoader.Installer.App.Utils;
+
+namespace MelonLoader.Installer.App;
 
 public partial class AppShell : Shell
 {
@@ -14,4 +16,11 @@ public partial class AppShell : Shell
 		CurrentItem = ADBDevicesTab;
 #endif
 	}
+
+    protected override async void OnAppearing()
+    {
+		await PackageWarningManager.Retrieve();
+
+        base.OnAppearing();
+    }
 }
