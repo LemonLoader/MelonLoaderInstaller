@@ -14,10 +14,15 @@ public static class PopupHelper
     public static async Task Toast(string message, ToastDuration duration = ToastDuration.Long, string title = "")
     {
 #if ANDROID
-        var toast = Toast.Make(message, duration);
+        var toast = CommunityToolkit.Maui.Alerts.Toast.Make(message, duration);
         await toast.Show();
 #else
         await Application.Current!.MainPage!.DisplayAlert(title, message, "Ok");
 #endif
+    }
+
+    public static async Task Alert(string message, string title, string cancel = "Ok")
+    {
+        await Application.Current!.MainPage!.DisplayAlert(title, message, cancel);
     }
 }
