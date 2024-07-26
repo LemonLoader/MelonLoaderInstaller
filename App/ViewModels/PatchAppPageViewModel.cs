@@ -19,9 +19,14 @@ public class PatchAppPageViewModel : BindableObject
 
     public PatchAppPageViewModel()
     {
-        PatchTappedCommand = new Command(DoPatch);
+        PatchTappedCommand = new Command(PatchWithoutLocalDeps);
         PatchLocalTappedCommand = new Command(SelectLocalDepsWithPatch);
         RestoreTappedCommand = new Command(RestoreUnpatchedAPK);
+    }
+
+    private async void PatchWithoutLocalDeps()
+    {
+        await DoPatch();
     }
 
     private async void SelectLocalDepsWithPatch()
@@ -66,7 +71,7 @@ public class PatchAppPageViewModel : BindableObject
                         return;
                     }
 
-                    // TODO: DoPatch with deps
+                    await DoPatch(result.FullPath);
                 }
                 catch (Exception ex)
                 {
@@ -84,7 +89,7 @@ public class PatchAppPageViewModel : BindableObject
         }
     }
 
-    private async void DoPatch()
+    private async Task DoPatch(string? localDepsPath = null)
     {
         if (_currentAppData == null)
         {
@@ -93,7 +98,8 @@ public class PatchAppPageViewModel : BindableObject
             return;
         }
         
-        // TODO: patch
+        // TODO: create a PatchRunner which handles everything
+        //       i don't want to go back to how the original frontend handled it where much of the non-core install stuff is shoved into the page class
     }
 
     private void RestoreUnpatchedAPK()
