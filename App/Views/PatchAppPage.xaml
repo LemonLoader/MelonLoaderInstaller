@@ -18,7 +18,7 @@
 
     <Grid RowDefinitions="Auto, Auto, Auto, *">
         <Label Grid.Row="0"
-               Text="Patching"
+               Text="Patcher"
                FontSize="Title"
                FontAttributes="Bold"
                TextColor="{StaticResource Light}"
