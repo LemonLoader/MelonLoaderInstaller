@@ -20,7 +20,7 @@ internal class PatchInfo
 
     public string PemData { get; set; } = "";
 
-    private PatchArguments _arguments;
+    private readonly PatchArguments _arguments;
 
     public PatchInfo(PatchArguments arguments)
     {

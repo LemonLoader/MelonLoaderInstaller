@@ -1,5 +1,4 @@
 ﻿using Ionic.Zip;
-using System;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -10,14 +9,14 @@ internal class RepackAPK : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        using ZipFile archive = new ZipFile(patcher._info.OutputBaseApkPath);
+        using ZipFile archive = new(patcher._info.OutputBaseApkPath);
 
         // Handle old installer files
         var dexEntries = archive.Entries.Where(a => a.FileName.Contains("originalDex")).ToArray();
-        if (dexEntries.Count() > 0)
+        if (dexEntries.Length > 0)
         {
             patcher._logger.Log("Found reminats of Java patching, replacing patched dex.");
-            for (int i = dexEntries.Count() - 1; i >= 0; i--)
+            for (int i = dexEntries.Length - 1; i >= 0; i--)
             {
                 ZipEntry dex = dexEntries[i];
                 string path = dex.FileName;
@@ -52,7 +51,7 @@ internal class RepackAPK : IPatchStep
         }
         else
         {
-            using ZipFile libArchive = new ZipFile(patcher._info.OutputLibApkPath);
+            using ZipFile libArchive = new(patcher._info.OutputLibApkPath);
 
             CopyTo(libArchive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
             CopyTo(libArchive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
@@ -65,7 +64,7 @@ internal class RepackAPK : IPatchStep
         return true;
     }
 
-    private void CopyTo(ZipFile archive, string source, string dest, string matcher = "*.*")
+    private static void CopyTo(ZipFile archive, string source, string dest, string matcher = "*.*")
     {
         foreach (string file in Directory.GetFiles(source, matcher, SearchOption.AllDirectories))
         {

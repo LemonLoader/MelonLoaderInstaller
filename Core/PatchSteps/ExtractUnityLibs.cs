@@ -7,8 +7,8 @@ internal class ExtractUnityLibs : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        using FileStream zipStream = new FileStream(patcher._args.UnityDependenciesPath, FileMode.Open);
-        using ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+        using FileStream zipStream = new(patcher._args.UnityDependenciesPath, FileMode.Open);
+        using ZipArchive archive = new(zipStream, ZipArchiveMode.Read);
         archive.ExtractToDirectory(patcher._info.UnityBaseDirectory);
 
         // We are going to be replacing libmain, we don't need any that are included by Unity

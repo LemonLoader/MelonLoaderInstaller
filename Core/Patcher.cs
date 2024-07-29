@@ -46,7 +46,6 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
             [
                 new DetectUnityVersion(),
                 new DownloadUnityDeps(),
-                new DownloadNativeLibs(),
                 new ExtractDependencies(),
                 new ExtractUnityLibs(),
                 new PatchManifest(),

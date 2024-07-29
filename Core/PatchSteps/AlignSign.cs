@@ -6,8 +6,8 @@ namespace MelonLoader.Installer.Core.PatchSteps;
 
 internal class AlignSign : IPatchStep
 {
-    private IPatchLogger _logger;
-    private string _pemData;
+    private IPatchLogger? _logger;
+    private string _pemData = "";
 
     public bool Run(Patcher patcher)
     {
@@ -31,11 +31,11 @@ internal class AlignSign : IPatchStep
 
     private bool Sign(string apk)
     {
-        _logger.Log($"Signing [ {Path.GetFileName(apk)} ]");
+        _logger!.Log($"Signing [ {Path.GetFileName(apk)} ]");
 
         try
         {
-            APKSigner signer = new APKSigner(_pemData, _logger);
+            APKSigner signer = new(_pemData, _logger);
             signer.Sign(apk);
             return true;
         }

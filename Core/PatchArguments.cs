@@ -13,8 +13,7 @@ public class PatchArguments
 
     public string TempDirectory = "";
 
-    public string LemonDataPath = "";
-    public string Il2CppEtcPath = "";
+    public string MelonDataPath = "";
     public string UnityDependenciesPath = "";
 
     public AssetRipper.Primitives.UnityVersion? UnityVersion;

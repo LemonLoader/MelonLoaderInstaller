@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Net.Security;
+using System.Threading.Tasks;
 
 namespace MelonLoader.Installer.Core.PatchSteps;
 
@@ -18,7 +20,7 @@ internal class DownloadUnityDeps : IPatchStep
 
         patcher._logger.Log("Downloading Unity dependencies");
 
-        using WebClient client = new WebClient();
+        using HttpClient client = new();
 
         if (!patcher._args.UnityVersion.HasValue)
         {
@@ -33,7 +35,10 @@ internal class DownloadUnityDeps : IPatchStep
             var originalValidator = ServicePointManager.ServerCertificateValidationCallback;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
 
-            client.DownloadFile(DEPS_PROVIDER + unityVersion + ".zip", patcher._args.UnityDependenciesPath);
+            Task<byte[]> task = client.GetByteArrayAsync(DEPS_PROVIDER + unityVersion + ".zip");
+            task.Wait();
+
+            File.WriteAllBytes(patcher._args.UnityDependenciesPath, task.Result);
 
             ServicePointManager.ServerCertificateValidationCallback = originalValidator;
         }

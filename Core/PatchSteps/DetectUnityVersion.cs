@@ -13,15 +13,15 @@ internal class DetectUnityVersion : IPatchStep
         if (patcher._args.UnityVersion != null && patcher._args.UnityVersion != UnityVersion.MinVersion)
             return true;
 
-        using FileStream apkStream = new FileStream(patcher._info.OutputBaseApkPath, FileMode.Open);
-        using ZipArchive archive = new ZipArchive(apkStream, ZipArchiveMode.Read);
+        using FileStream apkStream = new(patcher._info.OutputBaseApkPath, FileMode.Open);
+        using ZipArchive archive = new(apkStream, ZipArchiveMode.Read);
 
-        AssetsManager uAssetsManager = new AssetsManager();
+        AssetsManager uAssetsManager = new();
 
         // Try to read directly from file
         try
         {
-            ZipArchiveEntry assetEntry = archive.GetEntry("bin/Data/globalgamemanagers");
+            ZipArchiveEntry assetEntry = archive.GetEntry("assets/bin/Data/globalgamemanagers")!;
             using Stream stream = assetEntry.Open();
 
             AssetsFileInstance instance = uAssetsManager.LoadAssetsFile(stream, "/bin/Data/globalgamemanagers", true);
@@ -34,7 +34,7 @@ internal class DetectUnityVersion : IPatchStep
         // If failed before, try to get the data from data.unity3d
         try
         {
-            ZipArchiveEntry assetEntry = archive.GetEntry("bin/Data/data.unity3d");
+            ZipArchiveEntry assetEntry = archive.GetEntry("assets/bin/Data/data.unity3d")!;
             using Stream stream = assetEntry.Open();
 
             BundleFileInstance bundle = uAssetsManager.LoadBundleFile(stream, "/bin/Data/data.unity3d");

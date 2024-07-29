@@ -175,8 +175,7 @@ public static class PatchRunner
             IsSplit = data.APKPaths.Length > 1,
             OutputApkDirectory = _apkOutputPath,
             TempDirectory = _tempPath,
-            LemonDataPath = _melonDataPath,
-            Il2CppEtcPath = "" /* TODO: remove this */,
+            MelonDataPath = _melonDataPath,
             UnityDependenciesPath = _unityDepsPath,
             UnityVersion = _unityVersion,
             PackageName = data.PackageName

@@ -11,24 +11,24 @@ namespace MelonLoader.Installer.Core.PatchSteps;
 // https://github.com/Lauriethefish/QuestPatcher/blob/main/QuestPatcher.Core/Patching/PatchingManager.cs
 internal class PatchManifest : IPatchStep
 {
-    private static readonly Uri AndroidNamespaceUri = new Uri("http://schemas.android.com/apk/res/android");
+    private static readonly Uri AndroidNamespaceUri = new("http://schemas.android.com/apk/res/android");
 
     private const int NameAttributeResourceId = 16842755;
     private const int DebuggableAttributeResourceId = 16842767;
     private const int LegacyStorageAttributeResourceId = 16844291;
     private const int ExtractNativeLibsAttributeResourceId = 16844010;
 
-    private static readonly string[] StandardPermissions = new string[]
-    {
+    private static readonly string[] StandardPermissions =
+    [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.MANAGE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO", /* used for voice chat in some mods; requires the user to allow it via a prompt */
         "android.permission.INTERNET"
-    };
+    ];
 
-    private Patcher _patcher;
-    private IPatchLogger _logger;
+    private Patcher? _patcher;
+    private IPatchLogger? _logger;
 
     public bool Run(Patcher patcher)
     {
@@ -44,11 +44,11 @@ internal class PatchManifest : IPatchStep
 
     private void PatchAPK(string apkPath)
     {
-        using ZipFile archive = new ZipFile(apkPath);
+        using ZipFile archive = new(apkPath);
 
         ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
         using Stream manifestStream = manifestEntry.OpenReader();
-        using MemoryStream memoryStream = new MemoryStream();
+        using MemoryStream memoryStream = new();
 
         manifestStream.CopyTo(memoryStream);
         memoryStream.Position = 0;
@@ -57,7 +57,7 @@ internal class PatchManifest : IPatchStep
         AddStandardPermissions(manifest);
         AddApplicationFlags(manifest);
 
-        using MemoryStream saveStream = new MemoryStream();
+        using MemoryStream saveStream = new();
         AxmlSaver.SaveDocument(saveStream, manifest);
         saveStream.Position = 0;
 
@@ -67,14 +67,14 @@ internal class PatchManifest : IPatchStep
 
     private void AddStandardPermissions(AxmlElement manifest)
     {
-        ISet<string> existingPermissions = GetExistingChildren(manifest, "uses-permission");
+        HashSet<string> existingPermissions = GetExistingChildren(manifest, "uses-permission");
 
         foreach (string permission in StandardPermissions)
         {
             if (existingPermissions.Contains(permission)) { continue; } // Do not add existing permissions
 
-            _logger.Log($"Adding permission {permission}");
-            AxmlElement permElement = new AxmlElement("uses-permission");
+            _logger!.Log($"Adding permission {permission}");
+            AxmlElement permElement = new("uses-permission");
             AddNameAttribute(permElement, permission);
             manifest.Children.Add(permElement);
         }
@@ -85,38 +85,38 @@ internal class PatchManifest : IPatchStep
         AxmlElement appElement = manifest.Children.Single(element => element.Name == "application");
         if (!appElement.Attributes.Any(attribute => attribute.Name == "debuggable"))
         {
-            _logger.Log("Adding debuggable flag");
-            appElement.Attributes.Add(new AxmlAttribute("debuggable", AndroidNamespaceUri, DebuggableAttributeResourceId, true));
+            _logger!.Log("Adding debuggable flag");
+            appElement.Attributes.Add(new("debuggable", AndroidNamespaceUri, DebuggableAttributeResourceId, true));
         }
 
         if (!appElement.Attributes.Any(attribute => attribute.Name == "requestLegacyExternalStorage"))
         {
-            _logger.Log("Adding legacy external storage flag");
-            appElement.Attributes.Add(new AxmlAttribute("requestLegacyExternalStorage", AndroidNamespaceUri, LegacyStorageAttributeResourceId, true));
+            _logger!.Log("Adding legacy external storage flag");
+            appElement.Attributes.Add(new("requestLegacyExternalStorage", AndroidNamespaceUri, LegacyStorageAttributeResourceId, true));
         }
 
         // This has only been an issue for split APKs
-        if (_patcher._args.IsSplit)
+        if (_patcher!._args.IsSplit)
         {
-            _logger.Log("Patching extract native libraries flag");
-            AxmlAttribute extract = appElement.Attributes.FirstOrDefault(attribute => attribute.Name == "extractNativeLibs");
+            _logger!.Log("Patching extract native libraries flag");
+            AxmlAttribute? extract = appElement.Attributes.FirstOrDefault(attribute => attribute.Name == "extractNativeLibs");
             if (extract != null)
                 extract.Value = true;
             else
             {
-                appElement.Attributes.Add(new AxmlAttribute("extractNativeLibs", AndroidNamespaceUri, ExtractNativeLibsAttributeResourceId, true));
+                appElement.Attributes.Add(new("extractNativeLibs", AndroidNamespaceUri, ExtractNativeLibsAttributeResourceId, true));
             }
         }
     }
 
-    private void AddNameAttribute(AxmlElement element, string name)
+    private static void AddNameAttribute(AxmlElement element, string name)
     {
-        element.Attributes.Add(new AxmlAttribute("name", AndroidNamespaceUri, NameAttributeResourceId, name));
+        element.Attributes.Add(new("name", AndroidNamespaceUri, NameAttributeResourceId, name));
     }
 
-    private ISet<string> GetExistingChildren(AxmlElement manifest, string childNames)
+    private HashSet<string> GetExistingChildren(AxmlElement manifest, string childNames)
     {
-        HashSet<string> result = new HashSet<string>();
+        HashSet<string> result = [];
 
         foreach (AxmlElement element in manifest.Children)
         {

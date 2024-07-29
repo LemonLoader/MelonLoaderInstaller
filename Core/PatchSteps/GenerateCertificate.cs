@@ -48,15 +48,15 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
     {
         patcher._logger.Log("Generating certificate");
 
-        RsaKeyPairGenerator kpg = new RsaKeyPairGenerator();
+        RsaKeyPairGenerator kpg = new();
         kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
 
         AsymmetricCipherKeyPair keyPair = kpg.GenerateKeyPair();
 
-        var certificateGenerator = new X509V3CertificateGenerator();
+        X509V3CertificateGenerator certificateGenerator = new();
         BigInteger serialNumber = BigInteger.ProbablePrime(120, new Random());
-        X509Name issuerDN = new X509Name("CN=lemon");
-        X509Name subjectDN = new X509Name("CN=lemon");
+        X509Name issuerDN = new("CN=lemon");
+        X509Name subjectDN = new("CN=lemon");
         certificateGenerator.SetSerialNumber(serialNumber);
         certificateGenerator.SetIssuerDN(issuerDN);
         certificateGenerator.SetSubjectDN(subjectDN);
@@ -64,11 +64,11 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
         certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(999));
         certificateGenerator.SetPublicKey(keyPair.Public);
 
-        var subjectKeyIdentifierExtension = new SubjectKeyIdentifierStructure(keyPair.Public);
+        SubjectKeyIdentifierStructure subjectKeyIdentifierExtension = new(keyPair.Public);
         certificateGenerator.AddExtension(X509Extensions.SubjectKeyIdentifier.Id, false, subjectKeyIdentifierExtension);
         certificateGenerator.AddExtension(X509Extensions.BasicConstraints.Id, true, new BasicConstraints(false));
 
-        Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", keyPair.Private);
+        Asn1SignatureFactory signatureFactory = new("SHA256WITHRSA", keyPair.Private);
         X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
 
         if (certificate == null)
@@ -78,8 +78,8 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
             return true;
         }
 
-        using StringWriter stringWriter = new StringWriter();
-        PemWriter pemWriter = new PemWriter(stringWriter);
+        using StringWriter stringWriter = new();
+        PemWriter pemWriter = new(stringWriter);
 
         pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
         pemWriter.WriteObject(keyPair.Private);

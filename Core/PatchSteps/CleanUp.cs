@@ -10,8 +10,7 @@ internal class CleanUp : IPatchStep
 
         try
         {
-            DeleteFile(patcher._args.LemonDataPath);
-            DeleteFile(patcher._args.Il2CppEtcPath);
+            DeleteFile(patcher._args.MelonDataPath);
             DeleteFile(patcher._args.UnityDependenciesPath);
 
             DeleteDir(patcher._info.LemonDataDirectory);
@@ -28,13 +27,13 @@ internal class CleanUp : IPatchStep
         return true;
     }
 
-    private void DeleteFile(string path)
+    private static void DeleteFile(string path)
     {
         if (File.Exists(path))
             File.Delete(path);
     }
 
-    private void DeleteDir(string path)
+    private static void DeleteDir(string path)
     {
         if (Directory.Exists(path))
             Directory.Delete(path, true);
