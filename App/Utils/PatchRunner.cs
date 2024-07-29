@@ -76,6 +76,8 @@ public static class PatchRunner
         // TODO: reinstall
 
         // TODO: restore obbs/data if adb
+
+        Directory.Delete(_tempPath, true);
     }
 
     private static async Task GetUnityVersion(UnityApplicationFinder.Data data)
