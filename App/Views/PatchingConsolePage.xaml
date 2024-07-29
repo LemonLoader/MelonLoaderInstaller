@@ -16,9 +16,10 @@
                 StrokeShape="RoundRectangle 15,15,15,15"
                 Padding="10"
                 Margin="20,0,20,10">
-            <!-- TODO: this needs to be a scroll view; also need it to scroll as we add more text -->
-            <Label x:Name="LogLabel"
-                   LineBreakMode="WordWrap" />
+            <ScrollView x:Name="LogScrollView">
+                <Label x:Name="LogLabel"
+                       LineBreakMode="WordWrap" />
+            </ScrollView>
         </Border>
         <Border  x:Name="GoBackButton"
                  Grid.Row="2"
