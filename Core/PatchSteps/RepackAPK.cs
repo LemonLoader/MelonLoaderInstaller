@@ -20,7 +20,7 @@ internal class RepackAPK : IPatchStep
         var dexEntries = archive.Entries.Where(a => a.FileName.Contains("originalDex")).ToArray();
         if (dexEntries.Length > 0)
         {
-            patcher._logger.Log("Found reminats of Java patching, replacing patched dex.");
+            patcher._logger.Log("Found reminats of Java patching, replacing patched dex");
             for (int i = dexEntries.Length - 1; i >= 0; i--)
             {
                 ZipEntry dex = dexEntries[i];

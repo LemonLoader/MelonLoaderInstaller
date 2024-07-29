@@ -203,12 +203,24 @@ public static class PatchRunner
     {
         _logger?.Log("Starting patching core");
 
-        string targetApkPath = Path.Combine(_apkOutputPath, Path.GetFileName(data.APKPaths.First()));
+        string targetApkPath;
+        string libraryApkPath;
+        string[] extraSplits;
 
-        string? arm64Split = data.APKPaths.FirstOrDefault(p => p.Contains("arm64"));
-        string libraryApkPath = arm64Split == null ? "" : Path.Combine(_apkOutputPath, Path.GetFileName(arm64Split));
+        if (data.Source is UnityApplicationFinder.Source.PackageManager or UnityApplicationFinder.Source.File)
+        {
+            targetApkPath = data.APKPaths.First();
+            libraryApkPath = data.APKPaths.FirstOrDefault(p => p.Contains("arm64")) ?? "";
+            extraSplits = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).ToArray();
+        }
+        else
+        {
+            string? arm64Split = data.APKPaths.FirstOrDefault(p => p.Contains("arm64"));
 
-        string[] extraSplits = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).Select(p => Path.Combine(_apkOutputPath, Path.GetFileName(p))).ToArray();
+            targetApkPath = Path.Combine(_apkOutputPath, Path.GetFileName(data.APKPaths.First()));
+            libraryApkPath = arm64Split == null ? "" : Path.Combine(_apkOutputPath, Path.GetFileName(arm64Split));
+            extraSplits = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).Select(p => Path.Combine(_apkOutputPath, Path.GetFileName(p))).ToArray();
+        }
 
         Patcher patcher = new(new()
         {
