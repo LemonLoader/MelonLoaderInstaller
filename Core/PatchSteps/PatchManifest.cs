@@ -57,12 +57,16 @@ internal class PatchManifest : IPatchStep
         AddStandardPermissions(manifest);
         AddApplicationFlags(manifest);
 
+        _logger?.Log("Writing modified manifest");
+
         using MemoryStream saveStream = new();
         AxmlSaver.SaveDocument(saveStream, manifest);
         saveStream.Position = 0;
 
         archive.UpdateEntry(manifestEntry.FileName, saveStream);
         archive.Save();
+
+        _logger?.Log("Done");
     }
 
     private void AddStandardPermissions(AxmlElement manifest)

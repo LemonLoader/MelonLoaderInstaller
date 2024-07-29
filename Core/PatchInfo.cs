@@ -15,8 +15,8 @@ internal class PatchInfo
     public string UnityManagedDirectory { get; } = "";
 
     public string OutputBaseApkPath { get; } = "";
-    public string OutputLibApkPath { get; } = "";
-    public string[] OutputExtraApkPaths { get; } = [];
+    public string? OutputLibApkPath { get; } = null;
+    public string[]? OutputExtraApkPaths { get; } = null;
 
     public string PemData { get; set; } = "";
 

@@ -50,6 +50,8 @@ public static class PatchRunner
 
         _apkOutputPath = Path.Combine(_tempPath, "output");
 
+        Directory.Delete(_tempPath, true);
+
         Task task = Task.Run(async() => await InternalBegin(data, localUnityDepsPath));
         await task;
 
@@ -76,8 +78,6 @@ public static class PatchRunner
         // TODO: reinstall
 
         // TODO: restore obbs/data if adb
-
-        Directory.Delete(_tempPath, true);
     }
 
     private static async Task GetUnityVersion(UnityApplicationFinder.Data data)

@@ -1,7 +1,10 @@
 ﻿using Ionic.Zip;
+using System;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml;
 
 namespace MelonLoader.Installer.Core.PatchSteps;
 
@@ -32,16 +35,10 @@ internal class RepackAPK : IPatchStep
             patcher._logger.Log("Done");
         }
 
-        // assets/melonloader data
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "core"), "assets/melonloader/etc", "*.dll");
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "managed"), "assets/melonloader/etc/managed", "*.dll");
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "mono", "bcl"), "assets/melonloader/etc/managed", "*.dll");
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "support_modules"), "assets/melonloader/etc/support", "*.dll");
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "assembly_generation"), "assets/melonloader/etc/assembly_generation/managed", "*.dll");
-        CopyTo(archive, Path.Combine(patcher._info.UnityManagedDirectory), "assets/melonloader/etc/assembly_generation/unity", "*.dll");
-
-        // assets/bin data
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "etc"), "assets/bin/Data/Managed/etc");
+        // assets/ data
+        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "MelonLoader"), "assets/MelonLoader");
+        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "dotnet"), "assets/dotnet");
+        WritePatchDate(archive);
 
         // libs data
         if (!patcher._args.IsSplit)
@@ -76,5 +73,17 @@ internal class RepackAPK : IPatchStep
 
             archive.AddEntry(entryPath, File.ReadAllBytes(file));
         }
+    }
+
+    private static void WritePatchDate(ZipFile archive)
+    {
+        string entryPath = "assets/lemon_patch_date.txt";
+        if (archive.ContainsEntry(entryPath))
+            archive.RemoveEntry(entryPath);
+
+        string rfc3339 = XmlConvert.ToString(DateTime.Now, XmlDateTimeSerializationMode.Utc);
+        byte[] bytes = Encoding.UTF8.GetBytes(rfc3339);
+
+        archive.AddEntry(entryPath, bytes);
     }
 }
