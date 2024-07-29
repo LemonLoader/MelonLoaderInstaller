@@ -32,7 +32,7 @@
             <ShellContent ContentTemplate="{DataTemplate views:SelectADBDevicePage}" />
         </Tab>
         <Tab x:Name="PatchAppPage"
-             Title="Patching"
+             Title="Patcher"
              Icon="{mi:Fluent Wrench24}"
              Route="PatchAppPage">
             <ShellContent ContentTemplate="{DataTemplate views:PatchAppPage}" />
