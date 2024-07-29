@@ -1,7 +1,6 @@
-﻿namespace MelonLoader.Installer.Core
+﻿namespace MelonLoader.Installer.Core;
+
+internal interface IPatchStep
 {
-    internal interface IPatchStep
-    {
-        bool Run(Patcher patcher);
-    }
+    bool Run(Patcher patcher);
 }
