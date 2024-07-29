@@ -83,6 +83,16 @@ internal static partial class ADBManager
         _listingToolInstalled = false;
     }
 
+    public static async Task PullFileToPath(string devicePath, string destinationPath)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        using SyncService service = new(_deviceData.Value);
+        using FileStream stream = File.OpenWrite(destinationPath);
+        await service.PullAsync(devicePath, stream, null);
+    }
+
     const string LISTING_TOOL_SPLIT = "-----------------------------------";
     const string LISTING_TOOL_DNS = "DEVICE_NOT_SUPPORTED";
     public static List<UnityApplicationFinder.Data> GetAppDatasFromListingTool()

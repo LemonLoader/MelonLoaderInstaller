@@ -27,6 +27,7 @@ public static class MauiProgram
         Routing.RegisterRoute(nameof(PermissionSetupPage), typeof(PermissionSetupPage));
         Routing.RegisterRoute(nameof(SelectADBDevicePage), typeof(SelectADBDevicePage));
         Routing.RegisterRoute(nameof(PatchAppPage), typeof(PatchAppPage));
+        Routing.RegisterRoute(nameof(PatchingConsolePage), typeof(PatchingConsolePage));
 
         return builder.Build();
 	}

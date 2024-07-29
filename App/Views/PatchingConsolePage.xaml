@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MelonLoader.Installer.App.Views.PatchingConsolePage">
+    
+    <Grid RowDefinitions="Auto, *">
+        <Label Grid.Row="0"
+               Text="Patching..."
+               FontSize="Title"
+               FontAttributes="Bold"
+               TextColor="{StaticResource Light}"
+               Padding="25" />
+        <Border Grid.Row="1"
+                Stroke="{StaticResource Primary}"
+                Background="{StaticResource Primary}"
+                StrokeShape="RoundRectangle 15,15,15,15"
+                Padding="10"
+                Margin="20,0,20,10">
+            <Label x:Name="LogLabel"
+                   LineBreakMode="WordWrap" />
+        </Border>
+    </Grid>
+</ContentPage>

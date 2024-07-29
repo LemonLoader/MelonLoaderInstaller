@@ -151,6 +151,23 @@ namespace MelonLoader.Installer.App.Utils
                 APKPaths = apkPaths;
                 RawIconData = icon ?? PlaceholderIcon;
             }
+
+            public string? GetBackupDirectory()
+            {
+                if (Source == Source.None || string.IsNullOrEmpty(PackageName))
+                    return null;
+
+#if ANDROID
+                string basePath = Platform.CurrentActivity!.GetExternalFilesDir(null)!.ToString();
+#else
+                string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
+#endif
+
+                string baseBackupPath = Path.Combine(basePath, "AppBackups");
+                string backupDir = Path.Combine(baseBackupPath, PackageName);
+
+                return backupDir;
+            }
         }
 
         public enum Status

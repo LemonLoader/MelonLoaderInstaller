@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using MelonLoader.Installer.App.Utils;
-using MelonLoader.Installer.App.Views;
+﻿using MelonLoader.Installer.App.Utils;
 using System.IO.Compression;
 using System.Windows.Input;
 
@@ -8,7 +6,20 @@ namespace MelonLoader.Installer.App.ViewModels;
 
 public class PatchAppPageViewModel : BindableObject
 {
-    public static UnityApplicationFinder.Data CurrentAppData { get => _currentAppData ?? _dummyAppData; set => _currentAppData = value; }
+    public static UnityApplicationFinder.Data CurrentAppData
+    {
+        get => _currentAppData ?? _dummyAppData;
+        set
+        {
+            if (PatchRunner.IsPatching)
+            {
+                PopupHelper.Toast("Currently patching, cannot change apps.").Wait();
+                return;
+            }
+
+            _currentAppData = value;
+        }
+    }
 
     private static UnityApplicationFinder.Data _dummyAppData = new("No app selected.", "Please choose one from the apps tab.", UnityApplicationFinder.Status.Unpatched, UnityApplicationFinder.Source.None, [], null);
     private static UnityApplicationFinder.Data? _currentAppData;
@@ -91,15 +102,20 @@ public class PatchAppPageViewModel : BindableObject
 
     private async Task DoPatch(string? localDepsPath = null)
     {
+        if (PatchRunner.IsPatching)
+        {
+            await PopupHelper.Toast("Already patching, you cannot patch multiple apps at once.");
+            return;
+        }
+
         if (_currentAppData == null)
         {
             await PopupHelper.Toast("No app selected.", CommunityToolkit.Maui.Core.ToastDuration.Short);
 
             return;
         }
-        
-        // TODO: create a PatchRunner which handles everything
-        //       i don't want to go back to how the original frontend handled it where much of the non-core install stuff is shoved into the page class
+
+        await PatchRunner.Begin(CurrentAppData, localDepsPath);
     }
 
     private void RestoreUnpatchedAPK()

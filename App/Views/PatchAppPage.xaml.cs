@@ -9,7 +9,6 @@ public partial class PatchAppPage : ContentPage
 	{
 		InitializeComponent();
         BindingContext = new PatchAppPageViewModel();
-        // TODO: toggle RestoreAPKButton dependnding on if an unpatched apk exists
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -39,6 +38,12 @@ public partial class PatchAppPage : ContentPage
 
         if (PackageWarningManager.AvailableWarnings.TryGetValue(PatchAppPageViewModel.CurrentAppData.PackageName, out string? warning) && warning != null)
             await PopupHelper.Alert(warning, "Warning");
+
+        string? backupDir = PatchAppPageViewModel.CurrentAppData.GetBackupDirectory();
+        if (backupDir != null && Directory.Exists(backupDir) && Directory.GetFiles(backupDir, "*.apk").Length > 0)
+            RestoreAPKButton.IsVisible = true;
+        else
+            RestoreAPKButton.IsVisible = false;
 
         base.OnNavigatedTo(args);
     }
