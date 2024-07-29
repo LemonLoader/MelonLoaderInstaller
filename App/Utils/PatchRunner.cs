@@ -1,6 +1,4 @@
-﻿using AssetRipper.Primitives;
-using AssetsTools.NET.Extra;
-using MelonLoader.Installer.App.Views;
+﻿using MelonLoader.Installer.App.Views;
 using MelonLoader.Installer.Core;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -28,7 +26,6 @@ public static class PatchRunner
 
     public static async Task Begin(UnityApplicationFinder.Data data, string? localUnityDepsPath)
     {
-        // TODO: wrap this all in a trycatch so anything can be thrown onto the screen
         _isPatching = true;
 
         try
@@ -45,7 +42,8 @@ public static class PatchRunner
             _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
 #endif
 
-            _tempPath = Path.Combine(_basePath, "patch_temp", data.PackageName);
+            string packageName = data.Source == UnityApplicationFinder.Source.File ? "LocalFile" : data.PackageName;
+            _tempPath = Path.Combine(_basePath, "patch_temp", packageName);
 
             _melonDataPath = Path.Combine(_tempPath, "melondata.zip");
             _unityDepsPath = Path.Combine(_tempPath, "unity.zip");
@@ -76,11 +74,13 @@ public static class PatchRunner
         if (Directory.Exists(_tempPath))
             Directory.Delete(_tempPath);
 
-        await GetUnityVersion(data);
-
         await PrepareAssets(localUnityDepsPath);
 
-        BackupAPKs(data);
+        await GetUnityVersion(data);
+
+        await BackupAPKs(data);
+
+        await CopyAPKsFromDevice(data);
 
         // TODO: backup obbs/data if adb
 
@@ -153,28 +153,49 @@ public static class PatchRunner
         return true;
     }
 
-    private static void BackupAPKs(UnityApplicationFinder.Data data)
+    private static async Task BackupAPKs(UnityApplicationFinder.Data data)
     {
         if (data.Source == UnityApplicationFinder.Source.File)
             return;
 
-        if (data.Status != UnityApplicationFinder.Status.Patched)
+        if (data.Status == UnityApplicationFinder.Status.Patched)
         {
-            _logger?.Log("Backing up APKs");
-
-            string backupDir = data.GetBackupDirectory()!;
-
-            if (!Directory.Exists(backupDir))
-                Directory.CreateDirectory(backupDir);
-
-            foreach (string apk in data.APKPaths)
-            {
-                string backupPath = Path.Combine(backupDir, Path.GetFileName(apk));
-                File.Copy(apk, backupPath, true);
-            }
-        }
-        else
             _logger?.Log("App was previously patched, skipping back up");
+            return;
+        }
+
+        _logger?.Log("Backing up APKs");
+
+        string backupDir = data.GetBackupDirectory()!;
+
+        if (!Directory.Exists(backupDir))
+            Directory.CreateDirectory(backupDir);
+
+        foreach (string apk in data.APKPaths)
+        {
+            _logger?.Log($"Backing up [ {apk} ]");
+            string backupPath = Path.Combine(backupDir, Path.GetFileName(apk));
+            if (data.Source == UnityApplicationFinder.Source.PackageManager)
+                File.Copy(apk, backupPath, true);
+            else
+                await ADBManager.PullFileToPath(apk, backupPath);
+        }
+
+    }
+
+
+    private static async Task CopyAPKsFromDevice(UnityApplicationFinder.Data data)
+    {
+        if (data.Source != UnityApplicationFinder.Source.ADB)
+            return;
+
+        _logger?.Log("Copying APKs from device");
+
+        foreach (string apk in data.APKPaths)
+        {
+            _logger?.Log($"Copying [ {apk} ]");
+            await ADBManager.PullFileToPath(apk, Path.Combine(_apkOutputPath, Path.GetFileName(apk)));
+        }
 
     }
 
@@ -182,11 +203,18 @@ public static class PatchRunner
     {
         _logger?.Log("Starting patching core");
 
+        string targetApkPath = Path.Combine(_apkOutputPath, Path.GetFileName(data.APKPaths.First()));
+
+        string? arm64Split = data.APKPaths.FirstOrDefault(p => p.Contains("arm64"));
+        string libraryApkPath = arm64Split == null ? "" : Path.Combine(_apkOutputPath, Path.GetFileName(arm64Split));
+
+        string[] extraSplits = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).Select(p => Path.Combine(_apkOutputPath, Path.GetFileName(p))).ToArray();
+
         Patcher patcher = new(new()
         {
-            TargetApkPath = data.APKPaths.First(),
-            LibraryApkPath = data.APKPaths.FirstOrDefault(p => p.Contains("arm64")) ?? "",
-            ExtraSplitApkPaths = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).ToArray(),
+            TargetApkPath = targetApkPath,
+            LibraryApkPath = libraryApkPath,
+            ExtraSplitApkPaths = extraSplits,
             IsSplit = data.APKPaths.Length > 1,
             OutputApkDirectory = _apkOutputPath,
             TempDirectory = _tempPath,

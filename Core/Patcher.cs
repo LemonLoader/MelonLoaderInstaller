@@ -21,13 +21,16 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
         {
             _info.CreateDirectories();
 
-            _logger.Log($"Copying [ {_args.TargetApkPath} ] to [ {_info.OutputBaseApkPath} ]");
-            File.Copy(_args.TargetApkPath, _info.OutputBaseApkPath);
+            if (!Path.Exists(_info.OutputBaseApkPath))
+            {
+                _logger.Log($"Copying [ {_args.TargetApkPath} ] to [ {_info.OutputBaseApkPath} ]");
+                File.Copy(_args.TargetApkPath, _info.OutputBaseApkPath);
+            }
 
-            if (_args.IsSplit)
+            if (_args.IsSplit && !Path.Exists(_info.OutputLibApkPath))
             {
                 _logger.Log($"Copying [ {_args.LibraryApkPath} ] to [ {_info.OutputLibApkPath} ]");
-                File.Copy(_args.LibraryApkPath, _info.OutputLibApkPath);
+                File.Copy(_args.LibraryApkPath, _info.OutputLibApkPath!);
             }
 
             if (_args.ExtraSplitApkPaths != null)
@@ -35,10 +38,13 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
                 for (int i = 0; i < _args.ExtraSplitApkPaths.Length; i++)
                 {
                     string from = _args.ExtraSplitApkPaths[i];
-                    string to = _info.OutputExtraApkPaths[i];
+                    string to = _info.OutputExtraApkPaths![i];
 
-                    _logger.Log($"Copying [ {from} ] to [ {to} ]");
-                    File.Copy(from, to);
+                    if (!File.Exists(to))
+                    {
+                        _logger.Log($"Copying [ {from} ] to [ {to} ]");
+                        File.Copy(from, to);
+                    }
                 }
             }
 
