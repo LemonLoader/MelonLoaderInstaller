@@ -62,8 +62,10 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
         {
             _logger.Log("Signing, this can take a few minutes.");
 
+            /* This isn't necessary and should make it so on Quest it won't keep screaming at the user that they should restore the app, until they patch it at least.
+            
             _logger.Log("Signing with V1");
-            SignV1(apkPath);
+            SignV1(apkPath);*/
 
             _logger.Log("Aligning");
             APKAligner.AlignApk(apkPath);
