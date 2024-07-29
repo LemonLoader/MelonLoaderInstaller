@@ -73,8 +73,6 @@ public static class UnityVersionFinder
 
     private static async Task<UnityVersion> GenericParseUnityVersion(UnityApplicationFinder.Data data, Stream? globalgamemanagers, Stream? dataUnity3d)
     {
-        UnityVersion version = UnityVersion.MinVersion;
-
         AssetsManager uAssetsManager = new();
 
         // Try to read directly from file
@@ -95,7 +93,7 @@ public static class UnityVersionFinder
             stream.Dispose();
 
             AssetsFileInstance instance = uAssetsManager.LoadAssetsFile(memoryStream, "/bin/Data/globalgamemanagers", true);
-            version = TryParseUnityVersion(instance.file.Metadata.UnityVersion, data);
+            return TryParseUnityVersion(instance.file.Metadata.UnityVersion, data);
         }
         catch { }
 
@@ -119,16 +117,15 @@ public static class UnityVersionFinder
 
             BundleFileInstance bundle = uAssetsManager.LoadBundleFile(memoryStream, "/bin/Data/data.unity3d");
             AssetsFileInstance instance = uAssetsManager.LoadAssetsFileFromBundle(bundle, "globalgamemanagers");
-            version = TryParseUnityVersion(instance.file.Metadata.UnityVersion, data);
+            return TryParseUnityVersion(instance.file.Metadata.UnityVersion, data);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine("Failed to get Unity version for package " + data.PackageName);
             System.Diagnostics.Debug.WriteLine(ex);
-            version = UnityVersion.MinVersion;
         }
 
-        return version;
+        return UnityVersion.MinVersion;
     }
 
     private static UnityVersion TryParseUnityVersion(string version, UnityApplicationFinder.Data data)
