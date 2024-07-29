@@ -24,7 +24,10 @@ public static class UnityVersionFinder
 #if ANDROID
     private static async Task<UnityVersion> AndroidParseUnityVersion(UnityApplicationFinder.Data data)
     {
-        Android.Content.Res.AssetManager assetManager = Platform.CurrentActivity!.Assets!;
+        Android.Content.PM.PackageManager pm = Platform.CurrentActivity!.PackageManager!;
+        Android.Content.PM.ApplicationInfo packageInfo = pm.GetApplicationInfo(data.PackageName, Android.Content.PM.PackageInfoFlags.MetaData);
+        Android.Content.Res.AssetManager assetManager = pm.GetResourcesForApplication(packageInfo)!.Assets!;
+
         Stream? ggmStream = null;
         try
         {
