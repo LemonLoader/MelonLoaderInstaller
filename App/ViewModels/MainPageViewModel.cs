@@ -112,6 +112,14 @@ public class MainPageViewModel : BindableObject
                         return;
                     }
                 }
+                catch (IOException ex)
+                {
+                    await PopupHelper.Toast("Failed to access the selected APK.");
+
+                    System.Diagnostics.Debug.WriteLine(ex);
+
+                    return;
+                }
                 catch (Exception ex)
                 {
                     await PopupHelper.Toast("Selected APK is invalid or unsupported.");
