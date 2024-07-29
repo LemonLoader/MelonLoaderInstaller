@@ -31,31 +31,42 @@ public static class PatchRunner
         // TODO: wrap this all in a trycatch so anything can be thrown onto the screen
         _isPatching = true;
 
-        Reset();
+        try
+        {
+            Reset();
 
-        await Shell.Current.GoToAsync(nameof(PatchingConsolePage));
-        _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
-        _logger = new(_consolePage);
+            await Shell.Current.GoToAsync(nameof(PatchingConsolePage));
+            _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
+            _logger = new(_consolePage);
 
 #if ANDROID
-        _basePath = Platform.CurrentActivity!.GetExternalFilesDir(null)!.ToString();
+            _basePath = Platform.CurrentActivity!.GetExternalFilesDir(null)!.ToString();
 #else
-        _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
+            _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
 #endif
 
-        _tempPath = Path.Combine(_basePath, "patch_temp", data.PackageName);
+            _tempPath = Path.Combine(_basePath, "patch_temp", data.PackageName);
 
-        _melonDataPath = Path.Combine(_tempPath, "melondata.zip");
-        _unityDepsPath = Path.Combine(_tempPath, "unity.zip");
+            _melonDataPath = Path.Combine(_tempPath, "melondata.zip");
+            _unityDepsPath = Path.Combine(_tempPath, "unity.zip");
 
-        _apkOutputPath = Path.Combine(_tempPath, "output");
+            _apkOutputPath = Path.Combine(_tempPath, "output");
 
-        Directory.Delete(_tempPath, true);
+            if (Directory.Exists(_tempPath))
+                Directory.Delete(_tempPath, true);
 
-        Task task = Task.Run(async() => await InternalBegin(data, localUnityDepsPath));
-        await task;
+            Task task = Task.Run(async () => await InternalBegin(data, localUnityDepsPath));
+            await task;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            _logger?.Log(ex.ToString());
+            MarkFailure();
+        }
 
         _isPatching = false;
+        _consolePage!.BackButtonVisible = true;
     }
 
     private static async Task InternalBegin(UnityApplicationFinder.Data data, string? localUnityDepsPath)
@@ -86,7 +97,9 @@ public static class PatchRunner
 
         _unityVersion = await UnityVersionFinder.ParseUnityVersion(data, _tempPath);
         if (_unityVersion == UnityVersion.MinVersion)
-            return; // TODO: handle failure
+        {
+            throw new Exception("Failed to parse Unity version");
+        }
 
         _logger?.Log($"Found [ {_unityVersion} ]");
     }
@@ -185,12 +198,25 @@ public static class PatchRunner
 
         if (!patcher.Run())
         {
-            // TODO: handle failure
-            return false;
+            throw new Exception("Failed to patch.");
         }
 
         _logger?.Log("Application patched successfully, reinstalling.");
         return true;
+    }
+
+    private static void MarkFailure()
+    {
+        Application.Current!.Dispatcher.Dispatch(async () =>
+        {
+            _logger?.Log("Patching failed.");
+
+            await PopupHelper.Alert("Unable to patch the application, read the console for more info.", "Failure");
+
+            _consolePage!.BackButtonVisible = true;
+
+            _isPatching = false;
+        });
     }
 
     private static void Reset()

@@ -101,7 +101,8 @@
                        FontSize="Small"
                        HorizontalTextAlignment="Center" />
             </Border>
-            <Border  x:Name="RestoreAPKButton" Grid.Row="1"
+            <Border  x:Name="RestoreAPKButton"
+                     Grid.Row="1"
                      Stroke="{StaticResource Primary}"
                      Background="{StaticResource Primary}"
                      StrokeShape="RoundRectangle 15,15,15,15"
