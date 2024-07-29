@@ -12,6 +12,8 @@ internal class RepackAPK : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
+        patcher._logger.Log("Repacking APK");
+
         using ZipFile archive = new(patcher._info.OutputBaseApkPath);
 
         // Handle old installer files
@@ -35,6 +37,8 @@ internal class RepackAPK : IPatchStep
             patcher._logger.Log("Done");
         }
 
+        patcher._logger.Log("Copying data into APK");
+
         // assets/ data
         CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "MelonLoader"), "assets/MelonLoader");
         CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "dotnet"), "assets/dotnet");
@@ -56,7 +60,11 @@ internal class RepackAPK : IPatchStep
             libArchive.Save();
         }
 
+        patcher._logger.Log("Writing");
+
         archive.Save();
+
+        patcher._logger.Log("Done");
 
         return true;
     }
