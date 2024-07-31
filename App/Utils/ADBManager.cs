@@ -61,6 +61,14 @@ internal static partial class ADBManager
         return false;
     }
 
+    public static async Task ShellMove(string source, string dest)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        await _adbClient.ExecuteRemoteCommandAsync($"mv \"{source}\" \"{dest}\"", _deviceData.Value);
+    }
+
     public static void InstallAppListingTool()
     {
         if (_deviceData == null || _adbClient == null)

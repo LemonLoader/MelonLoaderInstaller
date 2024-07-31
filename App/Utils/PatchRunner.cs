@@ -82,13 +82,13 @@ public static class PatchRunner
 
         await CopyAPKsFromDevice(data);
 
-        // TODO: backup obbs/data if adb
+        await BackupAppData(data);
 
         CallPatchCore(data);
 
         // TODO: reinstall
 
-        // TODO: restore obbs/data if adb
+        await RestoreAppData(data);
     }
 
     private static async Task GetUnityVersion(UnityApplicationFinder.Data data)
@@ -183,7 +183,6 @@ public static class PatchRunner
 
     }
 
-
     private static async Task CopyAPKsFromDevice(UnityApplicationFinder.Data data)
     {
         if (data.Source != UnityApplicationFinder.Source.ADB)
@@ -196,7 +195,27 @@ public static class PatchRunner
             _logger?.Log($"Copying [ {apk} ]");
             await ADBManager.PullFileToPath(apk, Path.Combine(_apkOutputPath, Path.GetFileName(apk)));
         }
+    }
 
+    private static async Task BackupAppData(UnityApplicationFinder.Data data)
+    {
+        // backing up files on-device on most recent android versions is a massive pain, if not impossible
+        if (data.Source != UnityApplicationFinder.Source.ADB)
+            return;
+
+        _logger?.Log("Backing up app data");
+
+        string src = $"/sdcard/Android/data/{data.PackageName}";
+        string dest = $"/sdcard/Android/data/{data.PackageName}.lemon";
+
+        await ADBManager.ShellMove(src, dest);
+
+        _logger?.Log("Backing up app assets");
+
+        src = $"/sdcard/Android/obb/{data.PackageName}";
+        dest = $"/sdcard/Android/obb/{data.PackageName}.lemon";
+
+        await ADBManager.ShellMove(src, dest);
     }
 
     private static bool CallPatchCore(UnityApplicationFinder.Data data)
@@ -243,6 +262,27 @@ public static class PatchRunner
 
         _logger?.Log("Application patched successfully, reinstalling.");
         return true;
+    }
+
+    private static async Task RestoreAppData(UnityApplicationFinder.Data data)
+    {
+        // backing up files on-device on most recent android versions is a massive pain, if not impossible
+        if (data.Source != UnityApplicationFinder.Source.ADB)
+            return;
+
+        _logger?.Log("Restoring app data");
+
+        string src = $"/sdcard/Android/data/{data.PackageName}.lemon";
+        string dest = $"/sdcard/Android/data/{data.PackageName}";
+
+        await ADBManager.ShellMove(src, dest);
+
+        _logger?.Log("Restoring app assets");
+
+        src = $"/sdcard/Android/obb/{data.PackageName}.lemon";
+        dest = $"/sdcard/Android/obb/{data.PackageName}";
+
+        await ADBManager.ShellMove(src, dest);
     }
 
     private static void MarkFailure()
