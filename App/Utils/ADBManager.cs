@@ -69,6 +69,38 @@ internal static partial class ADBManager
         await _adbClient.ExecuteRemoteCommandAsync($"mv \"{source}\" \"{dest}\"", _deviceData.Value);
     }
 
+    public static async Task InstallAPK(string apkPath)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        using FileStream stream = File.OpenRead(apkPath);
+        await _adbClient.InstallAsync(_deviceData.Value, stream);
+    }
+
+    public static async Task InstallMultipleAPKs(string baseApkPath, string[] splitApks)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        using FileStream baseApkStream = File.OpenRead(baseApkPath);
+
+        var splitStreams = splitApks.Select(File.OpenRead);
+
+        await _adbClient.InstallMultipleAsync(_deviceData.Value, baseApkStream, splitStreams);
+
+        foreach (var stream in splitStreams)
+            await stream.DisposeAsync();
+    }
+
+    public static async Task UninstallPackage(string packageName)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        await _adbClient.UninstallAsync(_deviceData.Value, packageName);
+    }
+
     public static void InstallAppListingTool()
     {
         if (_deviceData == null || _adbClient == null)
@@ -130,6 +162,9 @@ internal static partial class ADBManager
 
                 i++; // go to Status
                 UnityApplicationFinder.Status status = Enum.Parse<UnityApplicationFinder.Status>(receiver.Listings[i], true);
+
+                if (packageName!.IsBad())
+                    status = UnityApplicationFinder.Status.Unsupported;
 
                 i++; // go to RawIconData
                 byte[] iconData = Convert.FromBase64String(receiver.Listings[i]);

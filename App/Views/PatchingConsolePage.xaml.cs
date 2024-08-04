@@ -13,6 +13,13 @@ public partial class PatchingConsolePage : ContentPage
             LogScrollView.ScrollToAsync(LogLabel, ScrollToPosition.End, false);
         }
     }
+
+    public string TopTitle
+    {
+        get => TitleLabel.Text;
+        set => TitleLabel.Text = value;
+    }
+
     public bool BackButtonVisible { get => GoBackButton.IsVisible; set => GoBackButton.IsVisible = value; }
 
     private Command _goBackCommand;

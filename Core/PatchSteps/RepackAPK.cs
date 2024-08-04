@@ -60,7 +60,7 @@ internal class RepackAPK : IPatchStep
             libArchive.Save();
         }
 
-        patcher._logger.Log("Writing");
+        patcher._logger.Log("Writing, this can take a few");
 
         archive.Save();
 

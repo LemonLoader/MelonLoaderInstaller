@@ -1,4 +1,5 @@
 ﻿using MelonLoader.Installer.App.Utils;
+using MelonLoader.Installer.Core;
 using System.IO.Compression;
 using System.Windows.Input;
 
@@ -104,22 +105,21 @@ public class PatchAppPageViewModel : BindableObject
     {
         if (PatchRunner.IsPatching)
         {
-            await PopupHelper.Toast("Already patching, you cannot patch multiple apps at once.");
+            await PopupHelper.Toast("Already patching or restoring, you cannot work on multiple apps at once.");
             return;
         }
 
         if (_currentAppData == null)
         {
             await PopupHelper.Toast("No app selected.", CommunityToolkit.Maui.Core.ToastDuration.Short);
-
             return;
         }
 
         await PatchRunner.Begin(CurrentAppData, localDepsPath);
     }
 
-    private void RestoreUnpatchedAPK()
+    private async void RestoreUnpatchedAPK()
     {
-        // TODO: restoring apk
+        await PatchRunner.BeginRestore(CurrentAppData);
     }
 }

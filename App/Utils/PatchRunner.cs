@@ -86,7 +86,61 @@ public static class PatchRunner
 
         CallPatchCore(data);
 
-        // TODO: reinstall
+        await ReinstallApp(data);
+
+        await RestoreAppData(data);
+    }
+
+    public static async Task BeginRestore(UnityApplicationFinder.Data data)
+    {
+        _isPatching = true;
+
+        try
+        {
+            Reset();
+
+            await Shell.Current.GoToAsync(nameof(PatchingConsolePage));
+            _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
+            _logger = new(_consolePage);
+
+            _consolePage.Title = "Restoring...";
+
+            Task task = Task.Run(async () => await InternalBeginRestore(data));
+            await task;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            _logger?.Log(ex.ToString());
+            MarkFailure();
+        }
+
+        _isPatching = false;
+        _consolePage!.BackButtonVisible = true;
+    }
+
+    private static async Task InternalBeginRestore(UnityApplicationFinder.Data data)
+    {
+        await BackupAppData(data);
+
+        string? backupDir = data.GetBackupDirectory();
+        if (backupDir == null)
+            return;
+
+        APKInstaller installer = new(data,
+            _logger!,
+            async () =>
+            {
+                await PopupHelper.Alert("Successfully patched the application.", "Success");
+                _consolePage!.BackButtonVisible = true;
+            },
+            async () =>
+            {
+                await PopupHelper.Alert("Unable to patch the application, read the console for more info.", "Failure");
+                _consolePage!.BackButtonVisible = true;
+            });
+
+        await installer.Install(backupDir);
 
         await RestoreAppData(data);
     }
@@ -126,6 +180,22 @@ public static class PatchRunner
 
     private static async Task<bool> DownloadMelonData(string destination)
     {
+        if (File.Exists(@"C:\Users\trevo\Desktop\melon_data\melon_data.zip"))
+        {
+            _logger?.Log("Using local melon data");
+
+            File.Copy(@"C:\Users\trevo\Desktop\melon_data\melon_data.zip", destination);
+            return true;
+        }
+
+        if (File.Exists(@"/sdcard/Download/melon_data.zip"))
+        {
+            _logger?.Log("Using local melon data");
+
+            File.Copy(@"/sdcard/Download/melon_data.zip", destination);
+            return true;
+        }
+
         _logger?.Log("Retrieving release info from GitHub");
 
         try
@@ -260,7 +330,6 @@ public static class PatchRunner
             throw new Exception("Failed to patch.");
         }
 
-        _logger?.Log("Application patched successfully, reinstalling.");
         return true;
     }
 
@@ -283,6 +352,56 @@ public static class PatchRunner
         dest = $"/sdcard/Android/obb/{data.PackageName}";
 
         await ADBManager.ShellMove(src, dest);
+    }
+
+    private static async Task ReinstallApp(UnityApplicationFinder.Data data)
+    {
+        if (data.Source == UnityApplicationFinder.Source.File)
+        {
+            _logger?.Log("APK patched successfully, moving to final path");
+
+            string originalPath = data.APKPaths.First();
+            string newPatchedPath = Path.Combine(Path.GetDirectoryName(originalPath)!, Path.GetFileNameWithoutExtension(originalPath) + "_patched.apk");
+            string patchedPath = Directory.GetFiles(_apkOutputPath).First();
+
+            File.Move(patchedPath, newPatchedPath, true);
+
+            _logger?.Log($"Patched APK saved [ {patchedPath} ]");
+
+#if WINDOWS
+            Process proc = new()
+            {
+                StartInfo =
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{newPatchedPath}\""
+                }
+            };
+
+            proc.Start();
+#endif
+
+            return;
+        }
+
+        _logger?.Log("Application patched successfully, reinstalling");
+
+        APKInstaller installer = new(data, _logger!, MarkSuccess, MarkFailure);
+        await installer.Install(_apkOutputPath);
+    }
+
+    private static void MarkSuccess()
+    {
+        Application.Current!.Dispatcher.Dispatch(async () =>
+        {
+            _logger?.Log("Patching complete");
+
+            await PopupHelper.Alert("Successfully patched the application.", "Success");
+
+            _consolePage!.BackButtonVisible = true;
+
+            _isPatching = false;
+        });
     }
 
     private static void MarkFailure()

@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Text;
+
 
 #if ANDROID
 using Android.Content.PM;
@@ -100,6 +102,9 @@ namespace MelonLoader.Installer.App.Utils
 #if ANDROID
         private static Status GetStatusFromInfo(ApplicationInfo info, string[]? libs = null)
         {
+            if (info.PackageName!.IsBad())
+                return Status.Unsupported;
+
             libs ??= Directory.GetFiles(info.NativeLibraryDir!);
 
             Status status = Status.Unpatched;
@@ -111,7 +116,6 @@ namespace MelonLoader.Installer.App.Utils
             return status;
         }
 #endif
-
         public class Data : BindableObject
         {
             public byte[] RawIconData { get; private set; }

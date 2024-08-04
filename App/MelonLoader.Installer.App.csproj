@@ -80,6 +80,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Platforms\Android\Resources\xml\provider_paths.xml" />
 	  <None Remove="Resources\Images\placeholder_icon.png" />
 	</ItemGroup>
 
