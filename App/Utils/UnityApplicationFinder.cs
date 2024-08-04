@@ -13,6 +13,8 @@ namespace MelonLoader.Installer.App.Utils
     {
         private static Dictionary<string, Data> _cachedDatas = [];
 
+        public static void Reset() => _cachedDatas.Clear();
+
         public static IEnumerable<Data> Find(CancellationToken token = default)
         {
 #if ANDROID

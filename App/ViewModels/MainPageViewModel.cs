@@ -51,6 +51,7 @@ public class MainPageViewModel : BindableObject
         Application.Current!.Dispatcher.Dispatch(() => OnAppAddingReset?.Invoke());
 
         Items.ClearOnUI();
+        UnityApplicationFinder.Reset();
         foreach (var app in UnityApplicationFinder.Find(token))
         {
             if (token.IsCancellationRequested)
