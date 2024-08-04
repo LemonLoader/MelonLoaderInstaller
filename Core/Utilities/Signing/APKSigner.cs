@@ -60,9 +60,6 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
 
         public void Sign(string apkPath)
         {
-            _logger.Log("Stripping V1 signing");
-            StripV1(apkPath);
-
             /* This isn't necessary and should make it so on Quest it won't keep screaming at the user that they should restore the app, until they patch it at least.
             
             _logger.Log("Signing with V1, this can take a few");
@@ -78,13 +75,6 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
         }
 
         #region V1
-
-        private void StripV1(string apkPath)
-        {
-            using ZipFile apkArchive = new(apkPath);
-            apkArchive.RemoveEntries(apkArchive.Entries.Where(entry => entry.FileName.StartsWith("META-INF")).ToArray());
-            apkArchive.Save();
-        }
 
         private void SignV1(string apkPath)
         {
