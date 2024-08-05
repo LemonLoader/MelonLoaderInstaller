@@ -1,4 +1,4 @@
-name: .NET MAUI (Android)
+name: .NET MAUI 
 
 on:
   push:
@@ -20,6 +20,6 @@ jobs:
     - name: Install MAUI workload
       run: dotnet workload install maui
     - name: Build
-      run: dotnet build -c Release -f:net8.0-android
+      run: dotnet build -c Release
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.5
