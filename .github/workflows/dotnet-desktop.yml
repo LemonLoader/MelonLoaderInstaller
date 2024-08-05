@@ -1,0 +1,25 @@
+name: .NET MAUI (Android)
+
+on:
+  push:
+    branches: [ master , redesign]
+  pull_request:
+    branches: [ master , redesign]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Install MAUI workload
+      run: dotnet workload install maui
+    - name: Build
+      run: dotnet build -c Release -f:net6.0-android
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.3.5
