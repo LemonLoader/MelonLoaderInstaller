@@ -26,4 +26,4 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.5
       with:
-        path: /home/runner/work/MelonLoaderInstaller/App/bin/Release/
+        path: App/bin/Release/
