@@ -21,5 +21,9 @@ jobs:
       run: dotnet workload install maui
     - name: Build
       run: dotnet build -c Release
+    - name: List files
+      run: tree /f
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.5
+      with:
+        path: /home/runner/work/MelonLoaderInstaller/App/bin/Release/
