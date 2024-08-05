@@ -5,6 +5,7 @@ on:
     branches: [ master , redesign]
   pull_request:
     branches: [ master , redesign]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,8 +22,6 @@ jobs:
       run: dotnet workload install maui
     - name: Build
       run: dotnet build -c Release
-    - name: List files
-      run: tree /f
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.5
       with:
