@@ -9,12 +9,6 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
 
-        if (!AndroidPermissionHandler.HaveRequired())
-        {
-            Shell.Current.GoToTabOnFirst(nameof(PermissionSetupPage));
-            return;
-        }
-
         MainPageViewModel viewModel = new();
         BindingContext = viewModel;
 
@@ -30,5 +24,11 @@ public partial class MainPage : ContentPage
             var twoStar = new RowDefinition(new(2, GridUnitType.Star));
             HeaderGrid.RowDefinitions = [twoStar, twoStar, twoStar, new(GridLength.Star)]; // "2*, 2*, 2*, *"
         };
+
+        if (!AndroidPermissionHandler.HaveRequired())
+        {
+            Shell.Current.GoToTabOnFirst(nameof(PermissionSetupPage));
+            return;
+        }
     }
 }
