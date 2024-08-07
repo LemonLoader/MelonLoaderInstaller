@@ -177,6 +177,8 @@ internal static partial class ADBManager
                     i++;
                 }
 
+                apkPaths.Reverse(); // apparently the java code causes a flipped list of apks; i presume i just misunderstood the api
+
                 i--; // go back so this process can run again
 
                 UnityApplicationFinder.Data data = new(appName, packageName, status, UnityApplicationFinder.Source.ADB, [.. apkPaths], iconData);
