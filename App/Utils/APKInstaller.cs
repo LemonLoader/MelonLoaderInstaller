@@ -120,7 +120,7 @@ public class APKInstaller
             }
 
             Intent callbackIntent = new(Platform.CurrentActivity!, typeof(Platforms.Android.SplitAPKService));
-            PendingIntent pending = PendingIntent.GetService(Platform.CurrentActivity!, 0, callbackIntent, PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
+            PendingIntent pending = PendingIntent.GetService(Platform.CurrentActivity!, 0, callbackIntent, (PendingIntentFlags)33554432)!; // 33554432 is PendingIntentFlags.Mutable but maui doesn't provide it
             session.Commit(pending.IntentSender);
         }
         catch (Exception e)

@@ -131,12 +131,12 @@ public static class PatchRunner
             _logger!,
             async () =>
             {
-                await PopupHelper.Alert("Successfully patched the application.", "Success");
+                await PopupHelper.Alert("Successfully restored the application.", "Success");
                 _consolePage!.BackButtonVisible = true;
             },
             async () =>
             {
-                await PopupHelper.Alert("Unable to patch the application, read the console for more info.", "Failure");
+                await PopupHelper.Alert("Unable to restore the application, read the console for more info.", "Failure");
                 _consolePage!.BackButtonVisible = true;
             });
 
