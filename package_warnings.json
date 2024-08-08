@@ -1,4 +1,4 @@
 {
-    "com.StressLevelZero.BONELAB": "Some mods will NOT function through LemonLoader, including Multiplayer Mockup.\nIf a mod does not function, do NOT bug the mod creator about it.",
+    "com.StressLevelZero.BONELAB": "LemonLoader does NOT currently work with any Patch 4 or 5 mods. It is best to wait for the next Lemon update before installing.",
     "com.SirCoolness.UnityTestModdingTarget": "This is a test warning!\nThis should only appear on SirCoolness' Unity Test Modding Target."
 }
