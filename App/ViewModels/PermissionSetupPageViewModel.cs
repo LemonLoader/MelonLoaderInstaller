@@ -60,8 +60,8 @@ public class PermissionSetupPageViewModel : BindableObject
         #region UI Bindings
 
         private bool _doneCheck = false;
-        public Color ButtonBackgroundColor => _doneCheck == true ? (Color)Application.Current!.Resources["Dark"] : (Color)Application.Current!.Resources["Light"];
-        public string ButtonText => _doneCheck == true ? "Already Setup" : "Press to Setup";
+        public Color ButtonBackgroundColor => _doneCheck ? (Color)Application.Current!.Resources["Dark"] : (Color)Application.Current!.Resources["Light"];
+        public string ButtonText => _doneCheck ? "Already Setup" : "Press to Setup";
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public RequiredPermission(Func<bool>? doneCheck = null)
