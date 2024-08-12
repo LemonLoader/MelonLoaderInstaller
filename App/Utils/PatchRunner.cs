@@ -180,22 +180,6 @@ public static class PatchRunner
 
     private static async Task<bool> DownloadMelonData(string destination)
     {
-        if (File.Exists(@"C:\Users\trevo\Desktop\melon_data\melon_data.zip"))
-        {
-            _logger?.Log("Using local melon data");
-
-            File.Copy(@"C:\Users\trevo\Desktop\melon_data\melon_data.zip", destination);
-            return true;
-        }
-
-        if (File.Exists(@"/sdcard/Download/melon_data.zip"))
-        {
-            _logger?.Log("Using local melon data");
-
-            File.Copy(@"/sdcard/Download/melon_data.zip", destination);
-            return true;
-        }
-
         _logger?.Log("Retrieving release info from GitHub");
 
         try
@@ -206,7 +190,7 @@ public static class PatchRunner
             string releaseInfo = await client.GetStringAsync("https://api.github.com/repos/LemonLoader/MelonLoader/releases/latest");
             JObject baseJson = JObject.Parse(releaseInfo);
             JToken asset = baseJson["assets"]!
-                .First(a => a["name"]!.ToString().StartsWith("installer_deps"));
+                .First(a => a["name"]!.ToString().StartsWith("melon_data"));
             string assetUrl = asset["browser_download_url"]!.ToString();
 
             _logger?.Log($"Downloading [ {assetUrl} ]");
