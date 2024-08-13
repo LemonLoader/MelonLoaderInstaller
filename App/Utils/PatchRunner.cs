@@ -259,17 +259,20 @@ public static class PatchRunner
 
         _logger?.Log("Backing up app data");
 
+        // the directories are moved out of their coresponding subdirs as restorecon doesn't have perms otherwise
         string src = $"/sdcard/Android/data/{data.PackageName}";
-        string dest = $"/sdcard/Android/data/{data.PackageName}.lemon";
+        string dest = $"/sdcard/Android/{data.PackageName}.data.lemon";
 
         await ADBManager.ShellMove(src, dest);
+        await ADBManager.ShellRestorecon(dest);
 
         _logger?.Log("Backing up app assets");
 
         src = $"/sdcard/Android/obb/{data.PackageName}";
-        dest = $"/sdcard/Android/obb/{data.PackageName}.lemon";
+        dest = $"/sdcard/Android/{data.PackageName}.obb.lemon";
 
         await ADBManager.ShellMove(src, dest);
+        await ADBManager.ShellRestorecon(dest);
     }
 
     private static bool CallPatchCore(UnityApplicationFinder.Data data)
@@ -325,14 +328,14 @@ public static class PatchRunner
 
         _logger?.Log("Restoring app data");
 
-        string src = $"/sdcard/Android/data/{data.PackageName}.lemon";
+        string src = $"/sdcard/Android/{data.PackageName}.data.lemon";
         string dest = $"/sdcard/Android/data/{data.PackageName}";
 
         await ADBManager.ShellMove(src, dest);
 
         _logger?.Log("Restoring app assets");
 
-        src = $"/sdcard/Android/obb/{data.PackageName}.lemon";
+        src = $"/sdcard/Android/{data.PackageName}.obb.lemon";
         dest = $"/sdcard/Android/obb/{data.PackageName}";
 
         await ADBManager.ShellMove(src, dest);

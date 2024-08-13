@@ -61,6 +61,14 @@ internal static partial class ADBManager
         return false;
     }
 
+    public static async Task ShellRestorecon(string path)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        await _adbClient.ExecuteRemoteCommandAsync($"restorecon -R \"{path}\"", _deviceData.Value);
+    }
+
     public static async Task ShellMove(string source, string dest)
     {
         if (_deviceData == null || _adbClient == null)
