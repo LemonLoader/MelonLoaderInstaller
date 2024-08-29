@@ -15,16 +15,16 @@ using System.Linq;
 using System.Collections.Generic;
 using Ionic.Zip;
 
-namespace MelonLoaderInstaller.Core.Utilities.Signing
+namespace MelonLoader.Installer.Core.Utilities.Signing
 {
     public class APKSigner
     {
         private X509Certificate _xCert;
         private AsymmetricKeyParameter _privateKey;
-        private SHA256 _sha;
+        private readonly SHA256 _sha;
 
-        private UTF8Encoding _encoding;
-        private IPatchLogger _logger;
+        private readonly UTF8Encoding _encoding;
+        private readonly IPatchLogger _logger;
 
         public APKSigner(string pemData, IPatchLogger patchLogger)
         {
@@ -60,10 +60,10 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         public void Sign(string apkPath)
         {
-            _logger.Log("Signing, this can take a few minutes.");
-
-            _logger.Log("Signing with V1");
-            SignV1(apkPath);
+            /* This isn't necessary and should make it so on Quest it won't keep screaming at the user that they should restore the app, until they patch it at least.
+            
+            _logger.Log("Signing with V1, this can take a few");
+            SignV1(apkPath);*/
 
             _logger.Log("Aligning");
             APKAligner.AlignApk(apkPath);
@@ -78,14 +78,14 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         private void SignV1(string apkPath)
         {
-            using ZipFile apkArchive = new ZipFile(apkPath);
+            using ZipFile apkArchive = new(apkPath);
 
             #region Create MANIFEST.MF
 
-            using MemoryStream manifestStream = new MemoryStream();
+            using MemoryStream manifestStream = new();
             using StreamWriter manifestWriter = AsStreamWriter(manifestStream);
 
-            using MemoryStream sigHolderStream = new MemoryStream();
+            using MemoryStream sigHolderStream = new();
             using StreamWriter sigHolderWriter = AsStreamWriter(sigHolderStream);
 
             manifestWriter.WriteLine("Manifest-Version: 1.0");
@@ -108,7 +108,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
             #region Create LEMON.SF
 
-            using MemoryStream sigStream = new MemoryStream();
+            using MemoryStream sigStream = new();
             using StreamWriter sigWriter = AsStreamWriter(sigStream);
 
             manifestStream.Seek(0, SeekOrigin.Begin);
@@ -157,7 +157,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             using Stream entryStream = entry.OpenReader();
             string entryDigest = Convert.ToBase64String(_sha.ComputeHash(entryStream));
 
-            using MemoryStream proxyStream = new MemoryStream();
+            using MemoryStream proxyStream = new();
             using StreamWriter proxyWriter = AsStreamWriter(proxyStream);
 
             proxyWriter.WriteLine($"Name: {entry.FileName}");
@@ -178,34 +178,34 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
         private byte[] GetSignatureFileSig(byte[] sfBytes)
         {
             var certStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(new List<X509Certificate> { _xCert }));
-            CmsSignedDataGenerator dataGen = new CmsSignedDataGenerator();
+            CmsSignedDataGenerator dataGen = new();
             dataGen.AddCertificates(certStore);
             dataGen.AddSigner(_privateKey, _xCert, CmsSignedGenerator.EncryptionRsa, CmsSignedGenerator.DigestSha256);
 
             // Content is detached - i.e. not included in the signature block itself
-            CmsProcessableByteArray detachedContent = new CmsProcessableByteArray(sfBytes);
+            CmsProcessableByteArray detachedContent = new(sfBytes);
             var signedContent = dataGen.Generate(detachedContent, false);
 
             // Get the signature in the proper ASN.1 structure for java to parse it properly.  Lots of trial and error
             var signerInfos = signedContent.GetSignerInfos();
             var signer = signerInfos.GetSigners().Cast<SignerInformation>().First();
             SignerInfo signerInfo = signer.ToSignerInfo();
-            Asn1EncodableVector digestAlgorithmsVector = new Asn1EncodableVector
-            {
+            Asn1EncodableVector digestAlgorithmsVector =
+            [
                 new AlgorithmIdentifier(new DerObjectIdentifier("2.16.840.1.101.3.4.2.1"), DerNull.Instance)
-            };
-            ContentInfo encapContentInfo = new ContentInfo(new DerObjectIdentifier("1.2.840.113549.1.7.1"), null);
-            Asn1EncodableVector asnVector = new Asn1EncodableVector()
-            {
+            ];
+            ContentInfo encapContentInfo = new(new DerObjectIdentifier("1.2.840.113549.1.7.1"), null);
+            Asn1EncodableVector asnVector =
+            [
                 X509CertificateStructure.GetInstance(Asn1Object.FromByteArray(_xCert.GetEncoded()))
-            };
-            Asn1EncodableVector signersVector = new Asn1EncodableVector() { signerInfo.ToAsn1Object() };
-            SignedData signedData = new SignedData(new DerSet(digestAlgorithmsVector), encapContentInfo, new BerSet(asnVector), null, new DerSet(signersVector));
-            ContentInfo contentInfo = new ContentInfo(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData);
+            ];
+            Asn1EncodableVector signersVector = [signerInfo.ToAsn1Object()];
+            SignedData signedData = new(new DerSet(digestAlgorithmsVector), encapContentInfo, new BerSet(asnVector), null, new DerSet(signersVector));
+            ContentInfo contentInfo = new(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData);
             return contentInfo.GetDerEncoded();
         }
 
-        private StreamWriter AsStreamWriter(MemoryStream ms) => new StreamWriter(ms, _encoding, 1024, true);
+        private StreamWriter AsStreamWriter(MemoryStream ms) => new(ms, _encoding, 1024, true);
 
         #endregion
 
@@ -213,10 +213,10 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
 
         private void SignV2(string path)
         {
-            FileStream fs = new FileStream(path, FileMode.Open);
-            using FileMemory memory = new FileMemory(fs);
-            using MemoryStream ms = new MemoryStream();
-            using FileMemory outMemory = new FileMemory(ms);
+            FileStream fs = new(path, FileMode.Open);
+            using FileMemory memory = new(fs);
+            using MemoryStream ms = new();
+            using FileMemory outMemory = new(ms);
             memory.Position = memory.Length() - 22;
             while (memory.ReadInt() != EndOfCentralDirectory.SIGNATURE)
             {
@@ -224,7 +224,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             }
             memory.Position -= 4;
             var eocdPosition = memory.Position;
-            EndOfCentralDirectory eocd = new EndOfCentralDirectory(memory);
+            EndOfCentralDirectory eocd = new(memory);
             if (eocd == null)
                 return;
             var cd = eocd.OffsetOfCD;
@@ -244,15 +244,15 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             bytes[2] = sizeBytes[1];
             bytes[3] = sizeBytes[2];
             bytes[4] = sizeBytes[3];
-            var digest = _sha.ComputeHash(bytes.Concat(digestChunks.Aggregate((a, b) => a.Concat(b).ToArray())).ToArray());
+            var digest = _sha.ComputeHash([.. bytes, .. digestChunks.Aggregate((a, b) => a.Concat(b).ToArray())]);
 
             uint algorithm = 0x0103;
 
-            APKSignatureSchemeV2 block = new APKSignatureSchemeV2();
-            var signer = new APKSignatureSchemeV2.Signer();
+            APKSignatureSchemeV2 block = new();
+            APKSignatureSchemeV2.Signer signer = new();
 
-            using MemoryStream signedDataMs = new MemoryStream();
-            using FileMemory memorySignedData = new FileMemory(signedDataMs);
+            using MemoryStream signedDataMs = new();
+            using FileMemory memorySignedData = new(signedDataMs);
             var signedData = new APKSignatureSchemeV2.Signer.BlockSignedData();
             signedData.Digests.Add(new APKSignatureSchemeV2.Signer.BlockSignedData.Digest(algorithm, digest));
 
@@ -269,7 +269,7 @@ namespace MelonLoaderInstaller.Core.Utilities.Signing
             signer.PublicKey = _xCert.CertificateStructure.SubjectPublicKeyInfo.GetDerEncoded();
             block.Signers.Add(signer);
 
-            APKSigningBlock signingBlock = new APKSigningBlock();
+            APKSigningBlock signingBlock = new();
             signingBlock.Values.Add(block.ToIDValuePair());
 
             fs.Position = 0;

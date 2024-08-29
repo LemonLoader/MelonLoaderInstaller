@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MelonLoader.Installer.App.Views.SelectADBDevicePage"
+             xmlns:local="clr-namespace:MelonLoader.Installer.App.Views"
+             xmlns:viewmodels="clr-namespace:MelonLoader.Installer.App.ViewModels"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons">
+
+    <ContentPage.BindingContext>
+        <viewmodels:SelectADBDevicePageViewModel />
+    </ContentPage.BindingContext>
+
+    <ListView ItemsSource="{Binding Devices}"
+              HasUnevenRows="True"
+              SelectionMode="None"
+              SeparatorVisibility="None">
+        <ListView.Header>
+            <Grid Padding="25"
+                  RowSpacing="10"
+                  RowDefinitions="2*"
+                  ColumnDefinitions="3*,*">
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Select an ADB device."
+                       FontSize="Title"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Light}" />
+
+                <Button Grid.Row="0"
+                        Grid.Column="1"
+                        Text="{mi:SegoeFluent Refresh, IconSize=Medium, IconColor={StaticResource Light}}"
+                        BorderWidth="0"
+                        BorderColor="Transparent"
+                        HorizontalOptions="EndAndExpand"
+                        Command="{Binding RefreshButtonCommand}"/>
+            </Grid>
+        </ListView.Header>
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <ViewCell>
+                    <Border Stroke="{StaticResource Dark}"
+                            Background="{StaticResource Dark}"
+                            StrokeShape="Rectangle">
+                        <Border Stroke="{StaticResource Primary}"
+                                Background="{StaticResource Primary}"
+                                StrokeShape="RoundRectangle 15,15,15,15"
+                                Padding="10"
+                                Margin="20,0,20,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding Model}"
+                                       TextColor="{StaticResource Light}"
+                                       FontAttributes="Bold"
+                                       FontSize="Medium" />
+                                <Label Grid.Row="1"
+                                       Grid.Column="0"
+                                       Text="{Binding Serial}"
+                                       TextColor="{StaticResource ExtraLight}"
+                                       FontSize="Micro" />
+
+                                <Border Grid.Row="2"
+                                        Grid.Column="0"
+                                        Stroke="{StaticResource Light}"
+                                        Background="{StaticResource Light}"
+                                        StrokeShape="RoundRectangle 15,15,15,15"
+                                        Padding="10"
+                                        Margin="0,10,0,0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:SelectADBDevicePage}}, Path=BindingContext.DeviceTappedCommand}"
+                                                              CommandParameter="{Binding}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Label Grid.Row="1"
+                                           Grid.Column="0"
+                                           Text="Use this Device"
+                                           TextColor="{StaticResource Primary}"
+                                           FontSize="Small"
+                                           HorizontalTextAlignment="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Border>
+                </ViewCell>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+        <ListView.Footer>
+            <Grid Padding="25"
+                  RowSpacing="10"
+                  RowDefinitions="2*">
+                <Border Grid.Row="0"
+                        Grid.Column="0"
+                        Stroke="{StaticResource Light}"
+                        Background="{StaticResource Light}"
+                        StrokeShape="RoundRectangle 15,15,15,15"
+                        Padding="10"
+                        Margin="0,10,0,0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:SelectADBDevicePage}}, Path=BindingContext.ContinueTappedCommand}"
+                                              CommandParameter="{Binding}" />
+                    </Border.GestureRecognizers>
+
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Continue Without a Device"
+                           TextColor="{StaticResource Primary}"
+                           FontSize="Small"
+                           HorizontalTextAlignment="Center" />
+                </Border>
+            </Grid>
+        </ListView.Footer>
+    </ListView>
+</ContentPage>

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MelonLoaderInstaller.Core.Utilities.Signing
+namespace MelonLoader.Installer.Core.Utilities.Signing
 {
     public class APKAligner
     {  

@@ -1,49 +1,48 @@
-﻿using MelonLoaderInstaller.Core.Utilities.Signing;
+﻿using MelonLoader.Installer.Core.Utilities.Signing;
 using System;
 using System.IO;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps;
+
+internal class AlignSign : IPatchStep
 {
-    internal class AlignSign : IPatchStep
+    private IPatchLogger? _logger;
+    private string _pemData = "";
+
+    public bool Run(Patcher patcher)
     {
-        private IPatchLogger _logger;
-        private string _pemData;
+        // Aligning occurs after V1 signing
 
-        public bool Run(Patcher patcher)
+        _logger = patcher._logger;
+        _pemData = patcher._info.PemData;
+
+        bool sign = Sign(patcher._info.OutputBaseApkPath);
+        if (patcher._args.IsSplit)
+            sign = sign && Sign(patcher._info.OutputLibApkPath);
+
+        if (patcher._info.OutputExtraApkPaths != null)
         {
-            // Aligning occurs after V1 signing
-
-            _logger = patcher._logger;
-            _pemData = patcher._info.PemData;
-
-            bool sign = Sign(patcher._info.OutputBaseApkPath);
-            if (patcher._args.IsSplit)
-                sign = sign && Sign(patcher._info.OutputLibApkPath);
-
-            if (patcher._info.OutputExtraApkPaths != null)
-            {
-                foreach (string apk in patcher._info.OutputExtraApkPaths)
-                    sign = sign && Sign(apk);
-            }
-
-            return sign;
+            foreach (string apk in patcher._info.OutputExtraApkPaths)
+                sign = sign && Sign(apk);
         }
 
-        private bool Sign(string apk)
-        {
-            _logger.Log($"Signing [ {Path.GetFileName(apk)} ]");
+        return sign;
+    }
 
-            try
-            {
-                APKSigner signer = new APKSigner(_pemData, _logger);
-                signer.Sign(apk);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"Signing failed\n{ex}");
-                return false;
-            }
+    private bool Sign(string apk)
+    {
+        _logger!.Log($"Signing [ {Path.GetFileName(apk)} ]");
+
+        try
+        {
+            APKSigner signer = new(_pemData, _logger);
+            signer.Sign(apk);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log($"Signing failed\n{ex}");
+            return false;
         }
     }
 }

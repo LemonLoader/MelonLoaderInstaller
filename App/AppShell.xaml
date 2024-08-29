@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="MelonLoader.Installer.App.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:MelonLoader.Installer.App"
+       xmlns:views="clr-namespace:MelonLoader.Installer.App.Views"
+       Shell.FlyoutBehavior="Disabled"
+       Shell.NavBarIsVisible="False"
+       Shell.BackgroundColor="Transparent"
+       Shell.TabBarBackgroundColor="{StaticResource Primary}"
+       Shell.TabBarForegroundColor="{StaticResource Light}"
+       Shell.TabBarTitleColor="{StaticResource Light}">
+
+    <TabBar>
+        <Tab x:Name="AppsTab"
+             Title="Apps"
+             Icon="{mi:SegoeFluent Apps}"
+             Route="MainPage">
+            <ShellContent ContentTemplate="{DataTemplate views:MainPage}" />
+        </Tab>
+        <Tab x:Name="PermissionsTab"
+             Title="Permissions"
+             Icon="{mi:SegoeFluent Permissions}"
+             Route="PermissionSetupPage">
+            <ShellContent ContentTemplate="{DataTemplate views:PermissionSetupPage}" />
+        </Tab>
+        <Tab x:Name="ADBDevicesTab"
+             Title="ADB Devices"
+             Icon="{mi:Fluent Phone24}"
+             Route="SelectADBDevicePage">
+            <ShellContent ContentTemplate="{DataTemplate views:SelectADBDevicePage}" />
+        </Tab>
+        <Tab x:Name="PatchAppPage"
+             Title="Patcher"
+             Icon="{mi:Fluent Wrench24}"
+             Route="PatchAppPage">
+            <ShellContent ContentTemplate="{DataTemplate views:PatchAppPage}" />
+        </Tab>
+    </TabBar>
+</Shell>

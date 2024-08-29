@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MelonLoader.Installer.App.Views.PatchingConsolePage">
+    
+    <Grid RowDefinitions="Auto, *, Auto">
+        <Label x:Name="TitleLabel"
+               Grid.Row="0"
+               Text="Patching..."
+               FontSize="Title"
+               FontAttributes="Bold"
+               TextColor="{StaticResource Light}"
+               Padding="25" />
+        <Border Grid.Row="1"
+                Stroke="{StaticResource Primary}"
+                Background="{StaticResource Primary}"
+                StrokeShape="RoundRectangle 15,15,15,15"
+                Padding="10"
+                Margin="20,0,20,10">
+            <ScrollView x:Name="LogScrollView">
+                <Label x:Name="LogLabel"
+                       LineBreakMode="WordWrap" />
+            </ScrollView>
+        </Border>
+        <Border  x:Name="GoBackButton"
+                 Grid.Row="2"
+                 Stroke="{StaticResource Light}"
+                 Background="{StaticResource Light}"
+                 StrokeShape="RoundRectangle 15,15,15,15"
+                 Padding="10"
+                 Margin="20,0,20,10">
+
+            <Label Text="Go Back"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="Small"
+                   HorizontalTextAlignment="Center" />
+        </Border>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MelonLoader.Installer.App.Views.MainPage"
+             xmlns:local="clr-namespace:MelonLoader.Installer.App.Views"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ListView ItemsSource="{Binding Items}"
+              HasUnevenRows="True"
+              SelectionMode="None"
+              SeparatorVisibility="None">
+        <ListView.Header>
+            <Grid x:Name="HeaderGrid"
+                  Padding="25"
+                  RowSpacing="10"
+                  RowDefinitions="2*,2*,2*,*"
+                  ColumnDefinitions="2*,*">
+                <Label Grid.Row="0"
+                       Text="LemonLoader"
+                       FontSize="Title"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Light}" />
+                <Label Grid.Row="1"
+                       Text="Select an app to patch."
+                       FontSize="Caption"
+                       FontAttributes="Italic"
+                       Padding="5,0,0,0"
+                       TextColor="{StaticResource ExtraLight}" />
+
+                <Label x:Name="LoadingLabel"
+                       Grid.Row="3"
+                       Text="Apps are loading, please wait."
+                       FontSize="Small"
+                       FontAttributes="Bold"
+                       Padding="5,0,0,0"
+                       TextColor="{StaticResource ExtraLight}" />
+                <Button Grid.Row="0"
+                        Grid.Column="1"
+                        HorizontalOptions="EndAndExpand"
+                        Text="{mi:SegoeFluent SDCard, IconSize=Medium, IconColor={StaticResource Light}}"
+                        BorderWidth="0"
+                        BorderColor="Transparent"
+                        Command="{Binding SelectAPKButtonCommand}" />
+            </Grid>
+        </ListView.Header>
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <ViewCell>
+                    <Border Stroke="{StaticResource Dark}"
+                            Background="{StaticResource Dark}"
+                            StrokeShape="Rectangle">
+                        <Border Stroke="{StaticResource Primary}"
+                                Background="{StaticResource Primary}"
+                                StrokeShape="RoundRectangle 15,15,15,15"
+                                Padding="10"
+                                Margin="20,0,20,10">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.ItemTappedCommand}"
+                                                      CommandParameter="{Binding}" />
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Grid.RowSpan="2"
+                                       Source="{Binding RawIconData, Mode=OneWay, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                                       Aspect="AspectFill"
+                                       HeightRequest="60"
+                                       WidthRequest="60" />
+
+                                <Label Grid.Column="1"
+                                       LineBreakMode="HeadTruncation">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding AppName}"
+                                                  TextColor="{StaticResource Light}"
+                                                  FontAttributes="Bold" />
+                                            <Span Text="{Binding StatusString}"
+                                                  TextColor="{StaticResource ExtraLight}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding PackageName}"
+                                       FontAttributes="Italic"
+                                       LineBreakMode="TailTruncation" />
+                            </Grid>
+                        </Border>
+                    </Border>
+                </ViewCell>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+</ContentPage>

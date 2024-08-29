@@ -10,11 +10,11 @@ using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.OpenSsl;
 
-namespace MelonLoaderInstaller.Core.PatchSteps
+namespace MelonLoader.Installer.Core.PatchSteps;
+
+internal class GenerateCertificate : IPatchStep
 {
-    internal class GenerateCertificate : IPatchStep
-    {
-        private const string FALLBACK_CERT = @"-----BEGIN CERTIFICATE-----
+    private const string FALLBACK_CERT = @"-----BEGIN CERTIFICATE-----
 MIICNTCCAZ6gAwIBAgIUeXP9Gyg714ZW2GVMXKbZzAKZIhEwDQYJKoZIhvcNAQEL
 BQAwFjEUMBIGA1UEAwwLbGVtb25fbWVsb24wIBcNMjMwNjA2MDU1NjI2WhgPMzAy
 MTEwMDcwNTU2MjZaMBYxFDASBgNVBAMMC2xlbW9uX21lbG9uMIGfMA0GCSqGSIb3
@@ -44,50 +44,49 @@ EAOKMnc46EOIT5Mfmi+IAQJAMyPfohx7AkrhalBIiTDV6pl332pdfVTBHdPUf4XV
 IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 -----END RSA PRIVATE KEY-----";
 
-        public bool Run(Patcher patcher)
+    public bool Run(Patcher patcher)
+    {
+        patcher._logger.Log("Generating certificate");
+
+        RsaKeyPairGenerator kpg = new();
+        kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
+
+        AsymmetricCipherKeyPair keyPair = kpg.GenerateKeyPair();
+
+        X509V3CertificateGenerator certificateGenerator = new();
+        BigInteger serialNumber = BigInteger.ProbablePrime(120, new Random());
+        X509Name issuerDN = new("CN=lemon");
+        X509Name subjectDN = new("CN=lemon");
+        certificateGenerator.SetSerialNumber(serialNumber);
+        certificateGenerator.SetIssuerDN(issuerDN);
+        certificateGenerator.SetSubjectDN(subjectDN);
+        certificateGenerator.SetNotBefore(DateTime.UtcNow.Date.AddYears(-999));
+        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(999));
+        certificateGenerator.SetPublicKey(keyPair.Public);
+
+        SubjectKeyIdentifierStructure subjectKeyIdentifierExtension = new(keyPair.Public);
+        certificateGenerator.AddExtension(X509Extensions.SubjectKeyIdentifier.Id, false, subjectKeyIdentifierExtension);
+        certificateGenerator.AddExtension(X509Extensions.BasicConstraints.Id, true, new BasicConstraints(false));
+
+        Asn1SignatureFactory signatureFactory = new("SHA256WITHRSA", keyPair.Private);
+        X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
+
+        if (certificate == null)
         {
-            patcher._logger.Log("Generating certificate");
-
-            RsaKeyPairGenerator kpg = new RsaKeyPairGenerator();
-            kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
-
-            AsymmetricCipherKeyPair keyPair = kpg.GenerateKeyPair();
-
-            var certificateGenerator = new X509V3CertificateGenerator();
-            BigInteger serialNumber = BigInteger.ProbablePrime(120, new Random());
-            X509Name issuerDN = new X509Name("CN=lemon");
-            X509Name subjectDN = new X509Name("CN=lemon");
-            certificateGenerator.SetSerialNumber(serialNumber);
-            certificateGenerator.SetIssuerDN(issuerDN);
-            certificateGenerator.SetSubjectDN(subjectDN);
-            certificateGenerator.SetNotBefore(DateTime.UtcNow.Date.AddYears(-999));
-            certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(999));
-            certificateGenerator.SetPublicKey(keyPair.Public);
-
-            var subjectKeyIdentifierExtension = new SubjectKeyIdentifierStructure(keyPair.Public);
-            certificateGenerator.AddExtension(X509Extensions.SubjectKeyIdentifier.Id, false, subjectKeyIdentifierExtension);
-            certificateGenerator.AddExtension(X509Extensions.BasicConstraints.Id, true, new BasicConstraints(false));
-
-            Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory("SHA256WITHRSA", keyPair.Private);
-            X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
-
-            if (certificate == null)
-            {
-                patcher._logger.Log("Generation failed, using fallback");
-                patcher._info.PemData = FALLBACK_CERT;
-                return true;
-            }
-
-            using StringWriter stringWriter = new StringWriter();
-            PemWriter pemWriter = new PemWriter(stringWriter);
-
-            pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
-            pemWriter.WriteObject(keyPair.Private);
-            patcher._info.PemData = stringWriter.ToString();
-
-            patcher._logger.Log("Done");
-
+            patcher._logger.Log("Generation failed, using fallback");
+            patcher._info.PemData = FALLBACK_CERT;
             return true;
         }
+
+        using StringWriter stringWriter = new();
+        PemWriter pemWriter = new(stringWriter);
+
+        pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
+        pemWriter.WriteObject(keyPair.Private);
+        patcher._info.PemData = stringWriter.ToString();
+
+        patcher._logger.Log("Done");
+
+        return true;
     }
 }
