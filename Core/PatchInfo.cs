@@ -10,9 +10,7 @@ internal class PatchInfo
 {
     public string LemonDataDirectory { get; } = "";
 
-    public string UnityBaseDirectory { get; } = "";
     public string UnityNativeDirectory { get; } = "";
-    public string UnityManagedDirectory { get; } = "";
 
     public string OutputBaseApkPath { get; } = "";
     public string? OutputLibApkPath { get; } = null;
@@ -28,9 +26,7 @@ internal class PatchInfo
 
         LemonDataDirectory = Path.Combine(arguments.TempDirectory, "lemon_data");
 
-        UnityBaseDirectory = Path.Combine(arguments.TempDirectory, "unity");
-        UnityNativeDirectory = Path.Combine(UnityBaseDirectory, "Libs");
-        UnityManagedDirectory = Path.Combine(UnityBaseDirectory, "Managed");
+        UnityNativeDirectory = Path.Combine(arguments.TempDirectory, "unity");
 
         OutputBaseApkPath = Path.Combine(arguments.OutputApkDirectory, "base.apk");
         if (_arguments.IsSplit)

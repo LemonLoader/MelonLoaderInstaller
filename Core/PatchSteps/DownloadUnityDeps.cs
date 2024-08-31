@@ -8,7 +8,7 @@ namespace MelonLoader.Installer.Core.PatchSteps;
 
 internal class DownloadUnityDeps : IPatchStep
 {
-    private const string DEPS_PROVIDER = "https://lemon.sircoolness.dev/android/";
+    private const string DEPS_PROVIDER = "https://github.com/LemonLoader/AndroidNativeLibraries/raw/main/";
 
     public bool Run(Patcher patcher)
     {

@@ -14,7 +14,7 @@ internal class CleanUp : IPatchStep
             DeleteFile(patcher._args.UnityDependenciesPath);
 
             DeleteDir(patcher._info.LemonDataDirectory);
-            DeleteDir(patcher._info.UnityBaseDirectory);
+            DeleteDir(patcher._info.UnityNativeDirectory);
 
             string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
             DeleteFile(extraLibPath);
