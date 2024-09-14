@@ -415,6 +415,7 @@ public static class PatchRunner
         _unityVersion = UnityVersion.MinVersion;
     }
 
+    // TODO: have this write to a file aswell
     public class PatchLogger : IPatchLogger
     {
         private PatchingConsolePage _consolePage;

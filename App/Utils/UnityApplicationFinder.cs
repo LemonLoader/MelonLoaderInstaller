@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Text;
-
 
 #if ANDROID
 using Android.Content.PM;

@@ -1,5 +1,4 @@
 ﻿using AdvancedSharpAdbClient.Models;
-using CommunityToolkit.Maui.Alerts;
 using MelonLoader.Installer.App.Utils;
 using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;

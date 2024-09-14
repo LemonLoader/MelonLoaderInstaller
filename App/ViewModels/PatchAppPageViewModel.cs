@@ -1,5 +1,4 @@
 ﻿using MelonLoader.Installer.App.Utils;
-using MelonLoader.Installer.Core;
 using System.IO.Compression;
 using System.Windows.Input;
 

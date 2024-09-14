@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using MelonLoader.Installer.App.Utils;
+﻿using MelonLoader.Installer.App.Utils;
 using MelonLoader.Installer.App.Views;
 using System.Collections.ObjectModel;
 using System.IO.Compression;

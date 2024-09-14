@@ -3,7 +3,6 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using AndroidX.Activity.Result;
-using AndroidX.Activity.Result.Contract;
 #endif
 
 using MelonLoader.Installer.Core;
