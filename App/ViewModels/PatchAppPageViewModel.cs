@@ -22,7 +22,7 @@ public class PatchAppPageViewModel : BindableObject
         }
     }
 
-    private static UnityApplicationFinder.Data _dummyAppData = new("No app selected.", "Please choose one from the apps tab.", UnityApplicationFinder.Status.Unpatched, UnityApplicationFinder.Source.None, [], null);
+    private static readonly UnityApplicationFinder.Data _dummyAppData = new("No app selected.", "Please choose one from the apps tab.", UnityApplicationFinder.Status.Unpatched, UnityApplicationFinder.Source.None, [], null);
     private static UnityApplicationFinder.Data? _currentAppData;
 
     public ICommand PatchTappedCommand { get; }
@@ -101,7 +101,7 @@ public class PatchAppPageViewModel : BindableObject
         }
     }
 
-    private async Task DoPatch(string? localDepsPath = null)
+    private static async Task DoPatch(string? localDepsPath = null)
     {
         if (PatchRunner.IsPatching)
         {

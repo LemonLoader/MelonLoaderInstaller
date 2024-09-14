@@ -17,13 +17,6 @@ public class PermissionSetupPageViewModel : BindableObject
         ItemTappedCommand = new Command<RequiredPermission>(OnItemTapped);
         ContinueTappedCommand = new Command(OnContinueTapped);
 
-        /*Permissions.Add(new(AndroidPermissionHandler.HasExternalStorage)
-        {
-            Name = "External Storage Permissions",
-            Description = "Required to access storage data during patching.",
-            Request = AndroidPermissionHandler.TryGetExternalStorage,
-        });*/
-
         Permissions.Add(new(AndroidPermissionHandler.HasAccessToAllFiles)
         {
             Name = "Manage All Files Permission",

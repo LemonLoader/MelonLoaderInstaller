@@ -1,30 +1,10 @@
-﻿#if ANDROID
-
-using Android;
-using Android.Content.PM;
-
-#endif
-
-namespace MelonLoader.Installer.App.Utils;
+﻿namespace MelonLoader.Installer.App.Utils;
 
 public static class AndroidPermissionHandler
 {
     public static bool HaveRequired()
     {
-        return HasExternalStorage() && HasAccessToAllFiles() && CanInstallUnknownSources();
-    }
-
-    public static bool HasExternalStorage()
-    {
-        // these perms don't work, hopefully they aren't too important
-        return true;
-/*#if ANDROID
-        bool canRead = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.ReadExternalStorage) == Permission.Granted;
-        bool canWrite = Platform.CurrentActivity!.CheckSelfPermission(Manifest.Permission.WriteExternalStorage) == Permission.Granted;
-        return canRead && canWrite;
-#else
-        return true;
-#endif*/
+        return HasAccessToAllFiles() && CanInstallUnknownSources();
     }
 
     public static bool HasAccessToAllFiles()
@@ -44,17 +24,6 @@ public static class AndroidPermissionHandler
         return Platform.CurrentActivity!.PackageManager!.CanRequestPackageInstalls();
 #else
         return true;
-#endif
-    }
-
-    public static void TryGetExternalStorage()
-    {
-#if ANDROID
-        Platform.CurrentActivity!.RequestPermissions(
-                [
-                    Manifest.Permission.ReadExternalStorage,
-                    Manifest.Permission.WriteExternalStorage,
-                ], 100);
 #endif
     }
 
