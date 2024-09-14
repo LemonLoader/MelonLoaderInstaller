@@ -2,6 +2,7 @@
 using MelonLoader.Installer.Core;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.Text;
 using UnityVersion = AssetRipper.Primitives.UnityVersion;
 
 namespace MelonLoader.Installer.App.Utils;
@@ -34,13 +35,15 @@ public static class PatchRunner
 
             await Shell.Current.GoToAsync(nameof(PatchingConsolePage));
             _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
-            _logger = new(_consolePage);
 
 #if ANDROID
             _basePath = Platform.CurrentActivity!.GetExternalFilesDir(null)!.ToString();
 #else
             _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
 #endif
+
+            _logger = new(_consolePage, _basePath);
+            _logger?.Log($"Created Log File [ {_logger.LogPath} ]");
 
             string packageName = data.Source == UnityApplicationFinder.Source.File ? "LocalFile" : data.PackageName;
             _tempPath = Path.Combine(_basePath, "patch_temp", packageName);
@@ -101,7 +104,7 @@ public static class PatchRunner
 
             await Shell.Current.GoToAsync(nameof(PatchingConsolePage));
             _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
-            _logger = new(_consolePage);
+            _logger = new(_consolePage, _basePath);
 
             _consolePage.Title = "Restoring...";
 
@@ -415,14 +418,30 @@ public static class PatchRunner
         _unityVersion = UnityVersion.MinVersion;
     }
 
-    // TODO: have this write to a file aswell
     public class PatchLogger : IPatchLogger
     {
-        private PatchingConsolePage _consolePage;
+        public string LogPath => _logPath;
 
-        public PatchLogger(PatchingConsolePage consolePage)
+        private PatchingConsolePage _consolePage;
+        private string _logPath;
+
+        private FileStream _fileStream;
+        private StreamWriter _writer;
+
+        public PatchLogger(PatchingConsolePage consolePage, string basePath)
         {
+            string baseLogPath = Path.Combine(basePath, "Logs");
+            if (!Directory.Exists(baseLogPath))
+                Directory.CreateDirectory(baseLogPath);
+
             _consolePage = consolePage;
+            _logPath = Path.Combine(baseLogPath, $"{DateTime.Now:%y-%M-%d_%H-%m-%s}.log");
+
+            _fileStream = File.Open(_logPath, new FileStreamOptions() { Access = FileAccess.ReadWrite, BufferSize = 0, Mode = FileMode.Create, Share = FileShare.ReadWrite });
+            _writer = new StreamWriter(_fileStream, Encoding.UTF8, 1)
+            {
+                AutoFlush = true
+            };
         }
 
         public void Clear()
@@ -433,6 +452,7 @@ public static class PatchRunner
         public void Log(string message)
         {
             Debug.WriteLine(message);
+            _writer.WriteLine(message);
             Application.Current!.Dispatcher.Dispatch(() => _consolePage.Log += message + '\n');
         }
     }
