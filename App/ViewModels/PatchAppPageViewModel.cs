@@ -66,15 +66,7 @@ public class PatchAppPageViewModel : BindableObject
                         return;
                     }
 
-                    bool hasAnyUnityEngineDlls = archive.Entries.Any(a => a.FullName.StartsWith("Managed") && a.FullName.Contains("UnityEngine.") && a.FullName.EndsWith("dll"));
-
-                    if (!hasAnyUnityEngineDlls)
-                    {
-                        await PopupHelper.Toast("Selected zip does not contain Unity DLLs and cannot be used.");
-                        return;
-                    }
-
-                    var unityLib = archive.GetEntry("Libs/arm64-v8a/libunity.so");
+                    var unityLib = archive.GetEntry("Libs/arm64-v8a/libunity.so") ?? archive.GetEntry("arm64-v8a/libunity.so");
 
                     if (unityLib == null)
                     {

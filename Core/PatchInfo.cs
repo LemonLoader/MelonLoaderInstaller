@@ -10,7 +10,7 @@ internal class PatchInfo
 {
     public string LemonDataDirectory { get; } = "";
 
-    public string UnityNativeDirectory { get; } = "";
+    public string UnityNativeDirectory { get; set; } = "";
 
     public string OutputBaseApkPath { get; } = "";
     public string? OutputLibApkPath { get; } = null;

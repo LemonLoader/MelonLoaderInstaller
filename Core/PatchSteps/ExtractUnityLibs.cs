@@ -11,6 +11,11 @@ internal class ExtractUnityLibs : IPatchStep
         using ZipArchive archive = new(zipStream, ZipArchiveMode.Read);
         archive.ExtractToDirectory(patcher._info.UnityNativeDirectory);
 
+        // handle unstripped dependencies from udgb
+        string libsSubDir = Path.Combine(patcher._info.UnityNativeDirectory, "Libs");
+        if (Directory.Exists(libsSubDir))
+            patcher._info.UnityNativeDirectory = libsSubDir;
+
         // We are going to be replacing libmain, we don't need any that are included by Unity
         foreach (string file in Directory.GetFiles(patcher._info.UnityNativeDirectory, "*.so", SearchOption.AllDirectories))
         {
