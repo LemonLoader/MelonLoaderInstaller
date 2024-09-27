@@ -27,15 +27,19 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<Title></Title>
+		<AndroidSigningKeyStore>meloninstaller.keystore</AndroidSigningKeyStore>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
 	  <ApplicationTitle>MelonLoader Installer</ApplicationTitle>
 	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
 	  <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
-	  <AndroidKeyStore>False</AndroidKeyStore>
+	  <AndroidKeyStore>True</AndroidKeyStore>
 	  <SupportedOSPlatformVersion>27.0</SupportedOSPlatformVersion>
 	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+	  <AndroidSigningStorePass>env:LEMON_KEYSTORE_PASS</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>melon</AndroidSigningKeyAlias>
+	  <AndroidSigningKeyPass>env:LEMON_KEYSTORE_PASS</AndroidSigningKeyPass>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
@@ -49,9 +53,12 @@
 	  <ApplicationId>com.lavagang.melonloader.installer</ApplicationId>
 	  <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
 	  <SupportedOSPlatformVersion>27.0</SupportedOSPlatformVersion>
-	  <AndroidKeyStore>False</AndroidKeyStore>
+	  <AndroidKeyStore>True</AndroidKeyStore>
 	  <AndroidPackageFormat>apk</AndroidPackageFormat>
 	  <RunAOTCompilation>False</RunAOTCompilation>
+	  <AndroidSigningStorePass>env:LEMON_KEYSTORE_PASS</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>melon</AndroidSigningKeyAlias>
+	  <AndroidSigningKeyPass>env:LEMON_KEYSTORE_PASS</AndroidSigningKeyPass>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">

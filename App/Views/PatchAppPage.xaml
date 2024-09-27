@@ -96,7 +96,7 @@
                                           CommandParameter="{Binding}" />
                 </Border.GestureRecognizers>
 
-                <Label Text="Patch with Local Dependencies"
+                <Label Text="Patch with Local Unity Dependencies"
                        TextColor="{StaticResource Light}"
                        FontSize="Small"
                        HorizontalTextAlignment="Center" />
