@@ -169,7 +169,7 @@ public class APKInstaller
         }
 
         _logger.Log("Uninstall successful");
-        _next!.Invoke();
+        await _next!();
     }
 
     public async Task CheckPackageInstalled()
