@@ -19,7 +19,7 @@ public class APKInstaller
     
     private string? _apkDirectory;
 
-    private Action? _next;
+    private Func<Task>? _next;
     private Action _onInstallFail;
     private Action _afterInstall;
 
@@ -51,7 +51,7 @@ public class APKInstaller
     {
         _apkDirectory = apkDirectory;
 
-        _next = async () => await InternalInstall();
+        _next = InternalInstall;
         await UninstallPackage();
     }
 
@@ -146,7 +146,7 @@ public class APKInstaller
         await Task.Delay(50);
 #else
         await ADBManager.UninstallPackage(_data.PackageName);
-        _next!.Invoke();
+        await _next!();
 #endif
     }
 

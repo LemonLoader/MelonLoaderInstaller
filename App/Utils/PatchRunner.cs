@@ -178,7 +178,8 @@ public static class PatchRunner
 
         _logger?.Log("Downloading MelonLoader data");
 
-        await DownloadMelonData(_melonDataPath);
+        if (!await DownloadMelonData(_melonDataPath))
+            throw new Exception("Failed to download MelonLoader data");
     }
 
     private static async Task<bool> DownloadMelonData(string destination)
