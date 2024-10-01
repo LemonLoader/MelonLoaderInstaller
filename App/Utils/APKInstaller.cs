@@ -21,7 +21,6 @@ public class APKInstaller
 
     private Func<Task>? _next;
     private Action _onInstallFail;
-    private Action _afterInstall;
 
 #if ANDROID
     private string _pending;
@@ -29,13 +28,12 @@ public class APKInstaller
     private int _uninstallLoopCount;
 #endif
 
-    public APKInstaller(UnityApplicationFinder.Data data, IPatchLogger logger, Action afterInstall, Action onInstallFail)
+    public APKInstaller(UnityApplicationFinder.Data data, IPatchLogger logger, Action onInstallFail)
     {
         Current = this;
 
         _data = data;
         _logger = logger;
-        _afterInstall = afterInstall;
         _onInstallFail = onInstallFail;
 
 #if ANDROID
@@ -93,7 +91,6 @@ public class APKInstaller
         await Task.Delay(50);
 #else
         await ADBManager.InstallAPK(apk);
-        _afterInstall.Invoke();
 #endif
     }
 
@@ -130,7 +127,6 @@ public class APKInstaller
         await Task.Delay(50);
 #else
         await ADBManager.InstallMultipleAPKs(apks.First(a => a.EndsWith("base.apk")), apks.Where(a => !a.EndsWith("base.apk")).ToArray());
-        _afterInstall.Invoke();
 #endif
     }
 
@@ -188,8 +184,6 @@ public class APKInstaller
 
             return;
         }
-
-        _afterInstall.Invoke();
     }
 
     private bool IsPackageInstalled()

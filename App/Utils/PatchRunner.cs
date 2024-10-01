@@ -92,6 +92,8 @@ public static class PatchRunner
         await ReinstallApp(data);
 
         await RestoreAppData(data);
+
+        MarkSuccess();
     }
 
     public static async Task BeginRestore(UnityApplicationFinder.Data data)
@@ -134,11 +136,6 @@ public static class PatchRunner
             _logger!,
             async () =>
             {
-                await PopupHelper.Alert("Successfully restored the application.", "Success");
-                _consolePage!.BackButtonVisible = true;
-            },
-            async () =>
-            {
                 await PopupHelper.Alert("Unable to restore the application, read the console for more info.", "Failure");
                 _consolePage!.BackButtonVisible = true;
             });
@@ -146,6 +143,9 @@ public static class PatchRunner
         await installer.Install(backupDir);
 
         await RestoreAppData(data);
+
+        await PopupHelper.Alert("Successfully restored the application.", "Success");
+        _consolePage!.BackButtonVisible = true;
     }
 
     private static async Task GetUnityVersion(UnityApplicationFinder.Data data)
@@ -256,7 +256,6 @@ public static class PatchRunner
             else
                 await ADBManager.PullFileToPath(apk, backupPath);
         }
-
     }
 
     private static async Task CopyAPKsFromDevice(UnityApplicationFinder.Data data)
@@ -395,7 +394,7 @@ public static class PatchRunner
 
         _logger?.Log("Application patched successfully, reinstalling");
 
-        APKInstaller installer = new(data, _logger!, MarkSuccess, MarkFailure);
+        APKInstaller installer = new(data, _logger!, MarkFailure);
         await installer.Install(_apkOutputPath);
     }
 
