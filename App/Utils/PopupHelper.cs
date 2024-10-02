@@ -25,4 +25,9 @@ public static class PopupHelper
     {
         await Application.Current!.MainPage!.DisplayAlert(title, message, cancel);
     }
+
+    public static async Task<bool> TwoAnswerQuestion(string message, string title, string yes, string no)
+    {
+        return await Application.Current!.MainPage!.DisplayAlert(title, message, yes, no);
+    }
 }

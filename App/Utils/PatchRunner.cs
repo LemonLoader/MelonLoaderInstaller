@@ -272,30 +272,6 @@ public static class PatchRunner
         }
     }
 
-    private static async Task BackupAppData(UnityApplicationFinder.Data data)
-    {
-        // backing up files on-device on most recent android versions is a massive pain, if not impossible
-        if (data.Source != UnityApplicationFinder.Source.ADB)
-            return;
-
-        _logger?.Log("Backing up app data");
-
-        // the directories are moved out of their coresponding subdirs as restorecon doesn't have perms otherwise
-        string src = $"/sdcard/Android/data/{data.PackageName}";
-        string dest = $"/sdcard/Android/{data.PackageName}.data.lemon";
-
-        await ADBManager.ShellMove(src, dest);
-        await ADBManager.ShellRestorecon(dest);
-
-        _logger?.Log("Backing up app assets");
-
-        src = $"/sdcard/Android/obb/{data.PackageName}";
-        dest = $"/sdcard/Android/{data.PackageName}.obb.lemon";
-
-        await ADBManager.ShellMove(src, dest);
-        await ADBManager.ShellRestorecon(dest);
-    }
-
     private static bool CallPatchCore(UnityApplicationFinder.Data data)
     {
         _logger?.Log("Starting patching core");
@@ -341,25 +317,72 @@ public static class PatchRunner
         return true;
     }
 
+    private static async Task BackupAppData(UnityApplicationFinder.Data data)
+    {
+        // backing up files on-device on most recent android versions is a massive pain, if not impossible
+        if (data.Source != UnityApplicationFinder.Source.ADB)
+            return;
+
+        _logger?.Log("Backing up app data, this can take awhile");
+
+        string src = $"/sdcard/Android/data/{data.PackageName}";
+        string dest = Path.Combine(_tempPath, "data_backup"); // the package name isnt here due to how adb handles pulling
+
+        await ADBManager.PullDirectoryToPath(src, dest, true, _logger);
+
+        _logger?.Log("Backing up app assets, this can take awhile");
+
+        src = $"/sdcard/Android/obb/{data.PackageName}";
+        dest = $"/sdcard/Android/{data.PackageName}.obb.lemon";
+
+        await ADBManager.TryMoveUsingScript(src, dest);
+    }
+
     private static async Task RestoreAppData(UnityApplicationFinder.Data data)
     {
         // backing up files on-device on most recent android versions is a massive pain, if not impossible
         if (data.Source != UnityApplicationFinder.Source.ADB)
             return;
 
-        _logger?.Log("Restoring app data");
+        // I tried so many things and all of them caused permission issues.
+        // At this point, I give up and will let users restore it themselves.
 
-        string src = $"/sdcard/Android/{data.PackageName}.data.lemon";
-        string dest = $"/sdcard/Android/data/{data.PackageName}";
+        /*_logger?.Log("Restoring app data, this can take awhile");
 
-        await ADBManager.ShellMove(src, dest);
+        string src = Path.Combine(_tempPath, "data_backup", $"{data.PackageName}");
+        string dest = $"/sdcard/Android/data/"; // the package name isnt here due to how adb handles pushing
 
-        _logger?.Log("Restoring app assets");
+        await ADBManager.PushDirectoryToDevice(src, dest, _logger);
+        await ADBManager.AttemptPermissionReset($"/sdcard/Android/data/{data.PackageName}");*/
 
-        src = $"/sdcard/Android/{data.PackageName}.obb.lemon";
-        dest = $"/sdcard/Android/obb/{data.PackageName}";
+        _logger?.Log("Restoring app assets (OBBs), this can take awhile");
 
-        await ADBManager.ShellMove(src, dest);
+        string src = $"/sdcard/Android/{data.PackageName}.obb.lemon";
+        string dest = $"/sdcard/Android/obb/{data.PackageName}";
+
+        await ADBManager.TryMoveUsingScript(src, dest);
+
+        _logger?.Log("Asset restore complete");
+
+        // ask about game data
+
+        await Application.Current!.Dispatcher.DispatchAsync(async () =>
+        {
+            bool res = await PopupHelper.TwoAnswerQuestion("Lemon is unable to restore app data, do you want to open the folder containing the back up now? It will not be deleted after patching is complete.", "Unable to Restore", "Yes", "No");
+            if (res)
+            {
+                Process proc = new()
+                {
+                    StartInfo =
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{Path.Combine(_tempPath, "data_backup", $"{data.PackageName}")}\""
+                }
+                };
+
+                proc.Start();
+            }
+        });
     }
 
     private static async Task ReinstallApp(UnityApplicationFinder.Data data)

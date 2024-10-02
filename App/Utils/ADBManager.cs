@@ -2,6 +2,11 @@
 using AdvancedSharpAdbClient;
 using AdvancedSharpAdbClient.Receivers;
 using System.Reflection;
+using AdvancedSharpAdbClient.Exceptions;
+using AdvancedSharpAdbClient.DeviceCommands;
+using MelonLoader.Installer.Core;
+using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace MelonLoader.Installer.App.Utils;
 
@@ -14,8 +19,10 @@ internal static partial class ADBManager
 
     private static bool _initialized;
     private static bool _listingToolInstalled;
+    private static bool _copyingToolInstalled;
 
     private static string _baseDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+    private static string? _adbExePath;
 
     public static void Initialize()
     {
@@ -23,12 +30,14 @@ internal static partial class ADBManager
         if (!Directory.Exists(Path.Combine(_baseDir, "Resources")))
             _baseDir = Path.GetDirectoryName(_baseDir)!;
 
+        _adbExePath = Path.Combine(_baseDir, "Resources", "platform-tools", "adb.exe");
+
         if (!AdbServer.Instance.GetStatus().IsRunning)
         {
             AdbServer server = new();
-            StartServerResult result = server.StartServer(Path.Combine(_baseDir, "Resources", "platform-tools", "adb.exe"), false);
+            StartServerResult result = server.StartServer(_adbExePath, false);
             if (result != StartServerResult.Started)
-                System.Diagnostics.Debug.WriteLine("Unable to start ADB server.");
+                Debug.WriteLine("Unable to start ADB server.");
         }
 
         _adbClient = new();
@@ -59,22 +68,6 @@ internal static partial class ADBManager
             return true;
 
         return false;
-    }
-
-    public static async Task ShellRestorecon(string path)
-    {
-        if (_deviceData == null || _adbClient == null)
-            return;
-
-        await _adbClient.ExecuteRemoteCommandAsync($"restorecon -R \"{path}\"", _deviceData.Value);
-    }
-
-    public static async Task ShellMove(string source, string dest)
-    {
-        if (_deviceData == null || _adbClient == null)
-            return;
-
-        await _adbClient.ExecuteRemoteCommandAsync($"mv \"{source}\" \"{dest}\"", _deviceData.Value);
     }
 
     public static async Task InstallAPK(string apkPath)
@@ -114,9 +107,9 @@ internal static partial class ADBManager
         if (_deviceData == null || _adbClient == null)
             return;
 
-        string aaptPath = Path.Combine(_baseDir, "Resources", "melonapplisting.dex");
+        string toolPath = Path.Combine(_baseDir, "Resources", "melonapplisting.dex");
         using SyncService service = new(_deviceData.Value);
-        using FileStream stream = File.OpenRead(aaptPath);
+        using FileStream stream = File.OpenRead(toolPath);
         service.Push(stream, "/data/local/tmp/melonapplisting.dex", UnixFileStatus.AccessPermissions, DateTimeOffset.Now, null);
         _listingToolInstalled = true;
     }
@@ -131,14 +124,134 @@ internal static partial class ADBManager
         _listingToolInstalled = false;
     }
 
+    public static void InstallCopyScript()
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        string toolPath = Path.Combine(_baseDir, "Resources", "lemon_copy_util.sh");
+        using SyncService service = new(_deviceData.Value);
+        using FileStream stream = File.OpenRead(toolPath);
+        service.Push(stream, "/data/local/tmp/lemon_copy_util.sh", UnixFileStatus.AccessPermissions, DateTimeOffset.Now, null);
+        _adbClient.ExecuteRemoteCommand("chmod +x /data/local/tmp/lemon_copy_util.sh", _deviceData.Value);
+        _copyingToolInstalled = true;
+    }
+
+    public static async Task TryMoveUsingScript(string source, string dest)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        if (!_copyingToolInstalled)
+            InstallCopyScript();
+
+        LineReceiver rc = new();
+        await _adbClient.ExecuteRemoteCommandAsync($"/system/bin/sh /data/local/tmp/lemon_copy_util.sh \"{source}\" \"{dest}\"", _deviceData.Value, rc);
+    }
+
     public static async Task PullFileToPath(string devicePath, string destinationPath)
     {
         if (_deviceData == null || _adbClient == null)
             return;
 
-        using SyncService service = new(_deviceData.Value);
-        using FileStream stream = File.OpenWrite(destinationPath);
-        await service.PullAsync(devicePath, stream, null);
+        try
+        {
+            using SyncService service = new(_deviceData.Value);
+            using FileStream stream = File.OpenWrite(destinationPath);
+            await service.PullAsync(devicePath, stream, null);
+        }
+        catch (AdbException)
+        {
+            // likely a file not found
+        }
+    }
+
+    public static async Task PullDirectoryToPath(string deviceFolderPath, string destinationFolderPath, bool stripIl2cpp = false, IPatchLogger? logger = null)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        if (!Directory.Exists(destinationFolderPath))
+            Directory.CreateDirectory(destinationFolderPath);
+
+        logger?.Log($"Working in {deviceFolderPath}");
+
+        await CallADBDirect($"pull \"{deviceFolderPath}\" \"{destinationFolderPath}\"");
+
+        if (stripIl2cpp)
+        {
+            // assumes we're working on an Android data folder
+            string path = Path.Combine(destinationFolderPath, Path.GetFileName(deviceFolderPath).TrimEnd('/'));
+
+            string il2Folder = Path.Combine(path, "files", "il2cpp");
+            if (Directory.Exists(il2Folder))
+                Directory.Delete(il2Folder, true);
+
+            // unity creates a "il2cpp_tmp" folder when the il2cpp folder can't be accessed (which happens with this pull/push cycle for some reason)
+            il2Folder = Path.Combine(path, "files", "il2cpp_tmp");
+            if (Directory.Exists(il2Folder))
+                Directory.Delete(il2Folder, true);
+        }
+    }
+
+    public static async Task PushDirectoryToDevice(string sourceFolderPath, string deviceFolderPath, IPatchLogger? logger = null)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        logger?.Log($"Pushing {sourceFolderPath}");
+
+        for (int i = 0; i < 5; i++)
+        {
+            try
+            {
+                await CallADBDirect($"push --sync \"{sourceFolderPath}\" \"{deviceFolderPath}\"");
+                break;
+            }
+            catch (AdbException ex)
+            {
+                // keep retrying if its a mkdir issue, it resolves itself
+                if (ex.Message.Contains("secure_mkdirs failed"))
+                {
+                    logger?.Log("mkdir error; retrying");
+                    i--;
+                }
+                else
+                    logger?.Log($"Failed to push {sourceFolderPath}\n{ex}");
+            }
+        }
+    }
+
+    public static async Task AttemptPermissionReset(string path)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        await _adbClient.ExecuteShellCommandAsync(_deviceData.Value, $"find \"{path}\" -type d -exec chmod 760 {{}} \\; -o -type f -exec chmod 660 {{}} \\;");
+    }
+
+    private static async Task CallADBDirect(string command)
+    {
+        if (_deviceData == null || _adbClient == null)
+            return;
+
+        Process proc = new()
+        {
+            StartInfo = new()
+            {
+                FileName = _adbExePath,
+                Arguments = $"-s {_deviceData!.Value.Serial} {command}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            }
+        };
+
+        proc.Start();
+        await proc.WaitForExitAsync();
+
+        if (proc.ExitCode != 0)
+            throw new AdbException(await proc.StandardOutput.ReadToEndAsync());
     }
 
     const string LISTING_TOOL_SPLIT = "-----------------------------------";
