@@ -27,13 +27,13 @@
         </Tab>
         <Tab x:Name="ADBDevicesTab"
              Title="ADB Devices"
-             Icon="{mi:Fluent Phone24}"
+             Icon="{mi:SegoeFluent MobileTablet}"
              Route="SelectADBDevicePage">
             <ShellContent ContentTemplate="{DataTemplate views:SelectADBDevicePage}" />
         </Tab>
         <Tab x:Name="PatchAppPage"
              Title="Patcher"
-             Icon="{mi:Fluent Wrench24}"
+             Icon="{mi:SegoeFluent Package}"
              Route="PatchAppPage">
             <ShellContent ContentTemplate="{DataTemplate views:PatchAppPage}" />
         </Tab>

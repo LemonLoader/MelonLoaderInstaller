@@ -374,10 +374,10 @@ public static class PatchRunner
                 Process proc = new()
                 {
                     StartInfo =
-                {
-                    FileName = "explorer.exe",
-                    Arguments = $"/select,\"{Path.Combine(_tempPath, "data_backup", $"{data.PackageName}")}\""
-                }
+                    {
+                        FileName = "explorer.exe",
+                        Arguments = $"/select,\"{Path.Combine(_tempPath, "data_backup", $"{data.PackageName}")}\""
+                    }
                 };
 
                 proc.Start();

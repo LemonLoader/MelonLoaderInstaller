@@ -199,6 +199,9 @@ internal static partial class ADBManager
         if (_deviceData == null || _adbClient == null)
             return;
 
+        if (!Directory.Exists(sourceFolderPath))
+            return;
+
         logger?.Log($"Pushing {sourceFolderPath}");
 
         for (int i = 0; i < 5; i++)
