@@ -366,23 +366,27 @@ public static class PatchRunner
 
         // ask about game data
 
-        await Application.Current!.Dispatcher.DispatchAsync(async () =>
+        string dataBackupPath = Path.Combine(_tempPath, "data_backup", $"{data.PackageName}");
+        if (Directory.Exists(dataBackupPath) && Directory.GetFileSystemEntries(dataBackupPath).Length > 0)
         {
-            bool res = await PopupHelper.TwoAnswerQuestion("Lemon is unable to restore app data, do you want to open the folder containing the back up now? It will not be deleted after patching is complete.", "Unable to Restore", "Yes", "No");
-            if (res)
+            await Application.Current!.Dispatcher.DispatchAsync(async () =>
             {
-                Process proc = new()
+                bool res = await PopupHelper.TwoAnswerQuestion("Lemon is unable to restore app data, do you want to open the folder containing the back up now? It will not be deleted after patching is complete.", "Unable to Restore", "Yes", "No");
+                if (res)
                 {
-                    StartInfo =
+                    Process proc = new()
+                    {
+                        StartInfo =
                     {
                         FileName = "explorer.exe",
-                        Arguments = $"/select,\"{Path.Combine(_tempPath, "data_backup", $"{data.PackageName}")}\""
+                        Arguments = $"/select,\"{dataBackupPath}\""
                     }
-                };
+                    };
 
-                proc.Start();
-            }
-        });
+                    proc.Start();
+                }
+            });
+        }
     }
 
     private static async Task ReinstallApp(UnityApplicationFinder.Data data)
