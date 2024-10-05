@@ -176,7 +176,15 @@ internal static partial class ADBManager
 
         logger?.Log($"Working in {deviceFolderPath}");
 
-        await CallADBDirect($"pull \"{deviceFolderPath}\" \"{destinationFolderPath}\"");
+        try
+        {
+            await CallADBDirect($"pull \"{deviceFolderPath}\" \"{destinationFolderPath}\"");
+        }
+        catch (AdbException ex)
+        {
+            if (!ex.Message.Contains("No such file or directory"))
+                throw;
+        }
 
         if (stripIl2cpp)
         {
