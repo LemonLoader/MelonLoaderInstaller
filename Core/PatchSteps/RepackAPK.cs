@@ -55,7 +55,7 @@ internal class RepackAPK : IPatchStep
         else
         {
             using FileStream libStream = File.Open(patcher._info.OutputLibApkPath!, FileMode.Open);
-            using ZipArchive libArchive = new(libStream);
+            using ZipArchive libArchive = new(libStream, ZipArchiveMode.Read | ZipArchiveMode.Update);
 
             CopyTo(libArchive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
             CopyTo(libArchive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
