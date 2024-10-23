@@ -2,6 +2,7 @@ package com.melonloader.nativeapplisting;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Intent;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -55,15 +56,23 @@ public class Core {
 
             for (ApplicationInfo info : pkg.getInstalledApplications(PackageManager.GET_META_DATA)) {
                 File nativeLibDir = Paths.get(info.nativeLibraryDir).toFile();
-
                 if (!nativeLibDir.exists())
                     continue;
 
                 File[] files = nativeLibDir.listFiles();
 
-                boolean isUnity = Arrays.stream(files).anyMatch(f -> f.getName().contains("libunity.so"));
-                boolean isIl2Cpp = Arrays.stream(files).anyMatch(f -> f.getName().contains("libil2cpp.so"));
-                if (!isUnity || !isIl2Cpp)
+                boolean isUnity = Arrays.stream(files).anyMatch(f -> f.getName().contains("libunity.so") || f.getName().contains("libil2cpp.so"));
+                boolean hasPlayer = false;
+
+                Intent intent = pkg.getLaunchIntentForPackage(info.packageName);
+                if (intent != null) {
+                    try {
+                        hasPlayer = intent.getComponent().getClassName().contains("UnityPlayer");
+                    }
+                    catch (Exception ex) {}
+                }
+
+                if (!isUnity && !hasPlayer)
                     continue;
 
                 Status status = Status.Unpatched;
