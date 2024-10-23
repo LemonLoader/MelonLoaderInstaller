@@ -54,21 +54,34 @@ public static class UnityVersionFinder
         Stream? ggmStream = archive.GetEntry("assets/bin/Data/globalgamemanagers")?.Open();
         Stream? dataStream = archive.GetEntry("assets/bin/Data/data.unity3d")?.Open();
 
+        if (ggmStream == null && dataStream == null)
+            return UnityVersion.MinVersion;
+
         return await GenericParseUnityVersion(data, ggmStream, dataStream);
     }
 
+    // TODO: this is incredibly wasteful, should see if I can do this after copying apks then just read those instead of pulling and deleting
     private static async Task<UnityVersion> ADBParseUnityVersion(UnityApplicationFinder.Data data, string tempPath)
     {
-        string deviceApkPath = data.APKPaths.First();
-        string destinationPath = Path.Combine(tempPath, Path.GetFileName(deviceApkPath));
+        foreach (string deviceApkPath in data.APKPaths)
+        {
+            // handle splits, but skip configs (libraries for the most part)
+            if (Path.GetFileName(deviceApkPath).StartsWith("split_config"))
+                continue;
 
-        await ADBManager.PullFileToPath(deviceApkPath, destinationPath);
+            string destinationPath = Path.Combine(tempPath, Path.GetFileName(deviceApkPath));
 
-        UnityVersion res = await FileParseUnityVersion(data, destinationPath);
+            await ADBManager.PullFileToPath(deviceApkPath, destinationPath);
 
-        File.Delete(destinationPath);
+            UnityVersion res = await FileParseUnityVersion(data, destinationPath);
 
-        return res;
+            File.Delete(destinationPath);
+
+            if (res != UnityVersion.MinVersion)
+                return res;
+        }
+
+        throw new Exception("Failed to parse Unity version.");
     }
 
     private static async Task<UnityVersion> GenericParseUnityVersion(UnityApplicationFinder.Data data, Stream? globalgamemanagers, Stream? dataUnity3d)
