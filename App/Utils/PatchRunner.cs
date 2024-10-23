@@ -1,4 +1,5 @@
-﻿using MelonLoader.Installer.App.Views;
+﻿using AdvancedSharpAdbClient.Exceptions;
+using MelonLoader.Installer.App.Views;
 using MelonLoader.Installer.Core;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -328,7 +329,17 @@ public static class PatchRunner
         string src = $"/sdcard/Android/data/{data.PackageName}";
         string dest = Path.Combine(_tempPath, "data_backup"); // the package name isnt here due to how adb handles pulling
 
-        await ADBManager.PullDirectoryToPath(src, dest, true, _logger);
+        try
+        {
+            await ADBManager.PullDirectoryToPath(src, dest, true, _logger);
+        }
+        catch (AdbException ex)
+        {
+            _logger?.Log($"Failed to back up data directory.\n{ex}");
+            bool res = await PopupHelper.TwoAnswerQuestion("Backing up game data failed, you may lose any save data or additional game data if the patching continues. Do you want to continue anyway?", "Unable to Back Up Data", "Yes", "No");
+            if (!res)
+                throw;
+        }
 
         _logger?.Log("Backing up app assets, this can take awhile");
 
