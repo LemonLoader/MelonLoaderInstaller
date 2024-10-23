@@ -13,7 +13,7 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Ionic.Zip;
+using System.IO.Compression;
 
 namespace MelonLoader.Installer.Core.Utilities.Signing
 {
@@ -78,7 +78,8 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
 
         private void SignV1(string apkPath)
         {
-            using ZipFile apkArchive = new(apkPath);
+            using FileStream zipStream = new(apkPath, FileMode.Open);
+            using ZipArchive archive = new(zipStream, ZipArchiveMode.Read | ZipArchiveMode.Update);
 
             #region Create MANIFEST.MF
 
@@ -94,9 +95,9 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
 
             manifestWriter.Close();
 
-            foreach (ZipEntry entry in apkArchive.Entries)
+            foreach (ZipArchiveEntry entry in archive.Entries)
             {
-                if (entry.FileName.StartsWith("META-INF"))
+                if (entry.FullName.StartsWith("META-INF"))
                     continue;
 
                 WriteDigests(entry, manifestStream, sigHolderWriter);
@@ -129,38 +130,41 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
             #region Add to APK
 
             // Remove old META-INF files
-            apkArchive.RemoveEntries(apkArchive.Entries.Where(a => a.FileName.StartsWith("META-INF")).ToList());
+            foreach (ZipArchiveEntry entry in archive.Entries.Where(a => a.FullName.StartsWith("META-INF")))
+                entry.Delete();
 
             // Add the new
             manifestStream.Seek(0, SeekOrigin.Begin);
             sigStream.Seek(0, SeekOrigin.Begin);
 
-            ZipEntry manifestEntry = apkArchive.AddFile("META-INF/MANIFEST.MF");
-            ZipEntry sigEntry = apkArchive.AddFile("META-INF/LEMON.SF");
-            ZipEntry rsaEntry = apkArchive.AddFile("META-INF/LEMON.RSA");
+            ZipArchiveEntry manifestEntry = archive.CreateEntry("META-INF/MANIFEST.MF");
+            ZipArchiveEntry sigEntry = archive.CreateEntry("META-INF/LEMON.SF");
+            ZipArchiveEntry rsaEntry = archive.CreateEntry("META-INF/LEMON.RSA");
 
-            apkArchive.UpdateEntry(manifestEntry.FileName, manifestStream);
-            apkArchive.UpdateEntry(sigEntry.FileName, sigStream);
+            using Stream manifestEntryStream = manifestEntry.Open();
+            manifestStream.CopyTo(manifestEntryStream);
+
+            using Stream sigEntryStream = sigEntry.Open();
+            sigStream.CopyTo(sigEntryStream);
 
             sigStream.Seek(0, SeekOrigin.Begin);
 
-            byte[] signedSig = GetSignatureFileSig(sigStream.ToArray());
-            apkArchive.UpdateEntry(rsaEntry.FileName, signedSig);
+            byte[] signedSig = GetSignatureFileSig(sigStream);
+            using Stream rsaEntryStream = rsaEntry.Open();
+            rsaEntryStream.Write(signedSig);
 
             #endregion
-
-            apkArchive.Save();
         }
 
-        private void WriteDigests(ZipEntry entry, Stream manifestStream, StreamWriter sigHolderWriter)
+        private void WriteDigests(ZipArchiveEntry entry, Stream manifestStream, StreamWriter sigHolderWriter)
         {
-            using Stream entryStream = entry.OpenReader();
+            using Stream entryStream = entry.Open();
             string entryDigest = Convert.ToBase64String(_sha.ComputeHash(entryStream));
 
             using MemoryStream proxyStream = new();
             using StreamWriter proxyWriter = AsStreamWriter(proxyStream);
 
-            proxyWriter.WriteLine($"Name: {entry.FileName}");
+            proxyWriter.WriteLine($"Name: {entry.FullName}");
             proxyWriter.WriteLine($"SHA-256-Digest: {entryDigest}");
             proxyWriter.WriteLine();
 
@@ -168,14 +172,14 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
 
             proxyStream.Seek(0, SeekOrigin.Begin);
 
-            sigHolderWriter.WriteLine($"Name: {entry.FileName}");
+            sigHolderWriter.WriteLine($"Name: {entry.FullName}");
             sigHolderWriter.WriteLine($"SHA-256-Digest: {Convert.ToBase64String(_sha.ComputeHash(proxyStream))}");
             sigHolderWriter.WriteLine();
             proxyStream.Seek(0, SeekOrigin.Begin);
             proxyStream.CopyTo(manifestStream);
         }
 
-        private byte[] GetSignatureFileSig(byte[] sfBytes)
+        private byte[] GetSignatureFileSig(Stream sfStream)
         {
             var certStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(new List<X509Certificate> { _xCert }));
             CmsSignedDataGenerator dataGen = new();
@@ -183,7 +187,7 @@ namespace MelonLoader.Installer.Core.Utilities.Signing
             dataGen.AddSigner(_privateKey, _xCert, CmsSignedGenerator.EncryptionRsa, CmsSignedGenerator.DigestSha256);
 
             // Content is detached - i.e. not included in the signature block itself
-            CmsProcessableByteArray detachedContent = new(sfBytes);
+            CmsProcessableInputStream detachedContent = new(sfStream);
             var signedContent = dataGen.Generate(detachedContent, false);
 
             // Get the signature in the proper ASN.1 structure for java to parse it properly.  Lots of trial and error

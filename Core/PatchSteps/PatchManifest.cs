@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using Ionic.Zip;
 using QuestPatcher.Axml;
 
 namespace MelonLoader.Installer.Core.PatchSteps;
@@ -44,10 +44,11 @@ internal class PatchManifest : IPatchStep
 
     private void PatchAPK(string apkPath)
     {
-        using ZipFile archive = new(apkPath);
+        using FileStream zipStream = new(apkPath, FileMode.Open);
+        using ZipArchive archive = new(zipStream, ZipArchiveMode.Read | ZipArchiveMode.Update);
 
-        ZipEntry manifestEntry = archive.Entries.First(a => a.FileName == "AndroidManifest.xml");
-        using Stream manifestStream = manifestEntry.OpenReader();
+        ZipArchiveEntry manifestEntry = archive.Entries.First(a => a.Name == "AndroidManifest.xml");
+        using Stream manifestStream = manifestEntry.Open();
         using MemoryStream memoryStream = new();
 
         manifestStream.CopyTo(memoryStream);
@@ -62,9 +63,9 @@ internal class PatchManifest : IPatchStep
         using MemoryStream saveStream = new();
         AxmlSaver.SaveDocument(saveStream, manifest);
         saveStream.Position = 0;
+        manifestStream.Position = 0;
 
-        archive.UpdateEntry(manifestEntry.FileName, saveStream);
-        archive.Save();
+        saveStream.CopyTo(manifestStream);
 
         _logger?.Log("Done");
     }
