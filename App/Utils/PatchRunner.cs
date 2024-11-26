@@ -50,7 +50,7 @@ public static class PatchRunner
             _tempPath = Path.Combine(_basePath, "patch_temp", packageName);
 
             _melonDataPath = Path.Combine(_tempPath, "melondata.zip");
-            _unityDepsPath = Path.Combine(_tempPath, "unity.zip");
+            _unityDepsPath = Path.Combine(_tempPath, "unity.bin");
 
             _apkOutputPath = Path.Combine(_tempPath, "output");
 

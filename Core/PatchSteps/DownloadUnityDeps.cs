@@ -2,13 +2,15 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MelonLoader.Installer.Core.PatchSteps;
 
 internal class DownloadUnityDeps : IPatchStep
 {
-    private const string DEPS_PROVIDER = "https://github.com/LemonLoader/AndroidNativeLibraries/raw/main/";
+    private const string LIBUNITY_URL_TEMPLATE = "https://github.com/LavaGang/MelonLoader.UnityDependencies/releases/download/{0}/libunity.so.{1}";
+    private const string CHINA_LIBUNITY_URL_TEMPLATE = "https://github.com/LemonLoader/MelonLoader.UnityDependencies.China/releases/download/{0}/libunity.so.{1}";
 
     public bool Run(Patcher patcher)
     {
@@ -35,10 +37,16 @@ internal class DownloadUnityDeps : IPatchStep
             var originalValidator = ServicePointManager.ServerCertificateValidationCallback;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
 
-            Task<byte[]> task = client.GetByteArrayAsync(DEPS_PROVIDER + unityVersion + ".zip");
+            string url = patcher._args.UnityVersion.Value.Type == AssetRipper.Primitives.UnityVersionType.China ? CHINA_LIBUNITY_URL_TEMPLATE : LIBUNITY_URL_TEMPLATE;
+
+            Task<byte[]> task = client.GetByteArrayAsync(string.Format(url, unityVersion, "arm64-v8a"));
             task.Wait();
 
-            File.WriteAllBytes(patcher._args.UnityDependenciesPath, task.Result);
+            string libDir = Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a");
+            if (!Directory.Exists(libDir))
+                Directory.CreateDirectory(libDir);
+
+            File.WriteAllBytes(Path.Combine(libDir, "libunity.so"), task.Result);
 
             ServicePointManager.ServerCertificateValidationCallback = originalValidator;
         }
