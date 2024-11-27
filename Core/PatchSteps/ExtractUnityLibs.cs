@@ -7,6 +7,10 @@ internal class ExtractUnityLibs : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
+        // we probably got it from the MelonLoader.UnityDependencies repo
+        if (!File.Exists(patcher._args.UnityDependenciesPath))
+            return true;
+
         using FileStream zipStream = new(patcher._args.UnityDependenciesPath, FileMode.Open);
         using ZipArchive archive = new(zipStream, ZipArchiveMode.Read);
         archive.ExtractToDirectory(patcher._info.UnityNativeDirectory);
