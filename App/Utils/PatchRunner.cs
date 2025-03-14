@@ -38,7 +38,7 @@ public static class PatchRunner
             _consolePage = (PatchingConsolePage)Shell.Current.CurrentPage;
 
 #if ANDROID
-            _basePath = Platform.CurrentActivity!.GetExternalFilesDir(null)!.ToString();
+            _basePath = Path.Combine(Android.OS.Environment.ExternalStorageDirectory!.ToString(), "MelonLoader.Installer.App");
 #else
             _basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MelonLoader.Installer.App");
 #endif
