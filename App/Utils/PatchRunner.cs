@@ -404,6 +404,7 @@ public static class PatchRunner
     {
         if (data.Source == UnityApplicationFinder.Source.File)
         {
+#if WINDOWS
             _logger?.Log("APK patched successfully, moving to final path");
 
             string originalPath = data.APKPaths.First();
@@ -414,7 +415,7 @@ public static class PatchRunner
 
             _logger?.Log($"Patched APK saved [ {patchedPath} ]");
 
-#if WINDOWS
+
             Process proc = new()
             {
                 StartInfo =
@@ -425,6 +426,9 @@ public static class PatchRunner
             };
 
             proc.Start();
+#else
+            _logger?.Log("APK patched successfully.");
+            _logger?.Log($"Patched APK(s) are available at [ {_apkOutputPath} ]");
 #endif
 
             return;
