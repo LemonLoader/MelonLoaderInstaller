@@ -5,6 +5,8 @@ namespace MelonLoader.Installer.App.Views;
 
 public partial class PatchAppPage : ContentPage
 {
+    private string? _lastWarnedPackage;
+
 	public PatchAppPage()
 	{
 		InitializeComponent();
@@ -21,13 +23,17 @@ public partial class PatchAppPage : ContentPage
         else
             RestoreAPKButton.IsVisible = false;
 
+        bool warnThisTime = _lastWarnedPackage != PatchAppPageViewModel.CurrentAppData.PackageName;
+
 #if ANDROID
-        if (PatchAppPageViewModel.CurrentAppData.Source == UnityApplicationFinder.Source.PackageManager)
+        if (warnThisTime && PatchAppPageViewModel.CurrentAppData.Source == UnityApplicationFinder.Source.PackageManager)
             await PopupHelper.Alert("This app may have data which will get deleted during the patching process. This installer does not back up these files, which could result in a non-functional application. Please back up these files before continuing.", "Warning");
 #endif
 
-        if (PackageWarningManager.AvailableWarnings.TryGetValue(PatchAppPageViewModel.CurrentAppData.PackageName, out string? warning) && warning != null)
+        if (warnThisTime && PackageWarningManager.AvailableWarnings.TryGetValue(PatchAppPageViewModel.CurrentAppData.PackageName, out string? warning) && warning != null)
             await PopupHelper.Alert(warning, "Warning");
+
+        _lastWarnedPackage = PatchAppPageViewModel.CurrentAppData.PackageName;
 
         base.OnNavigatedTo(args);
     }
