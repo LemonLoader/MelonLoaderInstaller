@@ -9,11 +9,14 @@ using MelonLoader.Installer.App.Utils;
 namespace MelonLoader.Installer.App.Platforms.Android;
 
 [Service(Exported = true)]
-internal class SplitAPKService : Service
+internal class PackageInstallerService : Service
 {
     [return: GeneratedEnum]
     public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
     {
+        if (intent == null)
+            return StartCommandResult.NotSticky;
+
         PackageInstallStatus status = (PackageInstallStatus)intent.GetIntExtra(PackageInstaller.ExtraStatus, -999);
 
         switch (status)
@@ -25,8 +28,16 @@ internal class SplitAPKService : Service
                 try { StartActivity(confirmationIntent); }
                 catch { }
                 break;
-            default:
-                APKInstaller.Current.CheckPackageInstalled();
+
+            case PackageInstallStatus.Success:
+                APKInstaller.Current.SetPackageChangeCompletion(true);
+                break;
+
+            case PackageInstallStatus.Failure:
+            case PackageInstallStatus.FailureAborted:
+            case PackageInstallStatus.FailureInvalid:
+            case PackageInstallStatus.FailureConflict:
+                APKInstaller.Current.SetPackageChangeCompletion(false);
                 break;
         }
 

@@ -20,82 +20,53 @@ public class APKInstaller
     private string? _apkDirectory;
 
     private Func<Task>? _next;
-    private Action _onInstallFail;
+    private bool _successful = false;
 
 #if ANDROID
-    private string _pending;
     private int _installLoopCount;
     private int _uninstallLoopCount;
+
+    private TaskCompletionSource<bool>? _packageChangeCompletionSource;
+    private PackageChangeReceiver? _packageChangeReceiver;
+
+    public void SetPackageChangeCompletion(bool success) => _packageChangeCompletionSource?.TrySetResult(success);
 #endif
 
-    public APKInstaller(UnityApplicationFinder.Data data, IPatchLogger logger, Action onInstallFail)
+    public APKInstaller(UnityApplicationFinder.Data data, IPatchLogger logger)
     {
         Current = this;
 
         _data = data;
         _logger = logger;
-        _onInstallFail = onInstallFail;
 
 #if ANDROID
-        var activity = (AndroidX.Activity.ComponentActivity)Platform.CurrentActivity!;
-
-        _pending = "";
         _installLoopCount = 0;
         _uninstallLoopCount = 0;
 #endif
     }
 
-    public async Task Install(string apkDirectory)
+    public async Task<bool> Install(string apkDirectory)
     {
         _apkDirectory = apkDirectory;
 
+
+#if ANDROID
+        _next = CheckPackageInstalled;
+        await CheckPackageUninstalled();
+#else
         _next = InternalInstall;
         await UninstallPackage();
+#endif
+
+        return _successful;
     }
 
     private async Task InternalInstall()
     {
-        _logger.Log("Beginning install");
+        _logger.Log("Installing, please wait...");
 
         string[] apks = Directory.GetFiles(_apkDirectory!, "*.apk");
-        if (apks.Length > 1)
-        {
-            await InternalInstall_Split(apks);
-            return;
-        }
 
-        await InternalInstall_Single(apks[0]);
-    }
-
-    private async Task InternalInstall_Single(string apk)
-    {
-#if ANDROID
-        Android.Net.Uri fileUri = AndroidX.Core.Content.FileProvider.GetUriForFile(Platform.CurrentActivity!, Platform.CurrentActivity!.PackageName + ".provider", new Java.IO.File(apk))!;
-
-        _pending = Intent.ActionInstallPackage;
-        Intent install = new(_pending);
-        install.SetDataAndType(fileUri, "application/vnd.android.package-archive");
-
-        install.SetFlags(ActivityFlags.GrantReadUriPermission);
-        install.PutExtra(Intent.ExtraReturnResult, true);
-
-        try
-        {
-            MainActivity.ActivityResultLauncher.Launch(install);
-        }
-        catch (ActivityNotFoundException ex)
-        {
-            _logger.Log($"Error in opening file.\n{ex}");
-        }
-
-        await Task.Delay(50);
-#else
-        await ADBManager.InstallAPK(apk);
-#endif
-    }
-
-    private async Task InternalInstall_Split(string[] apks)
-    {
 #if ANDROID
         PackageInstaller packageInstaller = Platform.CurrentActivity!.PackageManager!.PackageInstaller;
         try
@@ -112,34 +83,63 @@ public class APKInstaller
                 using FileStream apkStream = new(apk, FileMode.Open);
                 using Stream outStream = session.OpenWrite($"{i + 1}.apk", 0, apkStream.Length);
                 apkStream.CopyTo(outStream);
+                await outStream.FlushAsync();
                 session.Fsync(outStream);
             }
 
-            Intent callbackIntent = new(Platform.CurrentActivity!, typeof(Platforms.Android.SplitAPKService));
+            _packageChangeCompletionSource = new TaskCompletionSource<bool>();
+            _packageChangeReceiver = new PackageChangeReceiver(_packageChangeCompletionSource, _data.PackageName);
+            IntentFilter filter = new(Intent.ActionPackageAdded);
+            filter.AddDataScheme("package");
+            Platform.CurrentActivity!.RegisterReceiver(_packageChangeReceiver, filter);
+
+            Intent callbackIntent = new(Platform.CurrentActivity!, typeof(Platforms.Android.PackageInstallerService));
             PendingIntent pending = PendingIntent.GetService(Platform.CurrentActivity!, 0, callbackIntent, (PendingIntentFlags)33554432)!; // 33554432 is PendingIntentFlags.Mutable but maui doesn't provide it
             session.Commit(pending.IntentSender);
+
+            bool success = await _packageChangeCompletionSource.Task;
+
+            Platform.CurrentActivity!.UnregisterReceiver(_packageChangeReceiver);
+            _packageChangeReceiver = null;
         }
         catch (Exception e)
         {
-            _logger.Log($"Failed to install split APKs\n{e}");
+            _logger.Log($"Failed to install APK(s)\n{e}");
+            _successful = false;
+            return;
         }
-
-        await Task.Delay(50);
 #else
-        await ADBManager.InstallMultipleAPKs(apks.First(a => a.EndsWith("base.apk")), apks.Where(a => !a.EndsWith("base.apk")).ToArray());
+        if (apks.Length > 1)
+            await ADBManager.InstallMultipleAPKs(apks.First(a => a.EndsWith("base.apk")), apks.Where(a => !a.EndsWith("base.apk")).ToArray());
+        else
+            await ADBManager.InstallAPK(apks[0]);
 #endif
+
+        _successful = true;
     }
 
     private async Task UninstallPackage()
     {
-        _logger.Log("Beginning uninstall");
-
 #if ANDROID
-        _pending = Intent.ActionDelete;
-        Intent intent = new(_pending);
-        intent.SetData(Android.Net.Uri.Parse("package:" + _data.PackageName));
-        MainActivity.ActivityResultLauncher.Launch(intent);
-        await Task.Delay(50);
+        _logger.Log("Uninstalling, please wait...");
+
+        PackageInstaller packageInstaller = Platform.CurrentActivity!.PackageManager!.PackageInstaller;
+
+        Intent callbackIntent = new(Platform.CurrentActivity!, typeof(Platforms.Android.PackageInstallerService));
+        PendingIntent pending = PendingIntent.GetService(Platform.CurrentActivity!, 0, callbackIntent, (PendingIntentFlags)33554432)!;
+
+        _packageChangeCompletionSource = new TaskCompletionSource<bool>();
+        _packageChangeReceiver = new PackageChangeReceiver(_packageChangeCompletionSource, _data.PackageName);
+        IntentFilter filter = new(Intent.ActionPackageRemoved);
+        filter.AddDataScheme("package");
+        Platform.CurrentActivity!.RegisterReceiver(_packageChangeReceiver, filter);
+
+        packageInstaller.Uninstall(_data.PackageName, pending.IntentSender);
+
+        bool success = await _packageChangeCompletionSource.Task;
+
+        Platform.CurrentActivity!.UnregisterReceiver(_packageChangeReceiver);
+        _packageChangeReceiver = null;
 #else
         await ADBManager.UninstallPackage(_data.PackageName);
         await _next!();
@@ -149,19 +149,19 @@ public class APKInstaller
 #if ANDROID
     private async Task CheckPackageUninstalled()
     {
-        if (IsPackageInstalled())
+        while (IsPackageInstalled())
         {
             if (_uninstallLoopCount >= 3)
             {
-                _onInstallFail?.Invoke();
+                _successful = false;
                 return;
             }
 
-            _logger.Log("Package was not uninstalled, re-attempting");
+            if (_uninstallLoopCount > 0)
+                _logger.Log("Package was not uninstalled, re-attempting");
+
             _uninstallLoopCount++;
             await UninstallPackage();
-
-            return;
         }
 
         _logger.Log("Uninstall successful");
@@ -170,20 +170,22 @@ public class APKInstaller
 
     public async Task CheckPackageInstalled()
     {
-        if (!IsPackageInstalled())
+        while (!IsPackageInstalled())
         {
             if (_installLoopCount >= 3)
             {
-                _onInstallFail?.Invoke();
+                _successful = false;
                 return;
             }
 
-            _logger.Log("Package was not installed, re-attempting");
+            if (_installLoopCount > 0)
+                _logger.Log("Package was not installed, re-attempting");
+
             _installLoopCount++;
             await InternalInstall();
-
-            return;
         }
+
+        _logger.Log("Install successful");
     }
 
     private bool IsPackageInstalled()
@@ -198,28 +200,25 @@ public class APKInstaller
             return false;
         }
     }
-#endif
 
-#if ANDROID
-    public class APKInstallerCallback : Java.Lang.Object, IActivityResultCallback
+    public class PackageChangeReceiver(TaskCompletionSource<bool> completionSource, string packageName) : BroadcastReceiver
     {
-        public async void OnActivityResult(Result resultCode, Intent data)
-        {
-            switch (Current._pending)
-            {
-                case Intent.ActionDelete:
-                    await Current.CheckPackageUninstalled();
-                    break;
-                case Intent.ActionInstallPackage:
-                    await Current.CheckPackageInstalled();
-                    break;
-            }
-        }
+        private readonly TaskCompletionSource<bool> _completionSource = completionSource;
+        private readonly string _packageName = packageName;
 
-        public void OnActivityResult(Java.Lang.Object? result)
+        public override void OnReceive(Context? context, Intent? intent)
         {
-            if (result != null && result is ActivityResult activityResult)
-                OnActivityResult((Result)activityResult.ResultCode, activityResult.Data!);
+            if (intent == null)
+                return;
+
+            if (intent.Action == Intent.ActionPackageAdded || intent.Action == Intent.ActionPackageRemoved)
+            {
+                string? modifiedPackage = intent.Data?.EncodedSchemeSpecificPart;
+                if (modifiedPackage == _packageName)
+                {
+                    _completionSource.TrySetResult(true);
+                }
+            }
         }
     }
 #endif

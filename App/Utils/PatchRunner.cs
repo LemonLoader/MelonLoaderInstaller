@@ -90,7 +90,11 @@ public static class PatchRunner
 
         CallPatchCore(data);
 
-        await ReinstallApp(data);
+        if (!await ReinstallApp(data))
+        {
+            MarkFailure();
+            return;
+        }
 
         await RestoreAppData(data);
 
@@ -139,20 +143,29 @@ public static class PatchRunner
         if (backupDir == null)
             return;
 
+        bool failed = false;
+
         APKInstaller installer = new(data,
-            _logger!,
-            async () =>
+            _logger!);
+
+        if (await installer.Install(backupDir))
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await PopupHelper.Alert("Successfully restored the application.", "Success");
+                _consolePage!.BackButtonVisible = true;
+            });
+
+            await RestoreAppData(data);
+        }
+        else
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 await PopupHelper.Alert("Unable to restore the application, read the console for more info.", "Failure");
                 _consolePage!.BackButtonVisible = true;
             });
-
-        await installer.Install(backupDir);
-
-        await RestoreAppData(data);
-
-        await PopupHelper.Alert("Successfully restored the application.", "Success");
-        _consolePage!.BackButtonVisible = true;
+        }
     }
 
     private static async Task GetUnityVersion(UnityApplicationFinder.Data data)
@@ -406,7 +419,7 @@ public static class PatchRunner
         }
     }
 
-    private static async Task ReinstallApp(UnityApplicationFinder.Data data)
+    private static async Task<bool> ReinstallApp(UnityApplicationFinder.Data data)
     {
         if (data.Source == UnityApplicationFinder.Source.File)
         {
@@ -437,13 +450,13 @@ public static class PatchRunner
             _logger?.Log($"Patched APK(s) are available at [ {_apkOutputPath} ]");
 #endif
 
-            return;
+            return true;
         }
 
         _logger?.Log("Application patched successfully, reinstalling");
 
-        APKInstaller installer = new(data, _logger!, MarkFailure);
-        await installer.Install(_apkOutputPath);
+        APKInstaller installer = new(data, _logger!);
+        return await installer.Install(_apkOutputPath);
     }
 
     private static void MarkSuccess()
