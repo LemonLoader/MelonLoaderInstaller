@@ -63,6 +63,10 @@ namespace MelonLoader.Installer.Core
         /// </summary>
         public abstract string Name { get; }
         /// <summary>
+        ///  Array of compatible package names that this plugin can work with. e.g. ["com.example.package1", "com.example.package2"]
+        /// </summary>
+        public abstract string[] CompatiblePackages { get; }
+        /// <summary>
         /// Called when the InstallPlugins patch step is ran
         /// </summary>
         /// <param name="patcher"></param>

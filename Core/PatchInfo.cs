@@ -8,6 +8,8 @@ namespace MelonLoader.Installer.Core;
 /// </summary>
 public class PatchInfo
 {
+    public string PackageName { get; set; } = "";
+
     public string LemonDataDirectory { get; } = "";
 
     public string UnityNativeDirectory { get; set; } = "";
@@ -23,6 +25,8 @@ public class PatchInfo
     internal PatchInfo(PatchArguments arguments)
     {
         _arguments = arguments;
+
+        PackageName = _arguments.PackageName;
 
         LemonDataDirectory = Path.Combine(arguments.TempDirectory, "lemon_data");
 
