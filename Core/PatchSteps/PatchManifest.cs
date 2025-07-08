@@ -33,11 +33,11 @@ internal class PatchManifest : IPatchStep
     public bool Run(Patcher patcher)
     {
         _patcher = patcher;
-        _logger = patcher._logger;
+        _logger = patcher.Logger;
 
-        PatchAPK(patcher._info.OutputBaseApkPath);
-        if (patcher._info.OutputLibApkPath != null)
-            PatchAPK(patcher._info.OutputLibApkPath);
+        PatchAPK(patcher.Info.OutputBaseApkPath);
+        if (patcher.Info.OutputLibApkPath != null)
+            PatchAPK(patcher.Info.OutputLibApkPath);
 
         return true;
     }
@@ -101,7 +101,7 @@ internal class PatchManifest : IPatchStep
         }
 
         // This has only been an issue for split APKs
-        if (_patcher!._args.IsSplit)
+        if (_patcher!.Args.IsSplit)
         {
             _logger!.Log("Patching extract native libraries flag");
             AxmlAttribute? extract = appElement.Attributes.FirstOrDefault(attribute => attribute.Name == "extractNativeLibs");

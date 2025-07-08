@@ -6,22 +6,22 @@ internal class CleanUp : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        patcher._logger.Log("Cleaning up");
+        patcher.Logger.Log("Cleaning up");
 
         try
         {
-            DeleteFile(patcher._args.MelonDataPath);
-            DeleteFile(patcher._args.UnityDependenciesPath);
+            DeleteFile(patcher.Args.MelonDataPath);
+            DeleteFile(patcher.Args.UnityDependenciesPath);
 
-            DeleteDir(patcher._info.LemonDataDirectory);
-            DeleteDir(patcher._info.UnityNativeDirectory);
+            DeleteDir(patcher.Info.LemonDataDirectory);
+            DeleteDir(patcher.Info.UnityNativeDirectory);
 
-            string extraLibPath = Path.Combine(patcher._args.TempDirectory, "extraLibraries.zip");
+            string extraLibPath = Path.Combine(patcher.Args.TempDirectory, "extraLibraries.zip");
             DeleteFile(extraLibPath);
         }
         catch
         {
-            patcher._logger.Log("Failed to clean up leftover data.");
+            patcher.Logger.Log("Failed to clean up leftover data.");
         }
 
         return true;

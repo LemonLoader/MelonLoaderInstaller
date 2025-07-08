@@ -12,20 +12,20 @@ internal class RepackAPK : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        patcher._logger.Log("Repacking APK");
+        patcher.Logger.Log("Repacking APK");
 
-        using FileStream zipStream = new(patcher._info.OutputBaseApkPath, FileMode.Open);
+        using FileStream zipStream = new(patcher.Info.OutputBaseApkPath, FileMode.Open);
         ZipArchive archive = new(zipStream, ZipArchiveMode.Read | ZipArchiveMode.Update);
 
         // Handle old installer files
         var dexEntries = archive.Entries.Where(a => a.FullName.Contains("originalDex")).ToArray();
         if (dexEntries.Length > 0)
         {
-            patcher._logger.Log("Found remnants of Java patching, replacing patched dex");
+            patcher.Logger.Log("Found remnants of Java patching, replacing patched dex");
             for (int i = dexEntries.Length - 1; i >= 0; i--)
             {
                 ZipArchiveEntry dex = dexEntries[i];
-                string path = Path.Combine(patcher._args.TempDirectory, dex.Name);
+                string path = Path.Combine(patcher.Args.TempDirectory, dex.Name);
                 dex.ExtractToFile(path);
                 byte[] dexData = File.ReadAllBytes(path);
 
@@ -36,37 +36,37 @@ internal class RepackAPK : IPatchStep
                 dexStream.CopyTo(realDexStream);
             }
 
-            patcher._logger.Log("Done");
+            patcher.Logger.Log("Done");
         }
 
-        patcher._logger.Log("Copying data into APK");
+        patcher.Logger.Log("Copying data into APK");
 
         // assets/ data
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "MelonLoader"), "assets/MelonLoader");
-        CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "dotnet"), "assets/dotnet");
+        CopyTo(archive, Path.Combine(patcher.Info.LemonDataDirectory, "MelonLoader"), "assets/MelonLoader");
+        CopyTo(archive, Path.Combine(patcher.Info.LemonDataDirectory, "dotnet"), "assets/dotnet");
         WritePatchDate(archive);
 
         // libs data
-        if (!patcher._args.IsSplit)
+        if (!patcher.Args.IsSplit)
         {
-            CopyTo(archive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
-            CopyTo(archive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
+            CopyTo(archive, Path.Combine(patcher.Info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
+            CopyTo(archive, Path.Combine(patcher.Info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
         }
         else
         {
-            using FileStream libStream = File.Open(patcher._info.OutputLibApkPath!, FileMode.Open);
+            using FileStream libStream = File.Open(patcher.Info.OutputLibApkPath!, FileMode.Open);
             using ZipArchive libArchive = new(libStream, ZipArchiveMode.Read | ZipArchiveMode.Update);
 
-            CopyTo(libArchive, Path.Combine(patcher._info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
-            CopyTo(libArchive, Path.Combine(patcher._info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
+            CopyTo(libArchive, Path.Combine(patcher.Info.LemonDataDirectory, "native"), "lib/arm64-v8a", "*.so");
+            CopyTo(libArchive, Path.Combine(patcher.Info.UnityNativeDirectory, "arm64-v8a"), "lib/arm64-v8a", "*.so");
         }
 
-        patcher._logger.Log("Writing, this can take a few");
+        patcher.Logger.Log("Writing, this can take a few");
 
         // for whatever reason ZipArchive uses disposal as the only time to save
         archive.Dispose();
 
-        patcher._logger.Log("Done");
+        patcher.Logger.Log("Done");
 
         return true;
     }

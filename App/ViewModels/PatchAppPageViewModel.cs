@@ -1,4 +1,5 @@
 ﻿using MelonLoader.Installer.App.Utils;
+using MelonLoader.Installer.Core;
 using System.IO.Compression;
 using System.Windows.Input;
 
@@ -25,12 +26,14 @@ public class PatchAppPageViewModel : BindableObject
     private static UnityApplicationFinder.Data? _currentAppData;
 
     public ICommand PatchTappedCommand { get; }
+    public ICommand CustomPatchCommand { get; }
     public ICommand PatchLocalTappedCommand { get; }
     public ICommand RestoreTappedCommand { get; }
 
     public PatchAppPageViewModel()
     {
         PatchTappedCommand = new Command(PatchWithoutLocalDeps);
+        CustomPatchCommand = new Command(SelectCustomPatch);
         PatchLocalTappedCommand = new Command(SelectLocalDepsWithPatch);
         RestoreTappedCommand = new Command(RestoreUnpatchedAPK);
     }
@@ -38,6 +41,47 @@ public class PatchAppPageViewModel : BindableObject
     private async void PatchWithoutLocalDeps()
     {
         await DoPatch();
+    }
+
+    private async void SelectCustomPatch()
+    {
+        FilePickerFileType zipType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+        {
+            { DevicePlatform.Android, [ ".dll" ] },
+            { DevicePlatform.WinUI, [ ".dll" ] }
+        });
+
+        var result = await FilePicker.Default.PickAsync(new PickOptions() { FileTypes = zipType });
+        
+        if (result == null)
+        {
+            await PopupHelper.Toast("No file selected.");
+            return;
+        }
+
+        string patchPath = result.FullPath;
+
+        if (!File.Exists(patchPath))
+        {
+            await PopupHelper.Toast("Selected file does not exist.");
+            return;
+        }
+
+        if (PatchRunner.IsPatching)
+        {
+            await PopupHelper.Toast("Already patching or restoring, you cannot work on multiple apps at once.");
+            return;
+        }
+
+        bool loadResult = Plugin.LoadPlugin(patchPath, out bool added);
+
+        if (!loadResult)
+        {
+            await PopupHelper.Toast("Selected file is not a valid Lemonloader plugin.");
+            return;
+        }
+
+        await PopupHelper.Toast((added ? "Added " : "Removed ") + "selected plugin.");
     }
 
     private async void SelectLocalDepsWithPatch()

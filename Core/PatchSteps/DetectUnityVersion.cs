@@ -10,10 +10,10 @@ internal class DetectUnityVersion : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        if (patcher._args.UnityVersion != null && patcher._args.UnityVersion != UnityVersion.MinVersion)
+        if (patcher.Args.UnityVersion != null && patcher.Args.UnityVersion != UnityVersion.MinVersion)
             return true;
 
-        using FileStream apkStream = new(patcher._info.OutputBaseApkPath, FileMode.Open);
+        using FileStream apkStream = new(patcher.Info.OutputBaseApkPath, FileMode.Open);
         using ZipArchive archive = new(apkStream, ZipArchiveMode.Read);
 
         AssetsManager uAssetsManager = new();
@@ -25,7 +25,7 @@ internal class DetectUnityVersion : IPatchStep
             using Stream stream = assetEntry.Open();
 
             AssetsFileInstance instance = uAssetsManager.LoadAssetsFile(stream, "/bin/Data/globalgamemanagers", true);
-            patcher._args.UnityVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
+            patcher.Args.UnityVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
 
             return true;
         }
@@ -39,12 +39,12 @@ internal class DetectUnityVersion : IPatchStep
 
             BundleFileInstance bundle = uAssetsManager.LoadBundleFile(stream, "/bin/Data/data.unity3d");
             AssetsFileInstance instance = uAssetsManager.LoadAssetsFileFromBundle(bundle, "globalgamemanagers");
-            patcher._args.UnityVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
+            patcher.Args.UnityVersion = UnityVersion.Parse(instance.file.Metadata.UnityVersion);
         }
         catch (Exception ex)
         {
-            patcher._logger.Log("Failed to get Unity version, cannot patch.\n" + ex.ToString());
-            patcher._args.UnityVersion = UnityVersion.MinVersion;
+            patcher.Logger.Log("Failed to get Unity version, cannot patch.\n" + ex.ToString());
+            patcher.Args.UnityVersion = UnityVersion.MinVersion;
             return false;
         }
 

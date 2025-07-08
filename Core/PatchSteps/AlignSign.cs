@@ -13,16 +13,16 @@ internal class AlignSign : IPatchStep
     {
         // Aligning occurs after V1 signing
 
-        _logger = patcher._logger;
-        _pemData = patcher._info.PemData;
+        _logger = patcher.Logger;
+        _pemData = patcher.Info.PemData;
 
-        bool sign = Sign(patcher._info.OutputBaseApkPath);
-        if (patcher._args.IsSplit)
-            sign = sign && Sign(patcher._info.OutputLibApkPath);
+        bool sign = Sign(patcher.Info.OutputBaseApkPath);
+        if (patcher.Args.IsSplit)
+            sign = sign && Sign(patcher.Info.OutputLibApkPath);
 
-        if (patcher._info.OutputExtraApkPaths != null)
+        if (patcher.Info.OutputExtraApkPaths != null)
         {
-            foreach (string apk in patcher._info.OutputExtraApkPaths)
+            foreach (string apk in patcher.Info.OutputExtraApkPaths)
                 sign = sign && Sign(apk);
         }
 
