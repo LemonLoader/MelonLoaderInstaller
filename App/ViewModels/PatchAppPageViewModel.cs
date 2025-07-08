@@ -47,7 +47,7 @@ public class PatchAppPageViewModel : BindableObject
     {
         FilePickerFileType zipType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
         {
-            { DevicePlatform.Android, [ ".dll" ] },
+            { DevicePlatform.Android, [ "*/*" ] },
             { DevicePlatform.WinUI, [ ".dll" ] }
         });
 
@@ -56,6 +56,12 @@ public class PatchAppPageViewModel : BindableObject
         if (result == null)
         {
             await PopupHelper.Toast("No file selected.");
+            return;
+        }
+
+        if (!result.FileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            await PopupHelper.Toast("Please select a .dll file.");
             return;
         }
 
