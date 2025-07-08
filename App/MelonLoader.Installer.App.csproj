@@ -26,7 +26,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">34</TargetPlatformVersion>
 		<Title></Title>
 		<AndroidSigningKeyStore>meloninstaller.keystore</AndroidSigningKeyStore>
 	</PropertyGroup>
@@ -134,9 +133,4 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'">
 	  <Exec Command="XCOPY &quot;$(SolutionDir)Resources\WindowsResources&quot; &quot;$(TargetDir)\Resources\&quot; /S /Y" />
 	</Target>
-
-	<PropertyGroup>
-		<SdkVersion>8.0.100</SdkVersion>
-	</PropertyGroup>
-
 </Project>

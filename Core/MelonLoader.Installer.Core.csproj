@@ -13,10 +13,4 @@
     <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="MelonLoader.Installer.Core">
-      <HintPath>bin\Release\net8.0\MelonLoader.Installer.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
