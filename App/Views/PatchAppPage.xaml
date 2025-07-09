@@ -83,9 +83,27 @@
         </Border>
 
         <Grid Grid.Row="3"
-              RowDefinitions="Auto, Auto"
+              RowDefinitions="Auto, Auto, Auto"
               VerticalOptions="EndAndExpand">
-            <Border  Grid.Row="0"
+            <Border  x:Name="CustomPatchButton"
+                     Grid.Row="0"
+                     Stroke="{StaticResource Primary}"
+                     Background="{StaticResource Primary}"
+                     StrokeShape="RoundRectangle 15,15,15,15"
+                     Padding="10"
+                     Margin="20,0,20,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PatchAppPage}}, Path=BindingContext.CustomPatchCommand}"
+                                          CommandParameter="{Binding}" />
+                </Border.GestureRecognizers>
+
+                <Label Text="Add or Remove Custom Patches"
+                       TextColor="{StaticResource Light}"
+                       FontSize="Small"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+            <Border  x:Name="PatchLocalButton"
+                     Grid.Row="1"
                      Stroke="{StaticResource Primary}"
                      Background="{StaticResource Primary}"
                      StrokeShape="RoundRectangle 15,15,15,15"
@@ -102,7 +120,7 @@
                        HorizontalTextAlignment="Center" />
             </Border>
             <Border  x:Name="RestoreAPKButton"
-                     Grid.Row="1"
+                     Grid.Row="2"
                      Stroke="{StaticResource Primary}"
                      Background="{StaticResource Primary}"
                      StrokeShape="RoundRectangle 15,15,15,15"

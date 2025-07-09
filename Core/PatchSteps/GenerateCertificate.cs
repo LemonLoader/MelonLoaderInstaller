@@ -46,7 +46,7 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
     public bool Run(Patcher patcher)
     {
-        patcher._logger.Log("Generating certificate");
+        patcher.Logger.Log("Generating certificate");
 
         RsaKeyPairGenerator kpg = new();
         kpg.Init(new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1024));
@@ -73,8 +73,8 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
         if (certificate == null)
         {
-            patcher._logger.Log("Generation failed, using fallback");
-            patcher._info.PemData = FALLBACK_CERT;
+            patcher.Logger.Log("Generation failed, using fallback");
+            patcher.Info.PemData = FALLBACK_CERT;
             return true;
         }
 
@@ -83,9 +83,9 @@ IAE6kTSMMHC6bVbrbS/CC8hRW8m7yD3LUa1EjFJmRWXsCQ==
 
         pemWriter.WriteObject(new Org.BouncyCastle.Utilities.IO.Pem.PemObject("CERTIFICATE", certificate.GetEncoded()));
         pemWriter.WriteObject(keyPair.Private);
-        patcher._info.PemData = stringWriter.ToString();
+        patcher.Info.PemData = stringWriter.ToString();
 
-        patcher._logger.Log("Done");
+        patcher.Logger.Log("Done");
 
         return true;
     }

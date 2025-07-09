@@ -315,19 +315,8 @@ public static class PatchRunner
             extraSplits = data.APKPaths.Skip(1).Where(p => !p.Contains("arm64")).Select(p => Path.Combine(_apkOutputPath, Path.GetFileName(p))).ToArray();
         }
 
-        Patcher patcher = new(new()
-        {
-            TargetApkPath = targetApkPath,
-            LibraryApkPath = libraryApkPath,
-            ExtraSplitApkPaths = extraSplits,
-            IsSplit = data.APKPaths.Length > 1,
-            OutputApkDirectory = _apkOutputPath,
-            TempDirectory = _tempPath,
-            MelonDataPath = _melonDataPath,
-            UnityDependenciesPath = _unityDepsPath,
-            UnityVersion = _unityVersion,
-            PackageName = data.PackageName
-        }, _logger!);
+        PatchArguments arguments = new(targetApkPath, libraryApkPath, extraSplits, _apkOutputPath, _tempPath, _melonDataPath, _unityDepsPath, _unityVersion, data.PackageName, data.APKPaths.Length > 1);   
+        Patcher patcher = new(arguments, _logger!);
 
         if (!patcher.Run())
         {

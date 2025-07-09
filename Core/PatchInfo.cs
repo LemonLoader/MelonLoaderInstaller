@@ -4,23 +4,23 @@ using System.Linq;
 namespace MelonLoader.Installer.Core;
 
 /// <summary>
-/// Class for storing information only used internally
+/// Class for storing patch information
 /// </summary>
-internal class PatchInfo
+public class PatchInfo
 {
     public string LemonDataDirectory { get; } = "";
 
-    public string UnityNativeDirectory { get; set; } = "";
+    public string UnityNativeDirectory { get; internal set; } = "";
 
     public string OutputBaseApkPath { get; } = "";
     public string? OutputLibApkPath { get; } = null;
     public string[]? OutputExtraApkPaths { get; } = null;
 
-    public string PemData { get; set; } = "";
+    public string PemData { get; internal set; } = "";
 
     private readonly PatchArguments _arguments;
 
-    public PatchInfo(PatchArguments arguments)
+    internal PatchInfo(PatchArguments arguments)
     {
         _arguments = arguments;
 
@@ -35,7 +35,7 @@ internal class PatchInfo
             OutputExtraApkPaths = _arguments.ExtraSplitApkPaths.Select(p => Path.Combine(arguments.OutputApkDirectory, Path.GetFileName(p))).ToArray();
     }
 
-    public void CreateDirectories()
+    internal void CreateDirectories()
     {
         Directory.CreateDirectory(_arguments.TempDirectory);
         Directory.CreateDirectory(LemonDataDirectory);

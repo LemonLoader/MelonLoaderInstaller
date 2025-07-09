@@ -9,9 +9,9 @@ namespace MelonLoader.Installer.Core;
 /// </summary>
 public class Patcher(PatchArguments arguments, IPatchLogger logger)
 {
-    internal PatchArguments _args = arguments;
-    internal PatchInfo _info = new(arguments);
-    internal IPatchLogger _logger = logger;
+    public PatchArguments Args { get; internal set; } = arguments;
+    public IPatchLogger Logger { get; internal set; } = logger;
+    public PatchInfo Info { get; internal set; } = new(arguments);
 
     public bool Run()
     {
@@ -19,30 +19,30 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
 
         try
         {
-            _info.CreateDirectories();
+            Info.CreateDirectories();
 
-            if (!Path.Exists(_info.OutputBaseApkPath))
+            if (!Path.Exists(Info.OutputBaseApkPath))
             {
-                _logger.Log($"Copying [ {_args.TargetApkPath} ] to [ {_info.OutputBaseApkPath} ]");
-                File.Copy(_args.TargetApkPath, _info.OutputBaseApkPath);
+                Logger.Log($"Copying [ {Args.TargetApkPath} ] to [ {Info.OutputBaseApkPath} ]");
+                File.Copy(Args.TargetApkPath, Info.OutputBaseApkPath);
             }
 
-            if (_args.IsSplit && !Path.Exists(_info.OutputLibApkPath))
+            if (Args.IsSplit && !Path.Exists(Info.OutputLibApkPath))
             {
-                _logger.Log($"Copying [ {_args.LibraryApkPath} ] to [ {_info.OutputLibApkPath} ]");
-                File.Copy(_args.LibraryApkPath, _info.OutputLibApkPath!);
+                Logger.Log($"Copying [ {Args.LibraryApkPath} ] to [ {Info.OutputLibApkPath} ]");
+                File.Copy(Args.LibraryApkPath, Info.OutputLibApkPath!);
             }
 
-            if (_args.ExtraSplitApkPaths != null)
+            if (Args.ExtraSplitApkPaths != null)
             {
-                for (int i = 0; i < _args.ExtraSplitApkPaths.Length; i++)
+                for (int i = 0; i < Args.ExtraSplitApkPaths.Length; i++)
                 {
-                    string from = _args.ExtraSplitApkPaths[i];
-                    string to = _info.OutputExtraApkPaths![i];
+                    string from = Args.ExtraSplitApkPaths[i];
+                    string to = Info.OutputExtraApkPaths![i];
 
                     if (!File.Exists(to))
                     {
-                        _logger.Log($"Copying [ {from} ] to [ {to} ]");
+                        Logger.Log($"Copying [ {from} ] to [ {to} ]");
                         File.Copy(from, to);
                     }
                 }
@@ -55,6 +55,7 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
                 new ExtractDependencies(),
                 new ExtractUnityLibs(),
                 new PatchManifest(),
+                new InstallPlugins(),
                 new RepackAPK(),
                 new GenerateCertificate(),
                 new AlignSign(),
@@ -70,7 +71,7 @@ public class Patcher(PatchArguments arguments, IPatchLogger logger)
         }
         catch (Exception ex)
         {
-            _logger.Log("[ERROR] " + ex.ToString());
+            Logger.Log("[ERROR] " + ex.ToString());
             success = false;
         }
 

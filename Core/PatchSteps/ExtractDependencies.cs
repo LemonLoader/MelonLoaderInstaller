@@ -7,12 +7,12 @@ internal class ExtractDependencies : IPatchStep
 {
     public bool Run(Patcher patcher)
     {
-        patcher._logger.Log("Extracting Dependencies");
+        patcher.Logger.Log("Extracting Dependencies");
 
         {
-            using FileStream zipStream = new(patcher._args.MelonDataPath, FileMode.Open);
+            using FileStream zipStream = new(patcher.Args.MelonDataPath, FileMode.Open);
             using ZipArchive archive = new(zipStream, ZipArchiveMode.Read);
-            archive.ExtractToDirectory(patcher._info.LemonDataDirectory);
+            archive.ExtractToDirectory(patcher.Info.LemonDataDirectory);
         }
 
         return true;

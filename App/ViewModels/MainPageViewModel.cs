@@ -1,5 +1,6 @@
 ﻿using MelonLoader.Installer.App.Utils;
 using MelonLoader.Installer.App.Views;
+using MelonLoader.Installer.Core;
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using System.Windows.Input;
@@ -128,6 +129,8 @@ public class MainPageViewModel : BindableObject
 
                     return;
                 }
+
+                Plugin.ClearPlugins();
 
                 UnityApplicationFinder.Data data = new(Path.GetFileNameWithoutExtension(result.FullPath), "", UnityApplicationFinder.Status.Unpatched, UnityApplicationFinder.Source.File, [result.FullPath], null);
                 PatchAppPageViewModel.CurrentAppData = data;
