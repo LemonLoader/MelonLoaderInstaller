@@ -23,29 +23,21 @@ namespace MelonLoader.Installer.Core
             {
                 Assembly pluginAssembly = Assembly.LoadFile(pluginPath);
                 if (pluginAssembly == null)
-                {
                     return false;
-                }
 
-                Type[] types = pluginAssembly.GetTypes();
-                foreach (Type type in types)
+                var pluginInstances = pluginAssembly.GetTypes()
+                .Where(type => !type.IsAbstract && typeof(Plugin).IsAssignableFrom(type))
+                .Select(type => (Plugin)Activator.CreateInstance(type))
+                .Where(instance => instance != null);
+
+                foreach (Plugin pluginInstance in pluginInstances)
                 {
-                    if (type.IsAbstract || !typeof(Plugin).IsAssignableFrom(type))
+                    if (LoadedPlugins.Any(p => p.Name == pluginInstance.Name))
+                        LoadedPlugins.RemoveAll(p => p.Name == pluginInstance.Name);
+                    else
                     {
-                        continue;
-                    }
-                    Plugin pluginInstance = (Plugin)Activator.CreateInstance(type);
-                    if (pluginInstance != null)
-                    {
-                        if (LoadedPlugins.Any(p => p.Name == pluginInstance.Name))
-                        {
-                            LoadedPlugins.RemoveAll(p => p.Name == pluginInstance.Name);
-                        }
-                        else
-                        {
-                            added = true;
-                            LoadedPlugins.Add(pluginInstance);
-                        }
+                        added = true;
+                        LoadedPlugins.Add(pluginInstance);
                     }
                 }
 
@@ -63,14 +55,13 @@ namespace MelonLoader.Installer.Core
         /// </summary>
         public abstract string Name { get; }
         /// <summary>
-        ///  Array of compatible package names that this plugin can work with. e.g. ["com.example.package1", "com.example.package2"]
+        /// Array of compatible package names that this plugin can work with. e.g. ["com.example.package1", "com.example.package2"]
         /// </summary>
         public abstract string[] CompatiblePackages { get; }
         /// <summary>
         /// Called when the InstallPlugins patch step is ran
         /// </summary>
         /// <param name="patcher"></param>
-        /// <returns></returns>
         public abstract bool Run(Patcher patcher);
     }
 }

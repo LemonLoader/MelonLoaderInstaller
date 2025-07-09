@@ -9,9 +9,9 @@ namespace MelonLoader.Installer.Core;
 /// </summary>
 public class Patcher(PatchArguments arguments, IPatchLogger logger)
 {
-    public PatchArguments Args = arguments;
-    public IPatchLogger Logger = logger;
-    public PatchInfo Info = new(arguments);
+    public PatchArguments Args { get; internal set; } = arguments;
+    public IPatchLogger Logger { get; internal set; } = logger;
+    public PatchInfo Info { get; internal set; } = new(arguments);
 
     public bool Run()
     {

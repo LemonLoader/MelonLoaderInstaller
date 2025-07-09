@@ -45,13 +45,13 @@ public class PatchAppPageViewModel : BindableObject
 
     private async void SelectCustomPatch()
     {
-        FilePickerFileType zipType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+        FilePickerFileType dllType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
         {
             { DevicePlatform.Android, [ "*/*" ] },
             { DevicePlatform.WinUI, [ ".dll" ] }
         });
 
-        var result = await FilePicker.Default.PickAsync(new PickOptions() { FileTypes = zipType });
+        var result = await FilePicker.Default.PickAsync(new PickOptions() { FileTypes = dllType });
         
         if (result == null)
         {
@@ -83,7 +83,7 @@ public class PatchAppPageViewModel : BindableObject
 
         if (!loadResult)
         {
-            await PopupHelper.Toast("Selected file is not a valid Lemonloader plugin.");
+            await PopupHelper.Toast("Selected file is not a valid LemonLoader plugin.");
             return;
         }
 

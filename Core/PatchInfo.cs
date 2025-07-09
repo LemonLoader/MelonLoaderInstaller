@@ -8,25 +8,21 @@ namespace MelonLoader.Installer.Core;
 /// </summary>
 public class PatchInfo
 {
-    public string PackageName { get; set; } = "";
-
     public string LemonDataDirectory { get; } = "";
 
-    public string UnityNativeDirectory { get; set; } = "";
+    public string UnityNativeDirectory { get; internal set; } = "";
 
     public string OutputBaseApkPath { get; } = "";
     public string? OutputLibApkPath { get; } = null;
     public string[]? OutputExtraApkPaths { get; } = null;
 
-    public string PemData { get; set; } = "";
+    public string PemData { get; internal set; } = "";
 
     private readonly PatchArguments _arguments;
 
     internal PatchInfo(PatchArguments arguments)
     {
         _arguments = arguments;
-
-        PackageName = _arguments.PackageName;
 
         LemonDataDirectory = Path.Combine(arguments.TempDirectory, "lemon_data");
 

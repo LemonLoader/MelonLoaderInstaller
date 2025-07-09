@@ -5,19 +5,19 @@
 /// </summary>
 public class PatchArguments
 {
-    public string TargetApkPath = "";
-    public string LibraryApkPath = "";
-    public string[] ExtraSplitApkPaths = [];
+    public string TargetApkPath { get; set; } = "";
+    public string LibraryApkPath { get; set; } = "";
+    public string[] ExtraSplitApkPaths { get; set; } = [];
 
-    public string OutputApkDirectory = "";
+    public string OutputApkDirectory { get; set; } = "";
 
-    public string TempDirectory = "";
+    public string TempDirectory { get; set; } = "";
 
-    public string MelonDataPath = "";
-    public string UnityDependenciesPath = "";
+    public string MelonDataPath { get; set; } = "";
+    public string UnityDependenciesPath { get; set; } = "";
 
-    public AssetRipper.Primitives.UnityVersion? UnityVersion;
-    public string PackageName = "";
+    public AssetRipper.Primitives.UnityVersion? UnityVersion { get; set; }
+    public string PackageName { get; set; } = "";
 
-    public bool IsSplit;
+    public bool IsSplit { get; set; }
 }
