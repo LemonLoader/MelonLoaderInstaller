@@ -61,7 +61,6 @@ namespace MelonLoader.Installer.Core
         /// <summary>
         /// Called when the InstallPlugins patch step is ran
         /// </summary>
-        /// <param name="patcher"></param>
         public abstract bool Run(Patcher patcher);
     }
 }
