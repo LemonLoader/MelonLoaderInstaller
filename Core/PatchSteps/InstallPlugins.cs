@@ -12,10 +12,14 @@ namespace MelonLoader.Installer.Core.PatchSteps
         {
             foreach(Plugin plugin in Plugin.LoadedPlugins)
             {
-                if (!plugin.CompatiblePackages.Contains(patcher.Info.PackageName))
+                // ends up being empty on windows
+                if (!string.IsNullOrEmpty(patcher.Info.PackageName))
                 {
-                    patcher.Logger.Log($"{plugin.Name} is incompatible with the app you are trying to patch!.");
-                    continue;
+                    if (!plugin.CompatiblePackages.Contains(patcher.Info.PackageName))
+                    {
+                        patcher.Logger.Log($"{plugin.Name} is incompatible with the app you are trying to patch!.");
+                        continue;
+                    }
                 }
 
                 patcher.Logger.Log($"Running custom patch: {plugin.Name}");
