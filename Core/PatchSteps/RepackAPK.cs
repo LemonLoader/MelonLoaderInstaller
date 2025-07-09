@@ -81,7 +81,7 @@ internal class RepackAPK : IPatchStep
             ZipArchiveEntry? entry = archive.GetEntry(entryPath);
             entry?.Delete();
 
-            entry = archive.CreateEntry(entryPath);
+            entry = archive.CreateEntry(entryPath, CompressionLevel.Optimal);
             using FileStream sourceStream = File.Open(file, FileMode.Open);
             using Stream entryStream = entry.Open();
             sourceStream.CopyTo(entryStream);
@@ -97,7 +97,7 @@ internal class RepackAPK : IPatchStep
         string rfc3339 = XmlConvert.ToString(DateTime.Now, XmlDateTimeSerializationMode.Utc);
         byte[] bytes = Encoding.UTF8.GetBytes(rfc3339);
 
-        entry = archive.CreateEntry(entryPath);
+        entry = archive.CreateEntry(entryPath, CompressionLevel.Optimal);
         using Stream entryStream = entry.Open();
         entryStream.Write(bytes);
     }
